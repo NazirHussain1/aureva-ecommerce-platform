@@ -12,6 +12,7 @@ require("./models/Wishlist");
 require("./models/Address");
 require("./models/Review");
 require("./models/Coupon");
+require("./models/Newsletter");
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/api/wishlist", require("./routes/wishlistRoutes"));
 app.use("/api/addresses", require("./routes/addressRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));
 app.use("/api/coupons", require("./routes/couponRoutes"));
+app.use("/api/newsletter", require("./routes/newsletterRoutes"));
 app.use("/api/uploads", require("./routes/uploadRoutes"));
 app.use("/api/admin/users", require("./routes/adminUserRoutes"));
 app.use("/api/admin/products", require("./routes/adminProductRoutes"));
@@ -37,6 +39,7 @@ app.use("/api/admin/orders", require("./routes/adminOrderRoutes"));
 app.use("/api/admin/inventory", require("./routes/adminInventoryRoutes"));
 app.use("/api/admin/analytics", require("./routes/adminAnalyticsRoutes"));
 app.use("/api/admin/coupons", require("./routes/adminCouponRoutes"));
+app.use("/api/admin/newsletter", require("./routes/adminNewsletterRoutes"));
 
 const PORT = process.env.PORT || 5000;
 
