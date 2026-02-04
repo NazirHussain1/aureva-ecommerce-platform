@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { sendWelcomeEmail } = require("../services/emailService");
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -21,6 +22,8 @@ const signup = async (req, res) => {
 
     const user = await User.create({ name, email, password });
     const token = generateToken(user);
+
+    await sendWelcomeEmail(user);
 
     res.status(201).json({
       id: user.id,
