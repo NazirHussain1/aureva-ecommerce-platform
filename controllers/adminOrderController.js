@@ -1,6 +1,7 @@
 const Order = require("../models/Order");
 const User = require("../models/User");
 const { sendOrderStatusUpdateEmail } = require("../services/emailService");
+const NotificationService = require("../services/notificationService");
 
 const getAllOrders = async (req, res) => {
   const orders = await Order.findAll({
@@ -30,6 +31,13 @@ const updateOrderStatus = async (req, res) => {
 
   if (oldStatus !== req.body.status) {
     await sendOrderStatusUpdateEmail(order, order.User, req.body.status);
+    
+    // Create notification for order status change
+    await NotificationService.createOrderStatusNotification(
+      order.User.id,
+      order.id,
+      req.body.status
+    );
   }
 
   res.json({ message: "Order status updated", order });

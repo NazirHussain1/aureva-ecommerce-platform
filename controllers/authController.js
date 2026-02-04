@@ -2,6 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { sendWelcomeEmail } = require("../services/emailService");
+const EmailVerificationService = require("../services/emailVerificationService");
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -21,16 +22,18 @@ const signup = async (req, res) => {
     }
 
     const user = await User.create({ name, email, password });
-    const token = generateToken(user);
+    
+    // Send email verification instead of welcome email
+    await EmailVerificationService.sendVerificationToUser(user.id);
 
-    await sendWelcomeEmail(user);
-
+    // Don't generate token until email is verified
     res.status(201).json({
       id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,
-      token,
+      emailVerified: user.emailVerified,
+      message: "Registration successful! Please check your email to verify your account."
     });
   } catch (error) {
     console.error(error);
@@ -52,6 +55,14 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    // Check if email is verified
+    if (!user.emailVerified) {
+      return res.status(401).json({ 
+        message: "Please verify your email address before logging in",
+        emailVerified: false
+      });
+    }
+
     const token = generateToken(user);
 
     res.status(200).json({
@@ -59,6 +70,7 @@ const login = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      emailVerified: user.emailVerified,
       token,
     });
   } catch (error) {

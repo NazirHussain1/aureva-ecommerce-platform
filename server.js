@@ -2,6 +2,17 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const sequelize = require("./config/db");
+const { startNotificationCleanup } = require("./utils/notificationCleanup");
+
+// Security middleware imports
+const { 
+  securityHeaders, 
+  noSQLInjectionPrevention, 
+  xssProtection, 
+  corsOptions, 
+  securityLogger 
+} = require('./middleware/securityMiddleware');
+const { generalLimiter } = require('./middleware/rateLimitMiddleware');
 
 require("./models/User");
 require("./models/Product");
@@ -13,11 +24,19 @@ require("./models/Address");
 require("./models/Review");
 require("./models/Coupon");
 require("./models/Newsletter");
+require("./models/Notification");
+require("./models/ProductVariant");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+// Apply security middleware
+app.use(securityHeaders);
+app.use(cors(corsOptions));
+app.use(generalLimiter);
+app.use(noSQLInjectionPrevention);
+app.use(express.json({ limit: '10mb' }));
+app.use(xssProtection);
+app.use(securityLogger);
 
 app.get("/", (req, res) => {
   res.send("AUREVA API Running...");
@@ -32,6 +51,11 @@ app.use("/api/addresses", require("./routes/addressRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));
 app.use("/api/coupons", require("./routes/couponRoutes"));
 app.use("/api/newsletter", require("./routes/newsletterRoutes"));
+app.use("/api/notifications", require("./routes/notificationRoutes"));
+app.use("/api/password-reset", require("./routes/passwordResetRoutes"));
+app.use("/api/email-verification", require("./routes/emailVerificationRoutes"));
+app.use("/api/product-variants", require("./routes/productVariantRoutes"));
+app.use("/api/bulk-operations", require("./routes/bulkOperationsRoutes"));
 app.use("/api/uploads", require("./routes/uploadRoutes"));
 app.use("/api/admin/users", require("./routes/adminUserRoutes"));
 app.use("/api/admin/products", require("./routes/adminProductRoutes"));
@@ -51,4 +75,9 @@ sequelize.sync({ alter: true })
   .then(() => console.log("Tables synced"))
   .catch(err => console.log(err));
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  
+  // Start notification cleanup service
+  startNotificationCleanup();
+});
