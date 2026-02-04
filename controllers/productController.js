@@ -1,8 +1,11 @@
+const { Op } = require("sequelize");
 const Product = require("../models/Product");
 
 const getProducts = async (req, res) => {
   const { category, brand, minPrice, maxPrice } = req.query;
-  let filter = {};
+  let filter = {
+    stock: { [Op.gt]: 0 },
+  };
 
   if (category) filter.category = category;
   if (brand) filter.brand = brand;

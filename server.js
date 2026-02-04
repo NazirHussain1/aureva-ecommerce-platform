@@ -11,6 +11,7 @@ require("./models/Cart");
 require("./models/Wishlist");
 require("./models/Address");
 require("./models/Review");
+require("./models/Coupon");
 
 const app = express();
 
@@ -20,10 +21,6 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("AUREVA API Running...");
 });
-app.use(
-  "/api/admin/analytics",
-  require("./routes/adminAnalyticsRoutes")
-);
 
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/products", require("./routes/productRoutes"));
@@ -32,9 +29,14 @@ app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/wishlist", require("./routes/wishlistRoutes"));
 app.use("/api/addresses", require("./routes/addressRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));
+app.use("/api/coupons", require("./routes/couponRoutes"));
+app.use("/api/uploads", require("./routes/uploadRoutes"));
 app.use("/api/admin/users", require("./routes/adminUserRoutes"));
 app.use("/api/admin/products", require("./routes/adminProductRoutes"));
 app.use("/api/admin/orders", require("./routes/adminOrderRoutes"));
+app.use("/api/admin/inventory", require("./routes/adminInventoryRoutes"));
+app.use("/api/admin/analytics", require("./routes/adminAnalyticsRoutes"));
+app.use("/api/admin/coupons", require("./routes/adminCouponRoutes"));
 
 const PORT = process.env.PORT || 5000;
 

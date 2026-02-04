@@ -1,6 +1,5 @@
 const User = require("../models/User");
 
-/* Get all users */
 const getAllUsers = async (req, res) => {
   const users = await User.findAll({
     attributes: { exclude: ["password"] },
@@ -8,7 +7,6 @@ const getAllUsers = async (req, res) => {
   res.json(users);
 };
 
-/* Update user role */
 const updateUserRole = async (req, res) => {
   const user = await User.findByPk(req.params.id);
 
@@ -22,7 +20,6 @@ const updateUserRole = async (req, res) => {
   res.json({ message: "User role updated", user });
 };
 
-/* Delete user */
 const deleteUser = async (req, res) => {
   const user = await User.findByPk(req.params.id);
 

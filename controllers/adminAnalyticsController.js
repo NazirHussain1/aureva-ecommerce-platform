@@ -2,20 +2,13 @@ const { Op } = require("sequelize");
 const Order = require("../models/Order");
 const User = require("../models/User");
 
-/* Dashboard Stats */
 const getDashboardStats = async (req, res) => {
-  // total users
   const totalUsers = await User.count();
-
-  // total orders
   const totalOrders = await Order.count();
-
-  // total revenue (only paid orders)
   const totalRevenue = await Order.sum("totalAmount", {
     where: { paymentStatus: "paid" },
   });
 
-  // order status breakdown
   const orderStatus = {
     placed: await Order.count({ where: { orderStatus: "placed" } }),
     processing: await Order.count({ where: { orderStatus: "processing" } }),
@@ -32,7 +25,6 @@ const getDashboardStats = async (req, res) => {
   });
 };
 
-/* Monthly Sales (Last 6 Months) */
 const getMonthlySales = async (req, res) => {
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
@@ -48,7 +40,7 @@ const getMonthlySales = async (req, res) => {
   const monthlySales = {};
 
   orders.forEach((order) => {
-    const month = order.createdAt.toISOString().slice(0, 7); // YYYY-MM
+    const month = order.createdAt.toISOString().slice(0, 7);
     monthlySales[month] =
       (monthlySales[month] || 0) + order.totalAmount;
   });

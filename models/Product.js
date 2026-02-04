@@ -18,22 +18,27 @@ const Product = sequelize.define(
     },
     price: { type: DataTypes.FLOAT, allowNull: false },
     brand: { type: DataTypes.STRING, allowNull: false },
-    stock: { type: DataTypes.INTEGER, defaultValue: 0 },
+    stock: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    lowStockThreshold: {
+      type: DataTypes.INTEGER,
+      defaultValue: 5,
+    },
     description: { type: DataTypes.TEXT },
     ingredients: { type: DataTypes.TEXT },
     usage: { type: DataTypes.TEXT },
     images: { type: DataTypes.JSON }, 
     averageRating: {
-  type: DataTypes.FLOAT,
-  defaultValue: 0,
-},
-numReviews: {
-  type: DataTypes.INTEGER,
-  defaultValue: 0,
-},
-
-    rating: { type: DataTypes.FLOAT, defaultValue: 0 },
-    numReviews: { type: DataTypes.INTEGER, defaultValue: 0 },
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
+    },
+    numReviews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
   },
   { timestamps: true }
 );
