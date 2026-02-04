@@ -10,6 +10,22 @@ const User = sequelize.define("User", {
     type: DataTypes.ENUM("customer", "admin"),
     defaultValue: "customer",
   },
+  resetPasswordToken: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  resetPasswordExpires: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  emailVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  emailVerificationToken: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }, { timestamps: true });
 
 User.beforeCreate(async (user) => {

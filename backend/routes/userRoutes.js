@@ -1,43 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const { signup, login, getMe, logout } = require("../controllers/authController");
+const { protect } = require("../middleware/authMiddleware");
+const { 
+  validateUserRegistration, 
+  validateUserLogin 
+} = require("../middleware/validationMiddleware");
+const { authLimiter } = require("../middleware/rateLimitMiddleware");
 
-router.post("/register", async (req, res) => {
-  try {
-    const user = await User.create(req.body);
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid password" });
-
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-
-    res.json({
-      message: "Login successful",
-      token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role }
-    });
-
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Auth routes with validation and rate limiting
+router.post("/register", authLimiter, validateUserRegistration, signup);
+router.post("/login", authLimiter, validateUserLogin, login);
+router.get("/me", protect, getMe);
+router.post("/logout", protect, logout);
 
 module.exports = router;

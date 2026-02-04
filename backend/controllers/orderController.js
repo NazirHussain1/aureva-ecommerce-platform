@@ -3,6 +3,8 @@ const OrderItem = require("../models/OrderItem");
 const Product = require("../models/Product");
 const User = require("../models/User");
 const { sendOrderConfirmationEmail } = require("../services/emailService");
+const NotificationService = require("../services/notificationService");
+const { checkLowStock } = require("../middleware/stockMiddleware");
 
 const placeOrder = async (req, res) => {
   const { items, shippingAddress, paymentMethod, totalAmount } = req.body;
@@ -23,6 +25,9 @@ const placeOrder = async (req, res) => {
     }
     product.stock -= item.quantity;
     await product.save();
+
+    // Check for low stock after reducing inventory
+    await checkLowStock(product.id, product.stock);
   }
 
   const order = await Order.create({
@@ -45,18 +50,51 @@ const placeOrder = async (req, res) => {
   const orderWithItems = { ...order.toJSON(), items };
   await sendOrderConfirmationEmail(orderWithItems, user);
 
+  // Create order confirmation notification
+  await NotificationService.createOrderStatusNotification(
+    req.user.id,
+    order.id,
+    "placed"
+  );
+
   res.status(201).json({
     message: "Order placed successfully",
     orderId: order.id,
   });
 };
 
-// GET /api/orders/history - Get user's order history
+// GET /api/orders/history - Get user's order history with pagination
 const getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.findAll({
-      where: { UserId: req.user.id },
-      order: [["createdAt", "DESC"]],
+    const { 
+      page = 1, 
+      limit = 10, 
+      status, 
+      sortBy = 'createdAt', 
+      sortOrder = 'DESC' 
+    } = req.query;
+
+    // Build filter
+    let filter = { UserId: req.user.id };
+    
+    if (status) {
+      filter.orderStatus = status;
+    }
+
+    // Pagination
+    const offset = (page - 1) * limit;
+    const parsedLimit = parseInt(limit);
+
+    // Valid sort fields
+    const validSortFields = ['createdAt', 'totalAmount', 'orderStatus'];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    const order = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    const { count, rows: orders } = await Order.findAndCountAll({
+      where: filter,
+      order: [[sortField, order]],
+      limit: parsedLimit,
+      offset: parseInt(offset),
       include: [
         {
           model: OrderItem,
@@ -70,7 +108,19 @@ const getUserOrders = async (req, res) => {
       ],
     });
 
-    res.json(orders);
+    const totalPages = Math.ceil(count / parsedLimit);
+
+    res.json({
+      orders,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalOrders: count,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        limit: parsedLimit
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -103,6 +153,13 @@ const cancelOrder = async (req, res) => {
     }
 
     await order.save();
+
+    // Create cancellation notification
+    await NotificationService.createOrderStatusNotification(
+      req.user.id,
+      order.id,
+      "cancelled"
+    );
 
     res.json({ message: "Order cancelled successfully", order });
   } catch (error) {
@@ -147,6 +204,13 @@ const returnOrder = async (req, res) => {
     }
 
     await order.save();
+
+    // Create return notification
+    await NotificationService.createOrderStatusNotification(
+      req.user.id,
+      order.id,
+      "returned"
+    );
 
     res.json({ message: "Return processed successfully", order });
   } catch (error) {
