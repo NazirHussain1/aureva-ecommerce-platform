@@ -1,11 +1,26 @@
 const Order = require("../models/Order");
 const OrderItem = require("../models/OrderItem");
+const Product = require("../models/Product");
 
 const placeOrder = async (req, res) => {
   const { items, shippingAddress, paymentMethod, totalAmount } = req.body;
 
   if (!items || items.length === 0) {
     return res.status(400).json({ message: "No order items" });
+  }
+
+  for (let item of items) {
+    const product = await Product.findByPk(item.productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    if (product.stock < item.quantity) {
+      return res.status(400).json({
+        message: `${product.name} is out of stock`,
+      });
+    }
+    product.stock -= item.quantity;
+    await product.save();
   }
 
   const order = await Order.create({

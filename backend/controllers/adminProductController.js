@@ -1,18 +1,15 @@
 const Product = require("../models/Product");
 
-/* Get all products */
 const getAllProducts = async (req, res) => {
   const products = await Product.findAll();
   res.json(products);
 };
 
-/* Create product */
 const createProduct = async (req, res) => {
   const product = await Product.create(req.body);
   res.status(201).json(product);
 };
 
-/* Update product */
 const updateProduct = async (req, res) => {
   const product = await Product.findByPk(req.params.id);
 
@@ -24,7 +21,6 @@ const updateProduct = async (req, res) => {
   res.json(product);
 };
 
-/* Delete product */
 const deleteProduct = async (req, res) => {
   const product = await Product.findByPk(req.params.id);
 
