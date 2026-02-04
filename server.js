@@ -4,6 +4,14 @@ const express = require("express");
 const cors = require("cors");
 
 require("./models/User");
+const productRoutes = require("./routes/productRoutes");
+const cartRoutes = require("./routes/cartRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
+
+app.use("/api/products", productRoutes);
 
 const app = express();
 app.use(cors());
