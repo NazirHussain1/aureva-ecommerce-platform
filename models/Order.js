@@ -26,6 +26,15 @@ const Order = sequelize.define("Order", {
   deliveredAt: {
     type: DataTypes.DATE,
   },
+  returnRequestDate: {
+    type: DataTypes.DATE,
+  },
+  cancelReason: {
+    type: DataTypes.STRING,
+  },
+  returnReason: {
+    type: DataTypes.STRING,
+  },
 }, { 
   timestamps: true 
 });
