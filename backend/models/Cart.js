@@ -11,7 +11,6 @@ const Cart = sequelize.define("Cart", {
   },
 });
 
-// Associations
 User.hasMany(Cart, { foreignKey: "userId" });
 Cart.belongsTo(User, { foreignKey: "userId" });
 

@@ -1,8 +1,5 @@
 const Product = require("../models/Product");
 
-// @desc    Get all products (with optional filters)
-// @route   GET /api/products
-// @access  Public
 const getProducts = async (req, res) => {
   const { category, brand, minPrice, maxPrice } = req.query;
   let filter = {};
@@ -24,9 +21,6 @@ const getProducts = async (req, res) => {
   }
 };
 
-// @desc    Get single product
-// @route   GET /api/products/:id
-// @access  Public
 const getProductById = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
@@ -38,9 +32,6 @@ const getProductById = async (req, res) => {
   }
 };
 
-// @desc    Create new product
-// @route   POST /api/products
-// @access  Admin
 const createProduct = async (req, res) => {
   try {
     const product = await Product.create(req.body);
@@ -51,9 +42,6 @@ const createProduct = async (req, res) => {
   }
 };
 
-// @desc    Update product
-// @route   PUT /api/products/:id
-// @access  Admin
 const updateProduct = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
@@ -67,9 +55,6 @@ const updateProduct = async (req, res) => {
   }
 };
 
-// @desc    Delete product
-// @route   DELETE /api/products/:id
-// @access  Admin
 const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);

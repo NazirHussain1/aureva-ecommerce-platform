@@ -22,7 +22,16 @@ const Product = sequelize.define(
     description: { type: DataTypes.TEXT },
     ingredients: { type: DataTypes.TEXT },
     usage: { type: DataTypes.TEXT },
-    images: { type: DataTypes.JSON }, // array of image URLs
+    images: { type: DataTypes.JSON }, 
+    averageRating: {
+  type: DataTypes.FLOAT,
+  defaultValue: 0,
+},
+numReviews: {
+  type: DataTypes.INTEGER,
+  defaultValue: 0,
+},
+
     rating: { type: DataTypes.FLOAT, defaultValue: 0 },
     numReviews: { type: DataTypes.INTEGER, defaultValue: 0 },
   },

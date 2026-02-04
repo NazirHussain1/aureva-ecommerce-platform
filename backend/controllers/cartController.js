@@ -1,9 +1,6 @@
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 
-// @desc    Get user cart
-// @route   GET /api/cart
-// @access  Private
 const getCart = async (req, res) => {
   try {
     const cartItems = await Cart.findAll({
@@ -17,9 +14,6 @@ const getCart = async (req, res) => {
   }
 };
 
-// @desc    Add item to cart
-// @route   POST /api/cart
-// @access  Private
 const addToCart = async (req, res) => {
   const { productId, quantity } = req.body;
 
@@ -47,9 +41,6 @@ const addToCart = async (req, res) => {
   }
 };
 
-// @desc    Update cart item quantity
-// @route   PUT /api/cart/:id
-// @access  Private
 const updateCartItem = async (req, res) => {
   const { quantity } = req.body;
 
@@ -67,9 +58,6 @@ const updateCartItem = async (req, res) => {
   }
 };
 
-// @desc    Remove item from cart
-// @route   DELETE /api/cart/:id
-// @access  Private
 const removeCartItem = async (req, res) => {
   try {
     const cartItem = await Cart.findByPk(req.params.id);
