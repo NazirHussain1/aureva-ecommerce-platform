@@ -8,7 +8,6 @@ const {
 } = require("../controllers/cartController");
 const { protect } = require("../middleware/authMiddleware");
 
-// Protected routes
 router.get("/", protect, getCart);
 router.post("/", protect, addToCart);
 router.put("/:id", protect, updateCartItem);

@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-
 const protect = async (req, res, next) => {
   let token;
 
@@ -12,19 +11,16 @@ const protect = async (req, res, next) => {
     token = req.headers.authorization.split(" ")[1];
 
     try {
-      // 2️⃣ Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // 3️⃣ Find user by ID in token
       const user = await User.findByPk(decoded.id, {
-        attributes: { exclude: ["password"] }, // never send password
+        attributes: { exclude: ["password"] },
       });
 
       if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
 
-      // 4️⃣ Attach user info to request
       req.user = user;
       next();
     } catch (error) {

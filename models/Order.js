@@ -3,18 +3,34 @@ const sequelize = require("../config/db");
 const User = require("./User");
 
 const Order = sequelize.define("Order", {
-  items: { type: DataTypes.JSON, allowNull: false }, // array of {productId, quantity, price}
-  totalPrice: { type: DataTypes.FLOAT, allowNull: false },
-  status: {
-    type: DataTypes.ENUM("pending", "processing", "shipped", "delivered"),
+  totalAmount: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  paymentMethod: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  paymentStatus: {
+    type: DataTypes.ENUM("pending", "paid", "failed"),
     defaultValue: "pending",
   },
-  shippingAddress: { type: DataTypes.JSON, allowNull: false }, // {name, phone, addressLine1, city, postalCode}
-  paymentMethod: { type: DataTypes.STRING, allowNull: false },
+  orderStatus: {
+    type: DataTypes.ENUM("placed", "processing", "shipped", "delivered", "cancelled", "returned"),
+    defaultValue: "placed",
+  },
+  shippingAddress: {
+    type: DataTypes.JSON,
+    allowNull: false,
+  },
+  deliveredAt: {
+    type: DataTypes.DATE,
+  },
+}, { 
+  timestamps: true 
 });
 
-// Association
-User.hasMany(Order, { foreignKey: "userId" });
-Order.belongsTo(User, { foreignKey: "userId" });
+Order.belongsTo(User);
+User.hasMany(Order);
 
 module.exports = Order;
