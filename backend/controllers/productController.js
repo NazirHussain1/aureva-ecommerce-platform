@@ -2,10 +2,6 @@ const { Op } = require("sequelize");
 const Product = require("../models/Product");
 const NotificationService = require("../services/notificationService");
 
-const { Op } = require("sequelize");
-const Product = require("../models/Product");
-const NotificationService = require("../services/notificationService");
-
 const getProducts = async (req, res) => {
   try {
     const { 
