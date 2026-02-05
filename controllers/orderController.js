@@ -55,3 +55,87 @@ const placeOrder = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+const getUserOrders = async (req, res) => {
+  try {
+    const orders = await Order.findAll({
+      where: { UserId: req.user.id },
+      include: [{ model: OrderItem, include: [Product] }],
+      order: [['createdAt', 'DESC']],
+    });
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Get user orders error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id);
+
+    if (!order || order.UserId !== req.user.id) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (["shipped", "delivered", "cancelled", "returned"].includes(order.orderStatus)) {
+      return res.status(400).json({ message: "Cannot cancel this order" });
+    }
+
+    order.orderStatus = "cancelled";
+    await order.save();
+
+    const orderItems = await OrderItem.findAll({ where: { OrderId: order.id } });
+    for (let item of orderItems) {
+      const product = await Product.findByPk(item.ProductId);
+      product.stock += item.quantity;
+      await product.save();
+    }
+
+    res.json({ message: "Order cancelled successfully", order });
+  } catch (error) {
+    console.error("Cancel order error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const returnOrder = async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id);
+
+    if (!order || order.UserId !== req.user.id) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.orderStatus !== "delivered") {
+      return res.status(400).json({ message: "Cannot return this order" });
+    }
+
+    const returnWindowDays = 10;
+    const deliveredAt = new Date(order.deliveredAt);
+    const now = new Date();
+    const diffDays = Math.floor((now - deliveredAt) / (1000 * 60 * 60 * 24));
+
+    if (diffDays > returnWindowDays) {
+      return res.status(400).json({ message: "Return period expired" });
+    }
+
+    order.orderStatus = "returned";
+    await order.save();
+
+    const orderItems = await OrderItem.findAll({ where: { OrderId: order.id } });
+    for (let item of orderItems) {
+      const product = await Product.findByPk(item.ProductId);
+      product.stock += item.quantity;
+      await product.save();
+    }
+
+    res.json({ message: "Return processed successfully", order });
+  } catch (error) {
+    console.error("Return order error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { placeOrder, getUserOrders, cancelOrder, returnOrder };

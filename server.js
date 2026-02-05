@@ -51,7 +51,7 @@ sequelize.authenticate()
   .then(() => console.log("MySQL Connected"))
   .catch(err => console.log("DB Error:", err));
 
-sequelize.sync({ alter: true })
+sequelize.sync({ force: false })
   .then(() => console.log("Tables synced"))
   .catch(err => console.log(err));
 
