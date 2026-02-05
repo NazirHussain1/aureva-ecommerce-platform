@@ -1,7 +1,6 @@
 const Order = require("../models/Order");
 const User = require("../models/User");
 const { sendOrderStatusUpdateEmail } = require("../services/emailService");
-const NotificationService = require("../services/notificationService");
 
 const getAllOrders = async (req, res) => {
   const orders = await Order.findAll({
@@ -12,35 +11,33 @@ const getAllOrders = async (req, res) => {
 };
 
 const updateOrderStatus = async (req, res) => {
-  const order = await Order.findByPk(req.params.id, {
-    include: [{ model: User }],
-  });
-  
-  if (!order) {
-    return res.status(404).json({ message: "Order not found" });
-  }
-
-  const oldStatus = order.orderStatus;
-  order.orderStatus = req.body.status;
-  
-  if (req.body.status === "delivered") {
-    order.deliveredAt = new Date();
-  }
-
-  await order.save();
-
-  if (oldStatus !== req.body.status) {
-    await sendOrderStatusUpdateEmail(order, order.User, req.body.status);
+  try {
+    const order = await Order.findByPk(req.params.id, {
+      include: [{ model: User }],
+    });
     
-    // Create notification for order status change
-    await NotificationService.createOrderStatusNotification(
-      order.User.id,
-      order.id,
-      req.body.status
-    );
-  }
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
 
-  res.json({ message: "Order status updated", order });
+    const oldStatus = order.orderStatus;
+    order.orderStatus = req.body.status;
+    
+    if (req.body.status === "delivered") {
+      order.deliveredAt = new Date();
+    }
+
+    await order.save();
+
+    if (oldStatus !== req.body.status) {
+      await sendOrderStatusUpdateEmail(order, order.User, req.body.status);
+    }
+
+    res.json({ message: "Order status updated", order });
+  } catch (error) {
+    console.error("Update order status error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 module.exports = {
