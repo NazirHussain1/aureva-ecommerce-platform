@@ -1,87 +1,43 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
-const Order = require("./Order");
 const User = require("./User");
-const MerchantAccount = require("./MerchantAccount");
+const Order = require("./Order");
 
 const Payment = sequelize.define("Payment", {
-  paymentMethod: {
-    type: DataTypes.ENUM("jazzcash", "easypaisa", "bank_transfer", "cash_on_delivery"),
-    allowNull: false,
-  },
   amount: {
     type: DataTypes.FLOAT,
     allowNull: false,
   },
+  paymentMethod: {
+    type: DataTypes.ENUM("credit_card", "debit_card", "paypal", "stripe", "razorpay", "cash_on_delivery"),
+    allowNull: false,
+  },
   status: {
-    type: DataTypes.ENUM("pending", "processing", "completed", "failed", "refunded"),
+    type: DataTypes.ENUM("pending", "completed", "failed", "refunded"),
     defaultValue: "pending",
   },
   transactionId: {
     type: DataTypes.STRING,
-    allowNull: true,
     unique: true,
-    comment: "Transaction ID from payment gateway or bank"
   },
-  senderName: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    comment: "Name of person who made the payment"
-  },
-  senderAccount: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    comment: "Mobile number or account number of sender"
-  },
-  receiverAccount: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    comment: "Merchant account that received payment"
-  },
-  paymentProof: {
+  paymentGatewayResponse: {
     type: DataTypes.JSON,
-    allowNull: true,
-    comment: "Screenshot or proof of payment (image URLs)"
   },
-  paymentDate: {
-    type: DataTypes.DATE,
-    allowNull: true,
-    comment: "Date when payment was made by customer"
-  },
-  verifiedDate: {
-    type: DataTypes.DATE,
-    allowNull: true,
-    comment: "Date when payment was verified by admin"
-  },
-  verifiedBy: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    comment: "Admin user ID who verified the payment"
-  },
-  notes: {
-    type: DataTypes.TEXT,
-    allowNull: true,
+  refundAmount: {
+    type: DataTypes.FLOAT,
+    defaultValue: 0,
   },
   refundReason: {
     type: DataTypes.TEXT,
-    allowNull: true,
   },
-  refundDate: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-}, { 
-  timestamps: true 
+}, {
+  timestamps: true,
 });
 
-// Associations
-Payment.belongsTo(Order);
-Order.hasMany(Payment);
+Payment.belongsTo(User, { foreignKey: "userId" });
+User.hasMany(Payment, { foreignKey: "userId" });
 
-Payment.belongsTo(User);
-User.hasMany(Payment);
-
-Payment.belongsTo(MerchantAccount, { foreignKey: 'MerchantAccountId', allowNull: true });
-MerchantAccount.hasMany(Payment);
+Payment.belongsTo(Order, { foreignKey: "orderId" });
+Order.hasOne(Payment, { foreignKey: "orderId" });
 
 module.exports = Payment;

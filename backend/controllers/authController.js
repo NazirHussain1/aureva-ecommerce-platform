@@ -1,8 +1,8 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { sendWelcomeEmail } = require("../services/emailService");
-const EmailVerificationService = require("../services/emailVerificationService");
+const crypto = require("crypto");
+const { sendWelcomeEmail, sendPasswordResetEmail } = require("../services/emailService");
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -22,18 +22,16 @@ const signup = async (req, res) => {
     }
 
     const user = await User.create({ name, email, password });
-    
-    // Send email verification instead of welcome email
-    await EmailVerificationService.sendVerificationToUser(user.id);
+    const token = generateToken(user);
 
-    // Don't generate token until email is verified
+    await sendWelcomeEmail(user);
+
     res.status(201).json({
       id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,
-      emailVerified: user.emailVerified,
-      message: "Registration successful! Please check your email to verify your account."
+      token,
     });
   } catch (error) {
     console.error(error);
@@ -55,14 +53,6 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Check if email is verified
-    if (!user.emailVerified) {
-      return res.status(401).json({ 
-        message: "Please verify your email address before logging in",
-        emailVerified: false
-      });
-    }
-
     const token = generateToken(user);
 
     res.status(200).json({
@@ -70,9 +60,63 @@ const login = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      emailVerified: user.emailVerified,
       token,
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiry = new Date(Date.now() + 3600000);
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = resetTokenExpiry;
+    await user.save();
+
+    await sendPasswordResetEmail(user, resetToken);
+
+    res.status(200).json({ message: "Password reset email sent" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    const user = await User.findOne({
+      where: {
+        resetPasswordToken: token,
+        resetPasswordExpires: {
+          [require("sequelize").Op.gt]: new Date(),
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset token" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successful" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -97,4 +141,4 @@ const logout = async (req, res) => {
   res.status(200).json({ message: "Logged out successfully" });
 };
 
-module.exports = { signup, login, getMe, logout };
+module.exports = { signup, login, forgotPassword, resetPassword, getMe, logout };

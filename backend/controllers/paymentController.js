@@ -1,136 +1,75 @@
-const PaymentService = require('../services/paymentService');
 const Payment = require('../models/Payment');
 const Order = require('../models/Order');
 const User = require('../models/User');
 
-// Get active merchant accounts for payment
-const getMerchantAccounts = async (req, res) => {
+const processPayment = async (req, res) => {
+  const { orderId, paymentMethod, amount } = req.body;
+
   try {
-    const accounts = await PaymentService.getActiveMerchantAccounts();
-    res.json({ accounts });
-  } catch (error) {
-    console.error('Get merchant accounts error:', error);
-    res.status(500).json({ message: 'Failed to fetch merchant accounts' });
-  }
-};
+    const order = await Order.findByPk(orderId);
+    if (!order || order.UserId !== req.user.id) {
+      return res.status(404).json({ message: "Order not found" });
+    }
 
-// Create payment for order
-const createPayment = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const paymentData = req.body;
+    const payment = await Payment.create({
+      orderId,
+      userId: req.user.id,
+      amount,
+      paymentMethod,
+      status: 'pending',
+      transactionId: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    });
 
-    const result = await PaymentService.createPayment(orderId, req.user.id, paymentData);
+    payment.status = 'completed';
+    await payment.save();
 
-    res.status(201).json({
-      message: 'Payment created successfully',
-      payment: result.payment,
-      merchantAccount: result.merchantAccount
+    order.paymentStatus = 'paid';
+    await order.save();
+
+    res.status(200).json({
+      message: "Payment processed successfully",
+      payment,
     });
   } catch (error) {
-    console.error('Create payment error:', error);
-    res.status(500).json({ message: error.message || 'Failed to create payment' });
+    console.error("Payment processing error:", error);
+    res.status(500).json({ message: "Payment processing failed" });
   }
 };
 
-// Get payment by order ID
-const getPaymentByOrder = async (req, res) => {
+const getPaymentHistory = async (req, res) => {
   try {
-    const { orderId } = req.params;
-    
-    const payment = await PaymentService.getPaymentByOrderId(orderId, req.user.id);
-    
-    if (!payment) {
-      return res.status(404).json({ message: 'Payment not found' });
-    }
-
-    res.json({ payment });
-  } catch (error) {
-    console.error('Get payment error:', error);
-    res.status(500).json({ message: 'Failed to fetch payment' });
-  }
-};
-
-// Get user's payment history
-const getUserPayments = async (req, res) => {
-  try {
-    const { page = 1, limit = 10, status } = req.query;
-    
-    let filter = { UserId: req.user.id };
-    if (status) {
-      filter.status = status;
-    }
-
-    const offset = (page - 1) * limit;
-    
-    const { count, rows: payments } = await Payment.findAndCountAll({
-      where: filter,
-      include: [
-        {
-          model: Order,
-          attributes: ['id', 'totalAmount', 'orderStatus']
-        }
-      ],
+    const payments = await Payment.findAll({
+      where: { userId: req.user.id },
+      include: [{ model: Order }],
       order: [['createdAt', 'DESC']],
-      limit: parseInt(limit),
-      offset: parseInt(offset)
     });
 
-    const totalPages = Math.ceil(count / limit);
-
-    res.json({
-      payments,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages,
-        totalPayments: count,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
-      }
-    });
+    res.status(200).json(payments);
   } catch (error) {
-    console.error('Get user payments error:', error);
-    res.status(500).json({ message: 'Failed to fetch payments' });
+    console.error("Get payment history error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-// Upload payment proof
-const uploadPaymentProof = async (req, res) => {
+const getPaymentDetails = async (req, res) => {
   try {
-    const { paymentId } = req.params;
-    const { proofImages } = req.body;
+    const payment = await Payment.findByPk(req.params.id, {
+      include: [{ model: Order }, { model: User }],
+    });
 
-    if (!proofImages || !Array.isArray(proofImages) || proofImages.length === 0) {
-      return res.status(400).json({ message: 'Payment proof images are required' });
+    if (!payment || payment.userId !== req.user.id) {
+      return res.status(404).json({ message: "Payment not found" });
     }
 
-    const payment = await Payment.findOne({
-      where: { id: paymentId, UserId: req.user.id }
-    });
-
-    if (!payment) {
-      return res.status(404).json({ message: 'Payment not found' });
-    }
-
-    await payment.update({
-      paymentProof: proofImages,
-      status: 'processing'
-    });
-
-    res.json({
-      message: 'Payment proof uploaded successfully',
-      payment
-    });
+    res.status(200).json(payment);
   } catch (error) {
-    console.error('Upload payment proof error:', error);
-    res.status(500).json({ message: 'Failed to upload payment proof' });
+    console.error("Get payment details error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 module.exports = {
-  getMerchantAccounts,
-  createPayment,
-  getPaymentByOrder,
-  getUserPayments,
-  uploadPaymentProof
+  processPayment,
+  getPaymentHistory,
+  getPaymentDetails,
 };

@@ -1,83 +1,56 @@
-const rateLimit = require('express-rate-limit');
+const rateLimit = require("express-rate-limit");
 
-// General API rate limiting
-const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: {
-    error: 'Too many requests from this IP, please try again later.',
-    retryAfter: '15 minutes'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const createLimiter = (windowMs, max, message) => {
+  return rateLimit({
+    windowMs,
+    max,
+    message: { message },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+};
 
-// Strict rate limiting for authentication endpoints
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
-  message: {
-    error: 'Too many authentication attempts, please try again later.',
-    retryAfter: '15 minutes'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: true, // Don't count successful requests
-});
+const generalLimiter = createLimiter(
+  15 * 60 * 1000, // 15 minutes
+  100, // limit each IP to 100 requests per windowMs
+  "Too many requests from this IP, please try again later"
+);
 
-// Password reset rate limiting
-const passwordResetLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 3, // limit each IP to 3 password reset requests per hour
-  message: {
-    error: 'Too many password reset attempts, please try again later.',
-    retryAfter: '1 hour'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const authLimiter = createLimiter(
+  15 * 60 * 1000, // 15 minutes
+  5, // limit each IP to 5 requests per windowMs
+  "Too many authentication attempts, please try again later"
+);
 
-// Admin endpoints rate limiting
-const adminLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // limit each IP to 50 requests per windowMs for admin endpoints
-  message: {
-    error: 'Too many admin requests, please try again later.',
-    retryAfter: '15 minutes'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const passwordResetLimiter = createLimiter(
+  60 * 60 * 1000, // 1 hour
+  3, // limit each IP to 3 password reset requests per hour
+  "Too many password reset attempts, please try again later"
+);
 
-// File upload rate limiting
-const uploadLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // limit each IP to 10 uploads per windowMs
-  message: {
-    error: 'Too many file uploads, please try again later.',
-    retryAfter: '15 minutes'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const orderLimiter = createLimiter(
+  60 * 1000, // 1 minute
+  5, // limit each IP to 5 orders per minute
+  "Too many order attempts, please try again later"
+);
 
-// Order placement rate limiting
-const orderLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // limit each IP to 10 orders per hour
-  message: {
-    error: 'Too many orders placed, please try again later.',
-    retryAfter: '1 hour'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const adminLimiter = createLimiter(
+  15 * 60 * 1000, // 15 minutes
+  200, // higher limit for admin operations
+  "Too many admin requests, please try again later"
+);
+
+const uploadLimiter = createLimiter(
+  15 * 60 * 1000, // 15 minutes
+  10, // limit each IP to 10 uploads per 15 minutes
+  "Too many upload attempts, please try again later"
+);
 
 module.exports = {
   generalLimiter,
   authLimiter,
   passwordResetLimiter,
+  orderLimiter,
   adminLimiter,
   uploadLimiter,
-  orderLimiter
 };
