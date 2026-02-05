@@ -1,71 +1,73 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setLoading(true);
+
     setTimeout(() => {
-      setIsLoading(false);
-      setIsSubmitted(true);
+      setSubmitted(true);
+      setLoading(false);
     }, 1000);
   };
 
-  if (isSubmitted) {
+  if (submitted) {
     return (
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-          <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold mb-2">Check Your Email</h2>
-          <p className="text-gray-600 mb-6">
-            We've sent password reset instructions to {email}
-          </p>
-          <Link to="/auth/login" className="text-pink-600 hover:text-pink-700 font-medium">
-            Back to Login
-          </Link>
-        </div>
+      <div className="bg-white rounded-lg shadow-md p-8 text-center">
+        <div className="text-5xl mb-4">✉️</div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Check Your Email</h2>
+        <p className="text-gray-600 mb-6">
+          We've sent password reset instructions to <strong>{email}</strong>
+        </p>
+        <Link
+          to="/auth/login"
+          className="text-pink-600 hover:text-pink-700 font-medium"
+        >
+          Back to Login
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-md">
-      <div className="bg-white rounded-2xl shadow-xl p-8">
-        <h2 className="text-3xl font-bold text-center mb-2">Forgot Password?</h2>
-        <p className="text-gray-600 text-center mb-8">
-          Enter your email and we'll send you reset instructions
-        </p>
+    <div className="bg-white rounded-lg shadow-md p-8">
+      <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Forgot Password?</h2>
+      <p className="text-gray-600 text-center mb-6">
+        Enter your email and we'll send you reset instructions
+      </p>
 
-        <form onSubmit={handleSubmit}>
-          <Input
-            label="Email"
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             required
           />
+        </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Sending...' : 'Send Reset Link'}
-          </Button>
-        </form>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 transition disabled:opacity-50"
+        >
+          {loading ? 'Sending...' : 'Send Reset Link'}
+        </button>
+      </form>
 
-        <p className="text-center mt-6 text-gray-600">
-          <Link to="/auth/login" className="text-pink-600 hover:text-pink-700 font-medium">
-            Back to Login
-          </Link>
-        </p>
-      </div>
+      <p className="text-center text-sm text-gray-600 mt-6">
+        Remember your password?{' '}
+        <Link to="/auth/login" className="text-pink-600 hover:text-pink-700 font-medium">
+          Login
+        </Link>
+      </p>
     </div>
   );
 }

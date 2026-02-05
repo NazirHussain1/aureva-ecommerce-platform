@@ -1,7 +1,7 @@
 import axios from './axios';
 
 export const authApi = {
-  register: (userData) => axios.post('/users/register', userData),
+  register: (userData) => axios.post('/users/signup', userData),
   login: (credentials) => axios.post('/users/login', credentials),
   logout: () => axios.post('/users/logout'),
   getProfile: () => axios.get('/users/me'),

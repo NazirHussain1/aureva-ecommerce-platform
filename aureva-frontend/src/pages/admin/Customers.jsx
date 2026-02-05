@@ -1,62 +1,59 @@
-import { useState } from 'react';
-import DataTable from '../../components/admin/DataTable';
-import { formatDate } from '../../utils/formatters';
+import { useState, useEffect } from 'react';
 
 export default function Customers() {
-  const [customers, setCustomers] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'customer', createdAt: new Date('2024-01-15') },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'customer', createdAt: new Date('2024-02-20') },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'customer', createdAt: new Date('2024-03-10') },
-  ]);
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const columns = [
-    { key: 'id', label: 'ID' },
-    { key: 'name', label: 'Name' },
-    { key: 'email', label: 'Email' },
-    {
-      key: 'role',
-      label: 'Role',
-      render: (value) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          value === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
-        }`}>
-          {value}
-        </span>
-      ),
-    },
-    { key: 'createdAt', label: 'Joined', render: (value) => formatDate(value) },
-  ];
-
-  const handleEdit = (customer) => {
-    console.log('Edit customer:', customer);
-  };
-
-  const handleDelete = (customer) => {
-    if (confirm('Are you sure you want to delete this customer?')) {
-      setCustomers(customers.filter((c) => c.id !== customer.id));
-    }
-  };
+  useEffect(() => {
+    setLoading(false);
+  }, []);
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">Customers</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Customers Management</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <p className="text-gray-600 text-sm">Total Customers</p>
-          <p className="text-2xl font-bold">{customers.length}</p>
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <p className="text-gray-600 text-sm">New This Month</p>
-          <p className="text-2xl font-bold">12</p>
+      ) : customers.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-md p-12 text-center">
+          <div className="text-6xl mb-4">👥</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">No customers yet</h2>
+          <p className="text-gray-600">Customer information will appear here</p>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <p className="text-gray-600 text-sm">Active Users</p>
-          <p className="text-2xl font-bold">{customers.length}</p>
+      ) : (
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Orders</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Spent</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {customers.map((customer) => (
+                <tr key={customer.id}>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{customer.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{customer.email}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{customer.orderCount}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">${customer.totalSpent}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {new Date(customer.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    <button className="text-blue-600 hover:text-blue-800">View</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
-
-      <DataTable columns={columns} data={customers} onEdit={handleEdit} onDelete={handleDelete} />
+      )}
     </div>
   );
 }

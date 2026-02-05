@@ -1,85 +1,74 @@
 import { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
+import { useParams, useNavigate } from 'react-router-dom';
 
 export default function ResetPassword() {
   const { token } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     password: '',
-    confirmPassword: '',
+    confirmPassword: ''
   });
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setError('');
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
+    setLoading(true);
 
-    setIsLoading(true);
     setTimeout(() => {
-      setIsLoading(false);
+      alert('Password reset successful!');
       navigate('/auth/login');
     }, 1000);
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
-  };
-
   return (
-    <div className="w-full max-w-md">
-      <div className="bg-white rounded-2xl shadow-xl p-8">
-        <h2 className="text-3xl font-bold text-center mb-2">Reset Password</h2>
-        <p className="text-gray-600 text-center mb-8">Enter your new password</p>
+    <div className="bg-white rounded-lg shadow-md p-8">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Reset Password</h2>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
+      {error && (
+        <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
+          {error}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit}>
-          <Input
-            label="New Password"
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+          <input
             type="password"
-            name="password"
             value={formData.password}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             required
           />
+        </div>
 
-          <Input
-            label="Confirm Password"
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+          <input
             type="password"
-            name="confirmPassword"
             value={formData.confirmPassword}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             required
           />
+        </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Resetting...' : 'Reset Password'}
-          </Button>
-        </form>
-
-        <p className="text-center mt-6 text-gray-600">
-          <Link to="/auth/login" className="text-pink-600 hover:text-pink-700 font-medium">
-            Back to Login
-          </Link>
-        </p>
-      </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 transition disabled:opacity-50"
+        >
+          {loading ? 'Resetting...' : 'Reset Password'}
+        </button>
+      </form>
     </div>
   );
 }

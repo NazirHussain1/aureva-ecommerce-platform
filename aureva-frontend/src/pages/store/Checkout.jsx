@@ -1,14 +1,12 @@
 import { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import useCart from '../../hooks/useCart';
-import { formatPrice } from '../../utils/formatters';
-import { PAYMENT_METHODS } from '../../utils/constants';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
+import { clearCart } from '../../features/cart/cartSlice';
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const { items, cartTotal, clearAllItems } = useCart();
+  const dispatch = useDispatch();
+  const { items } = useSelector((state) => state.cart);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -17,142 +15,169 @@ export default function Checkout() {
     city: '',
     state: '',
     zipCode: '',
-    paymentMethod: 'credit_card',
+    paymentMethod: 'credit_card'
   });
 
-  const shipping = cartTotal > 50 ? 0 : 5.99;
-  const tax = cartTotal * 0.1;
-  const total = cartTotal + shipping + tax;
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    clearAllItems();
-    navigate('/orders');
+    try {
+      alert('Order placed successfully!');
+      dispatch(clearCart());
+      navigate('/orders');
+    } catch (error) {
+      console.error('Error placing order:', error);
+    }
   };
 
+  if (items.length === 0) {
+    navigate('/cart');
+    return null;
+  }
+
   return (
-    <div className="container-custom py-8">
-      <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container-custom">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Checkout</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Full Name"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  label="Email"
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  label="Phone"
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  label="Address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  required
-                  className="md:col-span-2"
-                />
-                <Input
-                  label="City"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  label="State"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  label="ZIP Code"
-                  name="zipCode"
-                  value={formData.zipCode}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-6">Shipping Information</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                    required
+                  />
+                </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
-              <div className="space-y-3">
-                {PAYMENT_METHODS.map((method) => (
-                  <label key={method.value} className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input
-                      type="radio"
-                      name="paymentMethod"
-                      value={method.value}
-                      checked={formData.paymentMethod === method.value}
-                      onChange={handleChange}
-                      className="mr-3"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                      required
                     />
-                    <span>{method.label}</span>
-                  </label>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                    required
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <input
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                    <input
+                      type="text"
+                      value={formData.state}
+                      onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                    <input
+                      type="text"
+                      value={formData.zipCode}
+                      onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                  <select
+                    value={formData.paymentMethod}
+                    onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                  >
+                    <option value="credit_card">Credit Card</option>
+                    <option value="debit_card">Debit Card</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="cash_on_delivery">Cash on Delivery</option>
+                  </select>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full mt-6 bg-pink-600 text-white py-3 rounded-lg hover:bg-pink-700 transition font-semibold"
+              >
+                Place Order
+              </button>
+            </form>
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Order Summary</h2>
+              
+              <div className="space-y-3 mb-6">
+                {items.map((item) => (
+                  <div key={item.id} className="flex justify-between text-sm">
+                    <span className="text-gray-600">{item.name} x {item.quantity}</span>
+                    <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                  </div>
                 ))}
               </div>
-            </div>
 
-            <Button type="submit" className="w-full">
-              Place Order
-            </Button>
-          </form>
-        </div>
-
-        <div className="lg:col-span-1">
-          <div className="bg-white p-6 rounded-lg shadow-md sticky top-24">
-            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-            
-            <div className="space-y-3 mb-4">
-              {items.map((item) => (
-                <div key={item.id} className="flex justify-between text-sm">
-                  <span className="text-gray-600">{item.name} x {item.quantity}</span>
-                  <span className="font-medium">{formatPrice(item.price * item.quantity)}</span>
+              <div className="border-t pt-3 space-y-2">
+                <div className="flex justify-between text-gray-600">
+                  <span>Subtotal</span>
+                  <span>${total.toFixed(2)}</span>
                 </div>
-              ))}
-            </div>
-
-            <div className="border-t pt-4 space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">{formatPrice(cartTotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Shipping</span>
-                <span className="font-medium">{shipping === 0 ? 'FREE' : formatPrice(shipping)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Tax</span>
-                <span className="font-medium">{formatPrice(tax)}</span>
-              </div>
-              <div className="border-t pt-2 flex justify-between text-lg font-bold">
-                <span>Total</span>
-                <span className="text-pink-600">{formatPrice(total)}</span>
+                <div className="flex justify-between text-gray-600">
+                  <span>Shipping</span>
+                  <span>Free</span>
+                </div>
+                <div className="flex justify-between font-bold text-lg">
+                  <span>Total</span>
+                  <span className="text-pink-600">${total.toFixed(2)}</span>
+                </div>
               </div>
             </div>
           </div>

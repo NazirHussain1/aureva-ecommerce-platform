@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../features/auth/authSlice';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -11,74 +9,74 @@ export default function Login() {
   const { isLoading, error } = useSelector((state) => state.auth);
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
+    password: ''
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await dispatch(login(formData));
-    if (result.type === 'auth/login/fulfilled') {
+
+    try {
+      await dispatch(login(formData)).unwrap();
       navigate('/');
+    } catch (err) {
+      console.error('Login error:', err);
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
   return (
-    <div className="w-full max-w-md">
-      <div className="bg-white rounded-2xl shadow-xl p-8">
-        <h2 className="text-3xl font-bold text-center mb-2">Welcome Back</h2>
-        <p className="text-gray-600 text-center mb-8">Login to your account</p>
+    <div className="bg-white rounded-lg shadow-md p-8">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Login</h2>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
+      {error && (
+        <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
+          {error}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit}>
-          <Input
-            label="Email"
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input
             type="email"
-            name="email"
             value={formData.email}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             required
           />
+        </div>
 
-          <Input
-            label="Password"
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input
             type="password"
-            name="password"
             value={formData.password}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             required
           />
+        </div>
 
-          <div className="flex justify-between items-center mb-6">
-            <label className="flex items-center">
-              <input type="checkbox" className="mr-2" />
-              <span className="text-sm text-gray-600">Remember me</span>
-            </label>
-            <Link to="/auth/forgot-password" className="text-sm text-pink-600 hover:text-pink-700">
-              Forgot password?
-            </Link>
-          </div>
-
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Logging in...' : 'Login'}
-          </Button>
-        </form>
-
-        <p className="text-center mt-6 text-gray-600">
-          Don't have an account?{' '}
-          <Link to="/auth/register" className="text-pink-600 hover:text-pink-700 font-medium">
-            Sign up
+        <div className="flex justify-between items-center text-sm">
+          <Link to="/auth/forgot-password" className="text-pink-600 hover:text-pink-700">
+            Forgot Password?
           </Link>
-        </p>
-      </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? 'Logging in...' : 'Login'}
+        </button>
+      </form>
+
+      <p className="text-center text-sm text-gray-600 mt-6">
+        Don't have an account?{' '}
+        <Link to="/auth/register" className="text-pink-600 hover:text-pink-700 font-medium">
+          Sign up
+        </Link>
+      </p>
     </div>
   );
 }

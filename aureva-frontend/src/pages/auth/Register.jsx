@@ -2,110 +2,132 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { register } from '../../features/auth/authSlice';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
 
 export default function Register() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isLoading, error } = useSelector((state) => state.auth);
+  const { loading, error } = useSelector((state) => state.auth);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
+    role: 'user'
   });
-  const [errors, setErrors] = useState({});
+  const [localError, setLocalError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setLocalError('');
+
     if (formData.password !== formData.confirmPassword) {
-      setErrors({ confirmPassword: 'Passwords do not match' });
+      setLocalError('Passwords do not match');
       return;
     }
 
-    const result = await dispatch(register({
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-    }));
+    if (formData.password.length < 6) {
+      setLocalError('Password must be at least 6 characters');
+      return;
+    }
 
-    if (result.type === 'auth/register/fulfilled') {
+    try {
+      await dispatch(register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role
+      })).unwrap();
       navigate('/');
+    } catch (err) {
+      console.error('Registration error:', err);
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: '' });
-  };
-
   return (
-    <div className="w-full max-w-md">
-      <div className="bg-white rounded-2xl shadow-xl p-8">
-        <h2 className="text-3xl font-bold text-center mb-2">Create Account</h2>
-        <p className="text-gray-600 text-center mb-8">Join Aureva Beauty Community</p>
+    <div className="bg-white rounded-lg shadow-md p-8">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Create Account</h2>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
+      {(error || localError) && (
+        <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
+          {localError || error}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit}>
-          <Input
-            label="Full Name"
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+          <input
             type="text"
-            name="name"
             value={formData.name}
-            onChange={handleChange}
-            error={errors.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             required
           />
+        </div>
 
-          <Input
-            label="Email"
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input
             type="email"
-            name="email"
             value={formData.email}
-            onChange={handleChange}
-            error={errors.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             required
           />
+        </div>
 
-          <Input
-            label="Password"
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input
             type="password"
-            name="password"
             value={formData.password}
-            onChange={handleChange}
-            error={errors.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             required
+            minLength={6}
           />
+        </div>
 
-          <Input
-            label="Confirm Password"
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+          <input
             type="password"
-            name="confirmPassword"
             value={formData.confirmPassword}
-            onChange={handleChange}
-            error={errors.confirmPassword}
+            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             required
+            minLength={6}
           />
+        </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Creating account...' : 'Create Account'}
-          </Button>
-        </form>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Register As</label>
+          <select
+            value={formData.role}
+            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+          >
+            <option value="user">Customer</option>
+            <option value="admin">Admin</option>
+          </select>
+          <p className="text-xs text-gray-500 mt-1">Select Admin to manage products and orders</p>
+        </div>
 
-        <p className="text-center mt-6 text-gray-600">
-          Already have an account?{' '}
-          <Link to="/auth/login" className="text-pink-600 hover:text-pink-700 font-medium">
-            Login
-          </Link>
-        </p>
-      </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? 'Creating account...' : 'Sign Up'}
+        </button>
+      </form>
+
+      <p className="text-center text-sm text-gray-600 mt-6">
+        Already have an account?{' '}
+        <Link to="/auth/login" className="text-pink-600 hover:text-pink-700 font-medium">
+          Login
+        </Link>
+      </p>
     </div>
   );
 }
