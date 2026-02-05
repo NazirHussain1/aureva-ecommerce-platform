@@ -1,11 +1,15 @@
-import { Outlet } from "react-router-dom";
+import { Outlet } from 'react-router-dom';
+import Header from '../components/common/Header';
+import Footer from '../components/common/Footer';
 
 export default function StoreLayout() {
   return (
-    <div>
-      <header className="p-4 bg-black text-white">Aureva Store</header>
-      <Outlet />
-      <footer className="p-4 bg-gray-200">© 2026 Aureva</footer>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <Outlet />
+      </main>
+      <Footer />
     </div>
   );
 }
