@@ -7,7 +7,7 @@ import orderReducer from "../features/orders/orderSlice";
 import adminReducer from "../features/admin/adminSlice";
 import notificationReducer from "../features/notifications/notificationSlice";
 
-const store = configureStore({
+export const store = configureStore({
   reducer: {
     auth: authReducer,
     cart: cartReducer,

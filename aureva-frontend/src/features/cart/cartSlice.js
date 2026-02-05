@@ -1,60 +1,36 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import cartApi from '../../api/cartApi';
-
-export const fetchCart = createAsyncThunk('cart/fetchCart', async () => {
-  const response = await cartApi.getCart();
-  return response.data;
-});
-
-export const addToCartAsync = createAsyncThunk('cart/addToCart', async ({ productId, quantity }) => {
-  const response = await cartApi.addToCart(productId, quantity);
-  return response.data;
-});
+import { createSlice } from '@reduxjs/toolkit';
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState: {
     items: [],
-    isLoading: false,
-    error: null,
+    total: 0,
   },
   reducers: {
     addToCart: (state, action) => {
-      const { product, quantity } = action.payload;
-      const existingItem = state.items.find(item => item.id === product.id);
+      const existingItem = state.items.find(item => item.id === action.payload.id);
       if (existingItem) {
-        existingItem.quantity += quantity;
+        existingItem.quantity += 1;
       } else {
-        state.items.push({ ...product, quantity });
+        state.items.push({ ...action.payload, quantity: 1 });
       }
+      state.total = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     },
     removeFromCart: (state, action) => {
       state.items = state.items.filter(item => item.id !== action.payload);
+      state.total = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     },
     updateQuantity: (state, action) => {
-      const { productId, quantity } = action.payload;
-      const item = state.items.find(item => item.id === productId);
+      const item = state.items.find(item => item.id === action.payload.id);
       if (item) {
-        item.quantity = quantity;
+        item.quantity = action.payload.quantity;
       }
+      state.total = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     },
     clearCart: (state) => {
       state.items = [];
+      state.total = 0;
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchCart.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(fetchCart.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.items = action.payload;
-      })
-      .addCase(fetchCart.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.error.message;
-      });
   },
 });
 
