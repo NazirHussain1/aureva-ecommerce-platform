@@ -1,60 +1,66 @@
-import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+// src/hooks/useAuth.js
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useMemo, useCallback } from 'react';
+import { logout } from '../features/auth/authSlice';
 
-export default function useSocket() {
-  const [socket, setSocket] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
+/**
+ * Custom hook to access authentication state, actions, and route guards
+ */
+export default function useAuth() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const socketInstance = io('http://localhost:5000', {
-      autoConnect: false,
-    });
+  // Grab auth state from Redux
+  const { user, token, loading } = useSelector((state) => state.auth);
 
-    socketInstance.on('connect', () => {
-      setIsConnected(true);
-    });
+  // Authentication status
+  const isAuthenticated = !!token;
+  const isAdmin = user?.role === 'admin';
 
-    socketInstance.on('disconnect', () => {
-      setIsConnected(false);
-    });
+  /**
+   * Logout function
+   * Clears auth state and redirects to login
+   */
+  const handleLogout = useCallback(() => {
+    dispatch(logout());
+    navigate('/auth/login', { replace: true });
+  }, [dispatch, navigate]);
 
-    setSocket(socketInstance);
+  /**
+   * Guard function for routes requiring authentication
+   * Redirects to login if not authenticated
+   */
+  const requireAuth = useCallback(
+    (redirectPath = '/auth/login') => {
+      if (!isAuthenticated) navigate(redirectPath, { replace: true });
+    },
+    [isAuthenticated, navigate]
+  );
 
-    return () => {
-      socketInstance.disconnect();
-    };
-  }, []);
+  /**
+   * Guard function for admin-only routes
+   * Redirects to home if not admin
+   */
+  const requireAdmin = useCallback(
+    (redirectPath = '/') => {
+      if (!isAdmin) navigate(redirectPath, { replace: true });
+    },
+    [isAdmin, navigate]
+  );
 
-  const connect = () => {
-    if (socket) {
-      socket.connect();
-    }
-  };
-
-  const disconnect = () => {
-    if (socket) {
-      socket.disconnect();
-    }
-  };
-
-  const emit = (event, data) => {
-    if (socket && isConnected) {
-      socket.emit(event, data);
-    }
-  };
-
-  const on = (event, callback) => {
-    if (socket) {
-      socket.on(event, callback);
-    }
-  };
-
-  return {
-    socket,
-    isConnected,
-    connect,
-    disconnect,
-    emit,
-    on,
-  };
+  // Memoize return object for better performance
+  return useMemo(
+    () => ({
+      user,
+      token,
+      loading,
+      isAuthenticated,
+      isAdmin,
+      logout: handleLogout,
+      requireAuth,
+      requireAdmin,
+    }),
+    [user, token, loading, isAuthenticated, isAdmin, handleLogout, requireAuth, requireAdmin]
+  );
 }

@@ -20,8 +20,9 @@ export default function Profile() {
         <h1 className="text-3xl font-bold text-gray-800 mb-8">My Account</h1>
 
         <div className="grid lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
           <aside className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
               <div className="text-center mb-6">
                 <div className="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-3xl">👤</span>
@@ -39,6 +40,7 @@ export default function Profile() {
                 >
                   Profile Information
                 </button>
+
                 <button
                   onClick={() => setActiveTab('addresses')}
                   className={`w-full text-left px-4 py-2 rounded-lg transition ${
@@ -47,6 +49,7 @@ export default function Profile() {
                 >
                   Addresses
                 </button>
+
                 <button
                   onClick={() => setActiveTab('security')}
                   className={`w-full text-left px-4 py-2 rounded-lg transition ${
@@ -55,6 +58,7 @@ export default function Profile() {
                 >
                   Security
                 </button>
+
                 <button
                   onClick={handleLogout}
                   className="w-full text-left px-4 py-2 rounded-lg hover:bg-red-50 text-red-600 transition"
@@ -65,8 +69,10 @@ export default function Profile() {
             </div>
           </aside>
 
+          {/* Main Content */}
           <main className="lg:col-span-3">
             <div className="bg-white rounded-lg shadow-md p-6">
+              {/* Profile Tab */}
               {activeTab === 'profile' && (
                 <div>
                   <h2 className="text-2xl font-bold text-gray-800 mb-6">Profile Information</h2>
@@ -79,6 +85,7 @@ export default function Profile() {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                       />
                     </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                       <input
@@ -87,6 +94,7 @@ export default function Profile() {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                       />
                     </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                       <input
@@ -94,6 +102,7 @@ export default function Profile() {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                       />
                     </div>
+
                     <button
                       type="submit"
                       className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition"
@@ -104,6 +113,7 @@ export default function Profile() {
                 </div>
               )}
 
+              {/* Addresses Tab */}
               {activeTab === 'addresses' && (
                 <div>
                   <div className="flex justify-between items-center mb-6">
@@ -116,6 +126,7 @@ export default function Profile() {
                 </div>
               )}
 
+              {/* Security Tab */}
               {activeTab === 'security' && (
                 <div>
                   <h2 className="text-2xl font-bold text-gray-800 mb-6">Change Password</h2>
@@ -127,6 +138,7 @@ export default function Profile() {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                       />
                     </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
                       <input
@@ -134,6 +146,7 @@ export default function Profile() {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                       />
                     </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
                       <input
@@ -141,6 +154,7 @@ export default function Profile() {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                       />
                     </div>
+
                     <button
                       type="submit"
                       className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition"

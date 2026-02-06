@@ -15,7 +15,6 @@ export default function Home() {
     try {
       setLoading(true);
       const response = await productApi.getProducts({ limit: 8 });
-      console.log('Products fetched:', response.data);
       setFeaturedProducts(response.data || []);
       setError(null);
     } catch (error) {
@@ -33,17 +32,18 @@ export default function Home() {
     { name: 'Makeup', image: '💄', path: '/products?category=makeup' },
     { name: 'Fragrance', image: '🌸', path: '/products?category=fragrance' },
     { name: 'Wellness', image: '🧘', path: '/products?category=personal wellness' },
-    { name: 'Accessories', image: '✨', path: '/products?category=beauty accessories' }
+    { name: 'Accessories', image: '✨', path: '/products?category=beauty accessories' },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
       <section className="bg-gradient-to-r from-pink-500 to-purple-600 text-white py-20">
         <div className="container-custom text-center">
           <h1 className="text-5xl font-bold mb-4">Welcome to Aureva Beauty</h1>
           <p className="text-xl mb-8">Discover Your Natural Radiance</p>
-          <Link 
-            to="/products" 
+          <Link
+            to="/products"
             className="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition inline-block"
           >
             Shop Now
@@ -51,6 +51,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Categories Section */}
       <section className="py-16">
         <div className="container-custom">
           <h2 className="text-3xl font-bold text-center mb-12">Shop by Category</h2>
@@ -59,7 +60,7 @@ export default function Home() {
               <Link
                 key={category.name}
                 to={category.path}
-                className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition text-center"
+                className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition flex flex-col items-center justify-center"
               >
                 <div className="text-5xl mb-3">{category.image}</div>
                 <h3 className="font-semibold text-gray-800">{category.name}</h3>
@@ -69,10 +70,11 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Featured Products Section */}
       <section className="py-16 bg-white">
         <div className="container-custom">
           <h2 className="text-3xl font-bold text-center mb-12">Featured Products</h2>
-          
+
           {loading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
@@ -98,11 +100,14 @@ export default function Home() {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {featuredProducts.map((product) => (
-                  <div key={product.id} className="bg-gray-50 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
+                  <div
+                    key={product.id}
+                    className="bg-gray-50 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition flex flex-col"
+                  >
                     <div className="h-64 bg-gray-200 flex items-center justify-center">
                       {product.images && product.images.length > 0 ? (
-                        <img 
-                          src={product.images[0]} 
+                        <img
+                          src={product.images[0]}
                           alt={product.name}
                           className="w-full h-full object-cover"
                         />
@@ -110,10 +115,10 @@ export default function Home() {
                         <span className="text-6xl">🧴</span>
                       )}
                     </div>
-                    <div className="p-4">
+                    <div className="p-4 flex flex-col flex-1">
                       <h3 className="font-semibold text-lg mb-2 truncate">{product.name}</h3>
                       <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center mt-auto">
                         <span className="text-xl font-bold text-purple-600">${product.price}</span>
                         <Link
                           to={`/products/${product.id}`}
@@ -139,20 +144,21 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Features Section */}
       <section className="py-16 bg-gradient-to-r from-purple-100 to-pink-100">
         <div className="container-custom">
           <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="bg-white p-8 rounded-lg shadow-md">
+            <div className="bg-white p-8 rounded-lg shadow-md flex flex-col items-center">
               <div className="text-4xl mb-4">🚚</div>
               <h3 className="font-bold text-xl mb-2">Free Shipping</h3>
               <p className="text-gray-600">On orders over $50</p>
             </div>
-            <div className="bg-white p-8 rounded-lg shadow-md">
+            <div className="bg-white p-8 rounded-lg shadow-md flex flex-col items-center">
               <div className="text-4xl mb-4">🔒</div>
               <h3 className="font-bold text-xl mb-2">Secure Payment</h3>
               <p className="text-gray-600">100% secure transactions</p>
             </div>
-            <div className="bg-white p-8 rounded-lg shadow-md">
+            <div className="bg-white p-8 rounded-lg shadow-md flex flex-col items-center">
               <div className="text-4xl mb-4">↩️</div>
               <h3 className="font-bold text-xl mb-2">Easy Returns</h3>
               <p className="text-gray-600">10-day return policy</p>
@@ -161,6 +167,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Newsletter Section */}
       <section className="py-16 bg-purple-600 text-white">
         <div className="container-custom text-center">
           <h2 className="text-3xl font-bold mb-4">Subscribe to Our Newsletter</h2>

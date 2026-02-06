@@ -20,13 +20,15 @@ export default function ProductList() {
 
   const categories = ['skincare', 'haircare', 'makeup', 'fragrance', 'personal wellness', 'beauty accessories'];
 
+  // Fetch products whenever filters change (with debounce)
   useEffect(() => {
     const delay = setTimeout(() => {
       dispatch(fetchProducts(filters));
-    }, 400);
+    }, 400); // 400ms debounce
     return () => clearTimeout(delay);
   }, [filters, dispatch]);
 
+  // Update URL query params based on filters
   const updateURL = (newFilters) => {
     const params = {};
     Object.keys(newFilters).forEach((key) => {
@@ -61,6 +63,7 @@ export default function ProductList() {
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8">
+          {/* Filters Sidebar */}
           <aside className={`lg:block ${showFilters ? 'block' : 'hidden'}`}>
             <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24 space-y-6">
               <div className="flex justify-between items-center">
@@ -93,22 +96,23 @@ export default function ProductList() {
                   value={filters.minPrice}
                   onChange={(e) => handleFilterChange('minPrice', e.target.value)}
                   placeholder="Min"
-                  className="px-3 py-2 border rounded-lg"
+                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500"
                 />
                 <input
                   type="number"
                   value={filters.maxPrice}
                   onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
                   placeholder="Max"
-                  className="px-3 py-2 border rounded-lg"
+                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500"
                 />
               </div>
             </div>
           </aside>
 
+          {/* Products Grid */}
           <main className="lg:col-span-3">
             <div className="mb-5 text-gray-600 text-sm">
-              {products.length} results found
+              {isLoading ? 'Loading products...' : `${products.length} results found`}
             </div>
             <ProductGrid products={products} isLoading={isLoading} />
           </main>
