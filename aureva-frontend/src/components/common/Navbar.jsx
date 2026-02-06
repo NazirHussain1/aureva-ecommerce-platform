@@ -1,25 +1,38 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 export default function Navbar() {
+  const { search } = useLocation();
+
+  const categories = [
+    { name: 'Skincare', value: 'skincare' },
+    { name: 'Makeup', value: 'makeup' },
+    { name: 'Haircare', value: 'haircare' },
+    { name: 'Fragrance', value: 'fragrance' },
+    { name: 'Wellness', value: 'personal wellness' },
+  ];
+
   return (
-    <nav className="bg-white shadow-sm">
-      <div className="container-custom">
-        <div className="flex items-center justify-center space-x-8 py-3">
-          <Link to="/products?category=skincare" className="text-gray-700 hover:text-pink-600 transition">
-            Skincare
-          </Link>
-          <Link to="/products?category=makeup" className="text-gray-700 hover:text-pink-600 transition">
-            Makeup
-          </Link>
-          <Link to="/products?category=haircare" className="text-gray-700 hover:text-pink-600 transition">
-            Haircare
-          </Link>
-          <Link to="/products?category=fragrance" className="text-gray-700 hover:text-pink-600 transition">
-            Fragrance
-          </Link>
-          <Link to="/products?category=personal wellness" className="text-gray-700 hover:text-pink-600 transition">
-            Wellness
-          </Link>
+    <nav className="bg-white border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex overflow-x-auto scrollbar-hide space-x-3 py-3">
+
+          {categories.map((cat) => {
+            const active = search.includes(cat.value);
+            return (
+              <Link
+                key={cat.value}
+                to={`/products?category=${cat.value}`}
+                className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition
+                  ${active
+                    ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow'
+                    : 'bg-gray-100 text-gray-700 hover:bg-pink-50 hover:text-pink-600'
+                  }`}
+              >
+                {cat.name}
+              </Link>
+            );
+          })}
+
         </div>
       </div>
     </nav>
