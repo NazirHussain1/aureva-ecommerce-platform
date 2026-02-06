@@ -19,7 +19,6 @@ export default function Login() {
     e.preventDefault();
     setLocalError('');
 
-    // Optional: simple client-side validation
     if (!formData.email || !formData.password) {
       setLocalError('Please fill in all fields');
       return;
@@ -27,10 +26,9 @@ export default function Login() {
 
     try {
       await dispatch(login(formData)).unwrap();
-      navigate('/'); // Redirect to home/dashboard after login
+      navigate('/');
     } catch (err) {
       console.error('Login error:', err);
-      // Optional: set local error if dispatch fails
       setLocalError(err?.message || 'Login failed');
     }
   };

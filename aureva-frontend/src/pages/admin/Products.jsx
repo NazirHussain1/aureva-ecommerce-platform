@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { productApi } from '../../api/productApi';
 
-// Reusable Spinner component
 const Spinner = () => (
   <div className="text-center py-12">
     <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
   </div>
 );
 
-// Reusable Modal component
 const Modal = ({ children, onClose }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
     <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
@@ -26,7 +24,6 @@ const Modal = ({ children, onClose }) => (
   </div>
 );
 
-// Stock color logic
 const getStockColor = (stock, threshold) => {
   if (stock === 0) return 'bg-red-100 text-red-800';
   if (stock <= threshold) return 'bg-orange-100 text-orange-800';
@@ -53,7 +50,6 @@ export default function AdminProducts() {
 
   const categories = ['skincare', 'haircare', 'makeup', 'fragrance', 'personal wellness', 'beauty accessories'];
 
-  // Fetch products
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -71,7 +67,6 @@ export default function AdminProducts() {
     }
   };
 
-  // Form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -103,7 +98,6 @@ export default function AdminProducts() {
     }
   };
 
-  // Edit product
   const handleEdit = (product) => {
     setEditingProduct(product);
     setFormData({
@@ -118,7 +112,6 @@ export default function AdminProducts() {
     setShowModal(true);
   };
 
-  // Delete product
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
@@ -132,7 +125,6 @@ export default function AdminProducts() {
     }
   };
 
-  // Reset form
   const resetForm = () => {
     setFormData({
       name: '',
@@ -146,7 +138,6 @@ export default function AdminProducts() {
     setEditingProduct(null);
   };
 
-  // Filtered products
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !filterCategory || product.category === filterCategory;
@@ -155,7 +146,6 @@ export default function AdminProducts() {
 
   return (
     <div>
-      {/* Header and Filters */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <div>
@@ -221,7 +211,6 @@ export default function AdminProducts() {
           )}
         </div>
       ) : (
-        // Products Table
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">

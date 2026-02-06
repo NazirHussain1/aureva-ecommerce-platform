@@ -1,11 +1,10 @@
-// wishlistSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
 const wishlistSlice = createSlice({
   name: 'wishlist',
   initialState: {
     items: [],
-    isLoading: false, // can be used if you later add async operations
+    isLoading: false,
   },
   reducers: {
     addToWishlist: (state, action) => {
@@ -25,7 +24,6 @@ const wishlistSlice = createSlice({
 
 export const { addToWishlist, removeFromWishlist, clearWishlist } = wishlistSlice.actions;
 
-// Selectors for easier usage in components
 export const selectWishlistItems = (state) => state.wishlist.items;
 export const selectWishlistCount = (state) => state.wishlist.items.length;
 export const selectWishlistLoading = (state) => state.wishlist.isLoading;

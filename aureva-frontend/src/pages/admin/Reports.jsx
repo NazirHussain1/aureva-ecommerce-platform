@@ -1,7 +1,4 @@
 import { useState, useEffect } from 'react';
-// Example: import charts when ready
-// import { LineChart, PieChart, BarChart } from 'recharts';
-// import { fetchReportsData } from '../../api/reportsApi';
 
 export default function Reports() {
   const [loading, setLoading] = useState(true);
@@ -13,13 +10,10 @@ export default function Reports() {
   });
 
   useEffect(() => {
-    // Simulate API call for now
     const loadData = async () => {
       setLoading(true);
       try {
-        // const data = await fetchReportsData();
-        // setReportsData(data);
-        await new Promise(res => setTimeout(res, 1000)); // simulate delay
+        await new Promise(res => setTimeout(res, 1000));
       } catch (error) {
         console.error('Error loading reports:', error);
       } finally {

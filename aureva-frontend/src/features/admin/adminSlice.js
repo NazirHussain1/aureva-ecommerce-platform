@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-// Example async actions (replace with your actual API calls)
 export const fetchAdminData = createAsyncThunk(
   'admin/fetchAdminData',
   async (_, thunkAPI) => {
@@ -24,7 +23,6 @@ const adminSlice = createSlice({
     error: null,
   },
   reducers: {
-    // Example: manually update state
     addProduct: (state, action) => {
       state.products.push(action.payload);
     },

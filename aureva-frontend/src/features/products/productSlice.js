@@ -1,8 +1,6 @@
-// productSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import productApi from '../../api/productApi';
 
-// Fetch all products with optional filters
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
   async (filters = {}, { rejectWithValue }) => {
@@ -15,7 +13,6 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
-// Fetch a single product by ID
 export const fetchProductById = createAsyncThunk(
   'products/fetchProductById',
   async (id, { rejectWithValue }) => {
@@ -37,11 +34,9 @@ const productSlice = createSlice({
     error: null,
   },
   reducers: {
-    // Reset the current selected product
     clearCurrentProduct: (state) => {
       state.currentProduct = null;
     },
-    // Clear all products and errors
     clearProducts: (state) => {
       state.items = [];
       state.error = null;
@@ -49,7 +44,6 @@ const productSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch products
       .addCase(fetchProducts.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -62,7 +56,6 @@ const productSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Fetch single product
       .addCase(fetchProductById.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -78,8 +71,6 @@ const productSlice = createSlice({
   },
 });
 
-// Export actions
 export const { clearCurrentProduct, clearProducts } = productSlice.actions;
 
-// Export reducer
 export default productSlice.reducer;

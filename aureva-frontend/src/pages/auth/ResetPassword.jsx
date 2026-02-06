@@ -15,7 +15,6 @@ export default function ResetPassword() {
     e.preventDefault();
     setError('');
 
-    // Simple validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -28,7 +27,6 @@ export default function ResetPassword() {
 
     setLoading(true);
 
-    // Simulate API call
     setTimeout(() => {
       alert('Password reset successful!');
       navigate('/auth/login');

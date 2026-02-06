@@ -1,8 +1,6 @@
-// orderSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import orderApi from '../../api/orderApi';
 
-// Fetch all orders
 export const fetchOrders = createAsyncThunk(
   'orders/fetchOrders',
   async (_, { rejectWithValue }) => {
@@ -15,7 +13,6 @@ export const fetchOrders = createAsyncThunk(
   }
 );
 
-// Place a new order
 export const placeOrder = createAsyncThunk(
   'orders/placeOrder',
   async (orderData, { rejectWithValue }) => {
@@ -34,8 +31,8 @@ const orderSlice = createSlice({
     items: [],
     isLoading: false,
     error: null,
-    placingOrder: false, // separate loading state for placing an order
-    lastOrder: null, // store last placed order if needed
+    placingOrder: false,
+    lastOrder: null,
   },
   reducers: {
     clearOrders: (state) => {
@@ -48,7 +45,6 @@ const orderSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch orders
       .addCase(fetchOrders.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -61,7 +57,6 @@ const orderSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Place order
       .addCase(placeOrder.pending, (state) => {
         state.placingOrder = true;
         state.error = null;
@@ -69,7 +64,7 @@ const orderSlice = createSlice({
       .addCase(placeOrder.fulfilled, (state, action) => {
         state.placingOrder = false;
         state.lastOrder = action.payload;
-        state.items.push(action.payload); // add the new order to items list
+        state.items.push(action.payload);
       })
       .addCase(placeOrder.rejected, (state, action) => {
         state.placingOrder = false;

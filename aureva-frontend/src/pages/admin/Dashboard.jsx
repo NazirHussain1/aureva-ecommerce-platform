@@ -23,7 +23,6 @@ export default function Dashboard() {
   const [lowStockProducts, setLowStockProducts] = useState([]);
 
   useEffect(() => {
-    // Simulate fetching stats
     setTimeout(() => {
       setStats({
         totalRevenue: 12450.50,

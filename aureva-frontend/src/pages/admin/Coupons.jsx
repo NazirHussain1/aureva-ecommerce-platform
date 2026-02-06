@@ -120,7 +120,6 @@ export default function Coupons() {
   });
 
   useEffect(() => {
-    // Simulate fetching coupons
     setTimeout(() => setLoading(false), 500);
   }, []);
 

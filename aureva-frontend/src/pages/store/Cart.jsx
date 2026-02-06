@@ -17,7 +17,6 @@ export default function Cart() {
 
   const handleRemove = (id, name) => {
     dispatch(removeFromCart(id));
-    // Optional: you can show a toast here
     console.log(`${name} removed from cart`);
   };
 

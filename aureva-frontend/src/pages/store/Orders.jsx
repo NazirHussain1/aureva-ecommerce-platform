@@ -4,7 +4,6 @@ export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Example mock data
   const mockOrders = [
     {
       id: '1001',
@@ -28,11 +27,10 @@ export default function Orders() {
   ];
 
   useEffect(() => {
-    // Simulate API fetch
     const fetchOrders = async () => {
       setLoading(true);
       setTimeout(() => {
-        setOrders(mockOrders); // Replace with real API call
+        setOrders(mockOrders);
         setLoading(false);
       }, 1000);
     };

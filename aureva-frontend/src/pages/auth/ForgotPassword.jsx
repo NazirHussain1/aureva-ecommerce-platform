@@ -12,7 +12,6 @@ export default function ForgotPassword() {
     setLocalError('');
     setLoading(true);
 
-    // Simple email validation
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
       setLocalError('Please enter a valid email');
@@ -20,7 +19,6 @@ export default function ForgotPassword() {
       return;
     }
 
-    // Simulate async request (replace with API call)
     setTimeout(() => {
       setSubmitted(true);
       setLoading(false);

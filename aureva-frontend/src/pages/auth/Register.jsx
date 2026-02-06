@@ -22,7 +22,6 @@ export default function Register() {
     e.preventDefault();
     setLocalError('');
 
-    // Client-side validation
     if (formData.password !== formData.confirmPassword) {
       setLocalError('Passwords do not match');
       return;

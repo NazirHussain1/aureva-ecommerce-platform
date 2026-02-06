@@ -16,7 +16,6 @@ export default function AdminOrders() {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    // Simulate fetching orders from API
     setTimeout(() => {
       setOrders([
         { id: 101, customerName: 'Alice', createdAt: '2026-02-05', totalAmount: 120.5, orderStatus: 'placed' },

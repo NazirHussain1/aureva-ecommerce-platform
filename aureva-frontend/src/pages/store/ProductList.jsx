@@ -20,15 +20,13 @@ export default function ProductList() {
 
   const categories = ['skincare', 'haircare', 'makeup', 'fragrance', 'personal wellness', 'beauty accessories'];
 
-  // Fetch products whenever filters change (with debounce)
   useEffect(() => {
     const delay = setTimeout(() => {
       dispatch(fetchProducts(filters));
-    }, 400); // 400ms debounce
+    }, 400);
     return () => clearTimeout(delay);
   }, [filters, dispatch]);
 
-  // Update URL query params based on filters
   const updateURL = (newFilters) => {
     const params = {};
     Object.keys(newFilters).forEach((key) => {

@@ -23,7 +23,6 @@ export default function Customers() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching customer data
     setTimeout(() => setLoading(false), 500);
   }, []);
 
