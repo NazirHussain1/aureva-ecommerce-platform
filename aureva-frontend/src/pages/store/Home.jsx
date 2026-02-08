@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../features/auth/authSlice';
 import axios from '../../api/axios';
+import { FiShoppingCart, FiChevronDown, FiLogOut, FiUser, FiPackage, FiSettings } from 'react-icons/fi';
+import { HiSparkles } from 'react-icons/hi';
+import { BiLoaderAlt } from 'react-icons/bi';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -21,7 +24,7 @@ export default function Home() {
     try {
       setLoading(true);
       const response = await axios.get('/api/products');
-      const allProducts = response.data.data || [];
+      const allProducts = response.data.products || [];
       setProducts(allProducts.filter(p => p.stock > 0).slice(0, 8));
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -48,9 +51,7 @@ export default function Home() {
           
           <div className="flex items-center gap-4">
             <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg transition">
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+              <FiShoppingCart className="w-6 h-6 text-gray-700" />
               {items.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {items.length}
@@ -71,9 +72,7 @@ export default function Home() {
                     <p className="text-sm font-semibold text-gray-800">{user.name}</p>
                     <p className="text-xs text-gray-500 capitalize">{user.role}</p>
                   </div>
-                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <FiChevronDown className="w-4 h-4 text-gray-600" />
                 </button>
 
                 {showDropdown && (
@@ -87,33 +86,37 @@ export default function Home() {
                       <Link
                         to="/admin"
                         onClick={() => setShowDropdown(false)}
-                        className="block px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 transition font-medium"
+                        className="block px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 transition font-medium flex items-center gap-2"
                       >
-                        🎛️ Admin Dashboard
+                        <FiSettings className="w-4 h-4" />
+                        Admin Dashboard
                       </Link>
                     )}
                     
                     <Link
                       to="/profile"
                       onClick={() => setShowDropdown(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"
                     >
-                      👤 My Profile
+                      <FiUser className="w-4 h-4" />
+                      My Profile
                     </Link>
                     
                     <Link
                       to="/orders"
                       onClick={() => setShowDropdown(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"
                     >
-                      📦 My Orders
+                      <FiPackage className="w-4 h-4" />
+                      My Orders
                     </Link>
                     
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2"
                     >
-                      🚪 Logout
+                      <FiLogOut className="w-4 h-4" />
+                      Logout
                     </button>
                   </div>
                 )}
@@ -151,9 +154,9 @@ export default function Home() {
             <Link
               key={cat}
               to="/products"
-              className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition cursor-pointer"
+              className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition cursor-pointer group"
             >
-              <div className="text-5xl mb-3">✨</div>
+              <HiSparkles className="text-5xl mb-3 mx-auto text-purple-500 group-hover:text-pink-500 transition" />
               <h3 className="font-semibold text-gray-800">{cat}</h3>
             </Link>
           ))}
@@ -169,7 +172,7 @@ export default function Home() {
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-purple-600"></div>
+              <BiLoaderAlt className="inline-block animate-spin h-12 w-12 text-purple-600" />
               <p className="text-gray-600 mt-4">Loading products...</p>
             </div>
           ) : products.length === 0 ? (
@@ -191,40 +194,46 @@ export default function Home() {
                     to={`/products/${product.id}`}
                     className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group border border-gray-100"
                   >
-                    <div className="h-48 bg-gray-200 overflow-hidden">
+                    <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden relative">
                       {product.images && product.images[0] ? (
                         <img
                           src={product.images[0]}
                           alt={product.name}
+                          loading="lazy"
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-5xl">
-                          🧴
+                        <div className="w-full h-full flex items-center justify-center">
+                          <HiSparkles className="text-5xl text-gray-400" />
                         </div>
+                      )}
+                      {product.stock < 10 && product.stock > 0 && (
+                        <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                          Only {product.stock} left
+                        </span>
                       )}
                     </div>
                     
                     <div className="p-4">
                       {product.brand && (
-                        <p className="text-xs text-purple-600 font-semibold uppercase mb-1">
+                        <p className="text-xs text-purple-600 font-semibold uppercase mb-1 tracking-wide">
                           {product.brand}
                         </p>
                       )}
-                      <h3 className="font-bold text-base text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-600 transition">
+                      <h3 className="font-bold text-base text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-600 transition min-h-[3rem]">
                         {product.name}
                       </h3>
                       
                       <div className="flex justify-between items-center">
                         <span className="text-xl font-bold text-purple-600">
-                          ${product.price}
+                          ${Number(product.price).toFixed(2)}
                         </span>
-                        <span className="text-xs text-gray-500">
-                          {product.stock} left
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                          {product.stock} in stock
                         </span>
                       </div>
                       
-                      <button className="w-full mt-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:from-pink-700 hover:to-purple-700 transition text-sm">
+                      <button className="w-full mt-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:from-pink-700 hover:to-purple-700 transition text-sm shadow-md">
                         View Details
                       </button>
                     </div>

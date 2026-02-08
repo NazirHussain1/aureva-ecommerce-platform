@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
+import { FiShoppingCart, FiSearch } from 'react-icons/fi';
+import { BiLoaderAlt } from 'react-icons/bi';
+import { HiSparkles } from 'react-icons/hi';
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -21,7 +24,7 @@ export default function Products() {
     try {
       setLoading(true);
       const response = await axios.get('/api/products');
-      setProducts(response.data.data || []);
+      setProducts(response.data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to load products');
@@ -48,9 +51,7 @@ export default function Products() {
           </Link>
           <div className="flex items-center gap-4">
             <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg transition">
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+              <FiShoppingCart className="w-6 h-6 text-gray-700" />
               {items.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {items.length}
@@ -70,13 +71,14 @@ export default function Products() {
           <p className="text-gray-600">Discover our collection of premium beauty products</p>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-8 relative">
+          <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
           <input
             type="text"
             placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-6 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-lg"
+            className="w-full pl-12 pr-6 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-lg"
           />
         </div>
 
@@ -110,7 +112,7 @@ export default function Products() {
 
         {loading ? (
           <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600"></div>
+            <BiLoaderAlt className="inline-block animate-spin h-16 w-16 text-purple-600" />
             <p className="text-gray-600 mt-4 text-lg">Loading products...</p>
           </div>
         ) : filteredProducts.length === 0 ? (
@@ -127,43 +129,49 @@ export default function Products() {
                 to={`/products/${product.id}`}
                 className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group"
               >
-                <div className="h-64 bg-gray-200 overflow-hidden">
+                <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden relative">
                   {product.images && product.images[0] ? (
                     <img
                       src={product.images[0]}
                       alt={product.name}
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-6xl">
-                      🧴
+                    <div className="w-full h-full flex items-center justify-center">
+                      <HiSparkles className="text-6xl text-gray-400" />
                     </div>
+                  )}
+                  {product.stock < 10 && product.stock > 0 && (
+                    <span className="absolute top-3 right-3 bg-orange-500 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
+                      Only {product.stock} left!
+                    </span>
                   )}
                 </div>
                 
                 <div className="p-4">
                   {product.brand && (
-                    <p className="text-xs text-purple-600 font-semibold uppercase mb-1">
+                    <p className="text-xs text-purple-600 font-semibold uppercase mb-1 tracking-wide">
                       {product.brand}
                     </p>
                   )}
-                  <h3 className="font-bold text-lg text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-600 transition">
+                  <h3 className="font-bold text-lg text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-600 transition min-h-[3.5rem]">
                     {product.name}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[2.5rem]">
                     {product.description}
                   </p>
                   
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-3">
                     <span className="text-2xl font-bold text-purple-600">
-                      ${product.price}
+                      ${Number(product.price).toFixed(2)}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                       {product.stock} in stock
                     </span>
                   </div>
                   
-                  <button className="w-full mt-4 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:from-pink-700 hover:to-purple-700 transition">
+                  <button className="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:from-pink-700 hover:to-purple-700 transition shadow-md">
                     View Details
                   </button>
                 </div>

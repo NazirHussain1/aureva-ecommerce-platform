@@ -2,6 +2,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { removeFromCart, updateQuantity } from '../../features/cart/cartSlice';
 import toast from 'react-hot-toast';
+import { FiShoppingCart, FiMinus, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { MdRemoveShoppingCart } from 'react-icons/md';
+import { HiSparkles } from 'react-icons/hi';
 
 export default function Cart() {
   const dispatch = useDispatch();
@@ -39,7 +42,7 @@ export default function Cart() {
 
         <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 80px)' }}>
           <div className="text-center">
-            <div className="text-8xl mb-6">🛒</div>
+            <MdRemoveShoppingCart className="text-8xl mb-6 mx-auto text-gray-300" />
             <h2 className="text-3xl font-bold text-gray-800 mb-4">Your cart is empty</h2>
             <p className="text-gray-600 mb-8">Add some products to get started!</p>
             <button
@@ -78,11 +81,13 @@ export default function Cart() {
               {items.map((item) => (
                 <div key={item.id} className="p-6 border-b last:border-b-0">
                   <div className="flex gap-4">
-                    <div className="w-24 h-24 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                    <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden flex-shrink-0">
                       {item.images && item.images.length > 0 ? (
-                        <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
+                        <img src={item.images[0]} alt={item.name} loading="lazy" className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-3xl">🧴</div>
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <HiSparkles className="text-3xl" />
+                        </div>
                       )}
                     </div>
 
@@ -95,25 +100,26 @@ export default function Cart() {
                     <div className="flex flex-col items-end justify-between">
                       <button
                         onClick={() => handleRemove(item.id, item.name)}
-                        className="text-red-600 hover:text-red-700 font-medium"
+                        className="text-red-600 hover:text-red-700 font-medium flex items-center gap-1"
                       >
-                        ✕ Remove
+                        <FiTrash2 className="w-4 h-4" />
+                        Remove
                       </button>
 
                       <div className="flex items-center space-x-2 mt-2">
                         <button
                           onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                          className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50 font-bold"
+                          className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
                           disabled={item.quantity === 1}
                         >
-                          -
+                          <FiMinus className="w-4 h-4" />
                         </button>
                         <span className="w-12 text-center font-semibold text-lg">{item.quantity}</span>
                         <button
                           onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                          className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 font-bold"
+                          className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
                         >
-                          +
+                          <FiPlus className="w-4 h-4" />
                         </button>
                       </div>
 
