@@ -1,125 +1,154 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { productApi } from '../../api/productApi';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../../features/auth/authSlice';
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const [showDropdown, setShowDropdown] = useState(false);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await productApi.getProducts({ limit: 8 });
-        setProducts(response.data || []);
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
+  const handleLogout = () => {
+    dispatch(logout());
+    setShowDropdown(false);
+    navigate('/');
+  };
 
   return (
-    <div className="w-full">
-      <section className="bg-gradient-to-r from-pink-500 to-purple-600 text-white py-20 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">Welcome to Aureva Beauty</h1>
-          <p className="text-xl mb-8">Discover Your Natural Radiance</p>
-          <Link
-            to="/products"
-            className="inline-block bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition"
-          >
+    <div className="w-full min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+          <Link to="/">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+              Aureva Beauty
+            </h1>
+          </Link>
+          
+          <div className="flex items-center gap-4">
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="flex items-center gap-2 hover:bg-gray-100 px-3 py-2 rounded-lg transition"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {user.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="text-left hidden md:block">
+                    <p className="text-sm font-semibold text-gray-800">{user.name}</p>
+                    <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                  </div>
+                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 py-2">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-800">{user.name}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                    </div>
+                    
+                    {user.role === 'admin' && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setShowDropdown(false)}
+                        className="block px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 transition font-medium"
+                      >
+                        🎛️ Admin Dashboard
+                      </Link>
+                    )}
+                    
+                    <Link
+                      to="/profile"
+                      onClick={() => setShowDropdown(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+                    >
+                      👤 My Profile
+                    </Link>
+                    
+                    <Link
+                      to="/orders"
+                      onClick={() => setShowDropdown(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+                    >
+                      📦 My Orders
+                    </Link>
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+                    >
+                      🚪 Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <Link to="/login" className="text-purple-600 hover:text-purple-700 font-medium px-4 py-2">
+                  Login
+                </Link>
+                <Link to="/register" className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-medium shadow-sm">
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white py-20 px-8 text-center">
+        <h1 className="text-5xl font-bold mb-4">Welcome to Aureva Beauty</h1>
+        <p className="text-xl mb-8">Discover Your Natural Radiance</p>
+        {user ? (
+          <p className="text-lg">Hello, {user.name}! 👋</p>
+        ) : (
+          <Link to="/register" className="inline-block bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition">
             Shop Now
           </Link>
+        )}
+      </div>
+      
+      <div className="py-16 px-8 text-center">
+        <h2 className="text-3xl font-bold mb-8 text-gray-800">Shop by Category</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {['Skincare', 'Haircare', 'Makeup', 'Fragrance'].map(cat => (
+            <div key={cat} className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition cursor-pointer">
+              <div className="text-5xl mb-3">✨</div>
+              <h3 className="font-semibold text-gray-800">{cat}</h3>
+            </div>
+          ))}
         </div>
-      </section>
+      </div>
 
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">Shop by Category</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {['Skincare', 'Haircare', 'Makeup', 'Fragrance', 'Wellness', 'Accessories'].map((cat) => (
-              <div key={cat} className="bg-white p-6 rounded-lg shadow-md text-center">
-                <div className="text-4xl mb-2">✨</div>
-                <h3 className="font-semibold text-gray-800">{cat}</h3>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <div className="py-16 px-8 bg-white text-center">
+        <h2 className="text-3xl font-bold mb-8 text-gray-800">Featured Products</h2>
+        <div className="text-6xl mb-4">📦</div>
+        <p className="text-gray-600 text-lg mb-4">No products yet</p>
+        {user?.role === 'admin' ? (
+          <Link to="/admin" className="text-purple-600 hover:underline font-medium">
+            Go to Admin Panel to add products →
+          </Link>
+        ) : (
+          <p className="text-gray-500">Products will appear here soon</p>
+        )}
+      </div>
 
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">Featured Products</h2>
-          
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-              <p className="text-gray-600 mt-4">Loading...</p>
-            </div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📦</div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">No Products Yet</h3>
-              <p className="text-gray-600">Products will appear here once added by admin</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {products.map((product) => (
-                <div key={product.id} className="bg-gray-50 rounded-lg shadow-md overflow-hidden">
-                  <div className="h-48 bg-gray-200 flex items-center justify-center">
-                    <span className="text-5xl">🧴</span>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-lg mb-2 text-gray-800">{product.name}</h3>
-                    <p className="text-purple-600 font-bold text-xl">${product.price}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+      <div className="bg-purple-600 text-white py-16 px-8 text-center">
+        <h2 className="text-3xl font-bold mb-4">Subscribe to Newsletter</h2>
+        <p className="mb-8">Get exclusive offers and beauty tips</p>
+        <div className="max-w-md mx-auto flex gap-2">
+          <input type="email" placeholder="Enter your email" className="flex-1 px-4 py-3 rounded-lg text-gray-800" />
+          <button className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">Subscribe</button>
         </div>
-      </section>
+      </div>
 
-      <section className="py-16 px-4 bg-gradient-to-r from-purple-100 to-pink-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="bg-white p-8 rounded-lg shadow-md">
-              <div className="text-4xl mb-4">🚚</div>
-              <h3 className="font-bold text-xl mb-2 text-gray-800">Free Shipping</h3>
-              <p className="text-gray-600">On orders over $50</p>
-            </div>
-            <div className="bg-white p-8 rounded-lg shadow-md">
-              <div className="text-4xl mb-4">🔒</div>
-              <h3 className="font-bold text-xl mb-2 text-gray-800">Secure Payment</h3>
-              <p className="text-gray-600">100% secure transactions</p>
-            </div>
-            <div className="bg-white p-8 rounded-lg shadow-md">
-              <div className="text-4xl mb-4">↩️</div>
-              <h3 className="font-bold text-xl mb-2 text-gray-800">Easy Returns</h3>
-              <p className="text-gray-600">10-day return policy</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 px-4 bg-purple-600 text-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Subscribe to Our Newsletter</h2>
-          <p className="mb-8">Get exclusive offers and beauty tips</p>
-          <div className="max-w-md mx-auto flex gap-2">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg text-gray-800"
-            />
-            <button className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold">
-              Subscribe
-            </button>
-          </div>
-        </div>
-      </section>
+      <div className="bg-gray-900 text-gray-400 py-8 text-center">
+        <p>© 2026 Aureva Beauty. All rights reserved.</p>
+      </div>
     </div>
   );
 }
