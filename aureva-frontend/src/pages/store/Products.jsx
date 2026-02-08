@@ -4,12 +4,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../features/auth/authSlice';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
-import { FiShoppingCart, FiSearch, FiChevronDown, FiLogOut, FiUser, FiPackage, FiSettings } from 'react-icons/fi';
+import { FiShoppingCart, FiSearch, FiChevronDown, FiLogOut, FiUser, FiPackage, FiSettings, FiMapPin } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import { HiSparkles } from 'react-icons/hi';
 import { GiLipstick, GiPerfumeBottle, GiComb } from 'react-icons/gi';
 import { MdFace, MdChildCare } from 'react-icons/md';
 import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
+import Footer from '../../components/common/Footer';
+import NotificationBell from '../../components/common/NotificationBell';
 
 export default function Products() {
   const navigate = useNavigate();
@@ -106,6 +108,8 @@ export default function Products() {
             </nav>
 
             <div className="flex items-center gap-4">
+              <NotificationBell />
+              
               <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg transition">
                 <FiShoppingCart className="w-6 h-6 text-gray-700" />
                 {items.length > 0 && (
@@ -144,6 +148,24 @@ export default function Products() {
                           Admin Dashboard
                         </Link>
                       )}
+                      
+                      <Link
+                        to="/profile"
+                        onClick={() => setShowDropdown(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"
+                      >
+                        <FiUser className="w-4 h-4" />
+                        My Profile
+                      </Link>
+                      
+                      <Link
+                        to="/addresses"
+                        onClick={() => setShowDropdown(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"
+                      >
+                        <FiMapPin className="w-4 h-4" />
+                        My Addresses
+                      </Link>
                       
                       <Link
                         to="/orders"
@@ -293,6 +315,8 @@ export default function Products() {
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 }

@@ -4,12 +4,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductById } from '../../features/products/productSlice';
 import { addToCart } from '../../features/cart/cartSlice';
 import { addToWishlist, removeFromWishlist } from '../../features/wishlist/wishlistSlice';
+import axios from '../../api/axios';
 import toast from 'react-hot-toast';
 import { FiShoppingCart, FiMinus, FiPlus, FiHeart } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import { MdCheckCircle, MdCancel } from 'react-icons/md';
 import { HiSparkles } from 'react-icons/hi';
-import { FaHeart } from 'react-icons/fa';
+import { FaHeart, FaStar, FaRegStar } from 'react-icons/fa';
+import Footer from '../../components/common/Footer';
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -18,13 +20,19 @@ export default function ProductDetails() {
   const { currentProduct: product, isLoading, error } = useSelector((state) => state.products);
   const { items } = useSelector((state) => state.cart);
   const wishlistItems = useSelector((state) => state.wishlist.items);
+  const { user } = useSelector((state) => state.auth);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [reviews, setReviews] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
 
   const isInWishlist = product && wishlistItems.some(item => item.id === product.id);
 
   useEffect(() => {
     dispatch(fetchProductById(id));
+    fetchReviews();
   }, [dispatch, id]);
 
   useEffect(() => {
@@ -53,6 +61,62 @@ export default function ProductDetails() {
       dispatch(addToWishlist(product));
       toast.success('Added to wishlist');
     }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      setLoadingReviews(true);
+      const response = await axios.get(`/api/products/${id}/reviews`);
+      setReviews(response.data || []);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    
+    if (!user) {
+      toast.error('Please login to submit a review');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      await axios.post(`/api/products/${id}/reviews`, reviewForm);
+      toast.success('Review submitted successfully!');
+      setShowReviewForm(false);
+      setReviewForm({ rating: 5, comment: '' });
+      fetchReviews();
+      dispatch(fetchProductById(id));
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      toast.error(error.response?.data?.message || 'Failed to submit review');
+    }
+  };
+
+  const renderStars = (rating, interactive = false, onRate = null) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => interactive && onRate && onRate(star)}
+            className={interactive ? 'cursor-pointer hover:scale-110 transition' : 'cursor-default'}
+            disabled={!interactive}
+          >
+            {star <= rating ? (
+              <FaStar className="text-yellow-400 text-xl" />
+            ) : (
+              <FaRegStar className="text-gray-300 text-xl" />
+            )}
+          </button>
+        ))}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -267,6 +331,115 @@ export default function ProductDetails() {
           </div>
         </div>
       </div>
+
+      {product && (
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-800 mb-2">Customer Reviews</h2>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    {renderStars(Math.round(product.averageRating || 0))}
+                    <span className="text-2xl font-bold text-gray-800">
+                      {product.averageRating ? product.averageRating.toFixed(1) : '0.0'}
+                    </span>
+                  </div>
+                  <span className="text-gray-600">
+                    ({product.numReviews || 0} {product.numReviews === 1 ? 'review' : 'reviews'})
+                  </span>
+                </div>
+              </div>
+              
+              {user && (
+                <button
+                  onClick={() => setShowReviewForm(!showReviewForm)}
+                  className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold shadow-md"
+                >
+                  {showReviewForm ? 'Cancel' : 'Write a Review'}
+                </button>
+              )}
+            </div>
+
+            {showReviewForm && (
+              <form onSubmit={handleSubmitReview} className="mb-8 p-6 bg-gray-50 rounded-xl">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Write Your Review</h3>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Your Rating
+                  </label>
+                  {renderStars(reviewForm.rating, true, (rating) => 
+                    setReviewForm({ ...reviewForm, rating })
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Your Review
+                  </label>
+                  <textarea
+                    value={reviewForm.comment}
+                    onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                    rows="4"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                    placeholder="Share your thoughts about this product..."
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold shadow-md"
+                >
+                  Submit Review
+                </button>
+              </form>
+            )}
+
+            {loadingReviews ? (
+              <div className="text-center py-8">
+                <BiLoaderAlt className="inline-block animate-spin h-8 w-8 text-purple-600" />
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className="text-center py-12">
+                <FaRegStar className="text-6xl text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-600 text-lg">No reviews yet. Be the first to review this product!</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {reviews.map((review) => (
+                  <div key={review.id} className="border-b border-gray-200 pb-6 last:border-0">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        {review.User?.name?.charAt(0).toUpperCase() || 'U'}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <p className="font-semibold text-gray-800">{review.User?.name || 'Anonymous'}</p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(review.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </p>
+                          </div>
+                          {renderStars(review.rating)}
+                        </div>
+                        <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <Footer />
     </div>
   );
 }

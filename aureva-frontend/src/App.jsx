@@ -10,6 +10,7 @@ import Cart from './pages/store/Cart';
 import Checkout from './pages/store/Checkout';
 import Orders from './pages/store/Orders';
 import Profile from './pages/store/Profile';
+import Addresses from './pages/store/Addresses';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import AdminLayout from './layouts/AdminLayout';
@@ -45,6 +46,7 @@ function AppRoutes() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/addresses" element={<Addresses />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         

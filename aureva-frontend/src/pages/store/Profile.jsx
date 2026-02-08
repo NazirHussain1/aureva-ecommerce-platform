@@ -6,6 +6,7 @@ import axios from '../../api/axios';
 import toast from 'react-hot-toast';
 import { FiUser, FiMail, FiShield, FiCalendar, FiEdit2, FiSave, FiX } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
+import Footer from '../../components/common/Footer';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -276,6 +277,8 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

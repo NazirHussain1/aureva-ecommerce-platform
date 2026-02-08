@@ -7,6 +7,7 @@ import { FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiClock } from 'react-ico
 import { BiLoaderAlt } from 'react-icons/bi';
 import { HiSparkles } from 'react-icons/hi';
 import { MdShoppingBag } from 'react-icons/md';
+import Footer from '../../components/common/Footer';
 
 export default function Orders() {
   const navigate = useNavigate();
@@ -210,6 +211,8 @@ export default function Orders() {
           ))}
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

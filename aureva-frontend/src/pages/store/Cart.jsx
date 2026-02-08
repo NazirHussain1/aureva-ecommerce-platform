@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { FiShoppingCart, FiMinus, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { MdRemoveShoppingCart } from 'react-icons/md';
 import { HiSparkles } from 'react-icons/hi';
+import Footer from '../../components/common/Footer';
 
 export default function Cart() {
   const dispatch = useDispatch();
@@ -182,6 +183,8 @@ export default function Cart() {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

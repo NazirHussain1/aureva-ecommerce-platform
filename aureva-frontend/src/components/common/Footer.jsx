@@ -1,62 +1,184 @@
 import { Link } from 'react-router-dom';
+import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa';
+import { FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
+import { HiSparkles } from 'react-icons/hi';
 
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
-            <h3 className="text-2xl font-bold text-white mb-4">Aureva Beauty</h3>
-            <p className="text-sm leading-relaxed text-gray-400">
-              Your trusted beauty destination for premium skincare, makeup, and wellness products crafted to enhance your natural glow.
+            <div className="flex items-center gap-2 mb-4">
+              <HiSparkles className="text-3xl text-pink-500" />
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+                Aureva Beauty
+              </h3>
+            </div>
+            <p className="text-sm text-gray-400 mb-4 leading-relaxed">
+              Your trusted destination for premium beauty and wellness products. Discover your natural radiance with our curated collection.
             </p>
-          </div>
-
-          <div>
-            <h4 className="text-white font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-3 text-sm">
-              <li><Link to="/products" className="hover:text-pink-500 transition">Products</Link></li>
-              <li><Link to="/orders" className="hover:text-pink-500 transition">Orders</Link></li>
-              <li><Link to="/profile" className="hover:text-pink-500 transition">Profile</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white font-semibold mb-4">Customer Service</h4>
-            <ul className="space-y-3 text-sm">
-              <li><a href="#" className="hover:text-pink-500 transition">Contact Us</a></li>
-              <li><a href="#" className="hover:text-pink-500 transition">Shipping Info</a></li>
-              <li><a href="#" className="hover:text-pink-500 transition">Returns Policy</a></li>
-              <li><a href="#" className="hover:text-pink-500 transition">FAQ</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white font-semibold mb-4">Follow Us</h4>
-            <div className="flex space-x-4">
-              <a href="#" className="bg-gray-800 p-2 rounded-lg hover:bg-pink-600 transition">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </a>
-              <a href="#" className="bg-gray-800 p-2 rounded-lg hover:bg-pink-600 transition">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/>
-                </svg>
-              </a>
-              <a href="#" className="bg-gray-800 p-2 rounded-lg hover:bg-pink-600 transition">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482z"/>
-                </svg>
-              </a>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2 text-gray-400">
+                <FiMail className="text-pink-500" />
+                <span>support@aureva.com</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-400">
+                <FiPhone className="text-pink-500" />
+                <span>+1 (555) 123-4567</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-400">
+                <FiMapPin className="text-pink-500" />
+                <span>123 Beauty Ave, NY 10001</span>
+              </div>
             </div>
           </div>
 
+          <div>
+            <h4 className="text-white font-bold mb-4 text-lg">Shop</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/products" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  All Products
+                </Link>
+              </li>
+              <li>
+                <Link to="/products?category=skincare" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  Skincare
+                </Link>
+              </li>
+              <li>
+                <Link to="/products?category=makeup" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  Makeup
+                </Link>
+              </li>
+              <li>
+                <Link to="/products?category=haircare" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  Haircare
+                </Link>
+              </li>
+              <li>
+                <Link to="/products?category=fragrance" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  Fragrance
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-4 text-lg">Customer Service</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/orders" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  Track Order
+                </Link>
+              </li>
+              <li>
+                <Link to="/profile" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  My Account
+                </Link>
+              </li>
+              <li>
+                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  Shipping Info
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  Returns & Exchanges
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  FAQ
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-4 text-lg">About Us</h4>
+            <ul className="space-y-2 text-sm mb-6">
+              <li>
+                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  Our Story
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  Careers
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  Terms of Service
+                </a>
+              </li>
+            </ul>
+            
+            <h4 className="text-white font-bold mb-3 text-sm">Follow Us</h4>
+            <div className="flex gap-3">
+              <a 
+                href="#" 
+                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 group"
+                aria-label="Facebook"
+              >
+                <FaFacebookF className="text-gray-300 group-hover:text-white transition" />
+              </a>
+              <a 
+                href="#" 
+                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 group"
+                aria-label="Instagram"
+              >
+                <FaInstagram className="text-gray-300 group-hover:text-white transition" />
+              </a>
+              <a 
+                href="#" 
+                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 group"
+                aria-label="Twitter"
+              >
+                <FaTwitter className="text-gray-300 group-hover:text-white transition" />
+              </a>
+              <a 
+                href="#" 
+                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 group"
+                aria-label="YouTube"
+              >
+                <FaYoutube className="text-gray-300 group-hover:text-white transition" />
+              </a>
+            </div>
+          </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-6 text-center text-sm text-gray-500">
-          © 2026 Aureva Beauty. All rights reserved.
+        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-gray-500">
+            © 2026 Aureva Beauty. All rights reserved.
+          </p>
+          <div className="flex gap-6 text-sm">
+            <a href="#" className="text-gray-500 hover:text-pink-400 transition">Privacy</a>
+            <a href="#" className="text-gray-500 hover:text-pink-400 transition">Terms</a>
+            <a href="#" className="text-gray-500 hover:text-pink-400 transition">Cookies</a>
+            <a href="#" className="text-gray-500 hover:text-pink-400 transition">Sitemap</a>
+          </div>
         </div>
       </div>
     </footer>

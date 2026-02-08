@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { FiCreditCard, FiTruck, FiMapPin, FiMail, FiPhone, FiUser } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import { HiSparkles } from 'react-icons/hi';
+import Footer from '../../components/common/Footer';
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -301,6 +302,8 @@ export default function Checkout() {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }
