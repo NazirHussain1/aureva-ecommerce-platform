@@ -21,7 +21,7 @@ const signup = async (req, res) => {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    const userRole = role === 'admin' ? 'admin' : 'user';
+    const userRole = role === 'admin' ? 'admin' : 'customer';
 
     const user = await User.create({ 
       name, 
