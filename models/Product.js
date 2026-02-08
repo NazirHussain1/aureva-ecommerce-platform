@@ -11,8 +11,10 @@ const Product = sequelize.define(
         "haircare",
         "makeup",
         "fragrance",
-        "personal wellness",
-        "beauty accessories"
+        "men",
+        "women",
+        "kids",
+        "wellness"
       ), 
       allowNull: false 
     },
