@@ -6,6 +6,9 @@ import axios from '../../api/axios';
 import { FiShoppingCart, FiChevronDown, FiLogOut, FiUser, FiPackage, FiSettings } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi';
 import { BiLoaderAlt } from 'react-icons/bi';
+import { GiLipstick, GiPerfumeBottle, GiComb } from 'react-icons/gi';
+import { MdFace, MdChildCare } from 'react-icons/md';
+import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -147,19 +150,30 @@ export default function Home() {
         )}
       </div>
       
-      <div className="py-16 px-8 text-center">
+      <div className="py-16 px-8 text-center bg-gray-50">
         <h2 className="text-3xl font-bold mb-8 text-gray-800">Shop by Category</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-          {['Skincare', 'Haircare', 'Makeup', 'Fragrance'].map(cat => (
-            <Link
-              key={cat}
-              to="/products"
-              className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition cursor-pointer group"
-            >
-              <HiSparkles className="text-5xl mb-3 mx-auto text-purple-500 group-hover:text-pink-500 transition" />
-              <h3 className="font-semibold text-gray-800">{cat}</h3>
-            </Link>
-          ))}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-7xl mx-auto">
+          {[
+            { name: 'Skincare', icon: HiSparkles, category: 'skincare', color: 'text-purple-500' },
+            { name: 'Haircare', icon: GiComb, category: 'haircare', color: 'text-pink-500' },
+            { name: 'Makeup', icon: GiLipstick, category: 'makeup', color: 'text-red-500' },
+            { name: 'Fragrance', icon: GiPerfumeBottle, category: 'fragrance', color: 'text-indigo-500' },
+            { name: 'Men', icon: IoManSharp, category: 'men', color: 'text-blue-600' },
+            { name: 'Women', icon: IoWomanSharp, category: 'women', color: 'text-pink-600' },
+            { name: 'Kids', icon: MdChildCare, category: 'kids', color: 'text-orange-500' }
+          ].map(cat => {
+            const IconComponent = cat.icon;
+            return (
+              <Link
+                key={cat.category}
+                to="/products"
+                className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition cursor-pointer group border border-gray-100"
+              >
+                <IconComponent className={`text-5xl mb-3 mx-auto ${cat.color} group-hover:scale-110 transition-transform`} />
+                <h3 className="font-semibold text-gray-800 group-hover:text-purple-600 transition">{cat.name}</h3>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
@@ -194,16 +208,16 @@ export default function Home() {
                     to={`/products/${product.id}`}
                     className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group border border-gray-100"
                   >
-                    <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden relative">
+                    <div className="h-48 bg-white overflow-hidden relative flex items-center justify-center border-b border-gray-100">
                       {product.images && product.images[0] ? (
                         <img
                           src={product.images[0]}
                           alt={product.name}
                           loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                           <HiSparkles className="text-5xl text-gray-400" />
                         </div>
                       )}

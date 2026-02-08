@@ -1,20 +1,42 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../../features/auth/authSlice';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
-import { FiShoppingCart, FiSearch } from 'react-icons/fi';
+import { FiShoppingCart, FiSearch, FiChevronDown, FiLogOut, FiUser, FiPackage, FiSettings } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import { HiSparkles } from 'react-icons/hi';
+import { GiLipstick, GiPerfumeBottle, GiComb } from 'react-icons/gi';
+import { MdFace, MdChildCare } from 'react-icons/md';
+import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
 
 export default function Products() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
   const { items } = useSelector((state) => state.cart);
+  const { user } = useSelector((state) => state.auth);
 
-  const categories = ['skincare', 'haircare', 'makeup', 'fragrance', 'personal wellness', 'beauty accessories'];
+  const categories = [
+    { value: 'skincare', label: 'Skincare', icon: HiSparkles, color: 'text-purple-500' },
+    { value: 'haircare', label: 'Haircare', icon: GiComb, color: 'text-pink-500' },
+    { value: 'makeup', label: 'Makeup', icon: GiLipstick, color: 'text-red-500' },
+    { value: 'fragrance', label: 'Fragrance', icon: GiPerfumeBottle, color: 'text-indigo-500' },
+    { value: 'men', label: 'Men', icon: IoManSharp, color: 'text-blue-600' },
+    { value: 'women', label: 'Women', icon: IoWomanSharp, color: 'text-pink-600' },
+    { value: 'kids', label: 'Kids', icon: MdChildCare, color: 'text-orange-500' }
+  ];
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setShowDropdown(false);
+    navigate('/');
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -34,7 +56,7 @@ export default function Products() {
   };
 
   const filteredProducts = products.filter(product => {
-    const matchesCategory = !selectedCategory || product.category === selectedCategory;
+    const matchesCategory = !selectedCategory || product.category?.toLowerCase() === selectedCategory.toLowerCase();
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch && product.stock > 0;
@@ -43,24 +65,91 @@ export default function Products() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-              Aureva Beauty
-            </h1>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg transition">
-              <FiShoppingCart className="w-6 h-6 text-gray-700" />
-              {items.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {items.length}
-                </span>
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <Link to="/">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                Aureva Beauty
+              </h1>
+            </Link>
+            
+            <nav className="hidden md:flex items-center gap-6">
+              <Link to="/" className="text-gray-700 hover:text-purple-600 font-medium transition">
+                Home
+              </Link>
+              <Link to="/products" className="text-purple-600 font-semibold border-b-2 border-purple-600">
+                Products
+              </Link>
+              <Link to="/cart" className="text-gray-700 hover:text-purple-600 font-medium transition">
+                Cart
+              </Link>
+            </nav>
+
+            <div className="flex items-center gap-4">
+              <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg transition">
+                <FiShoppingCart className="w-6 h-6 text-gray-700" />
+                {items.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {items.length}
+                  </span>
+                )}
+              </Link>
+
+              {user ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="flex items-center gap-2 hover:bg-gray-100 px-3 py-2 rounded-lg transition"
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      {user.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <FiChevronDown className="w-4 h-4 text-gray-600 hidden md:block" />
+                  </button>
+
+                  {showDropdown && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-2">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-semibold text-gray-800 truncate">{user.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                      </div>
+                      
+                      {user.role === 'admin' && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setShowDropdown(false)}
+                          className="block px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 transition font-medium flex items-center gap-2"
+                        >
+                          <FiSettings className="w-4 h-4" />
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      
+                      <Link
+                        to="/orders"
+                        onClick={() => setShowDropdown(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"
+                      >
+                        <FiPackage className="w-4 h-4" />
+                        My Orders
+                      </Link>
+                      
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2"
+                      >
+                        <FiLogOut className="w-4 h-4" />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link to="/login" className="text-gray-700 hover:text-purple-600 font-medium">
+                  Login
+                </Link>
               )}
-            </Link>
-            <Link to="/" className="text-gray-600 hover:text-gray-800">
-              ← Back to Home
-            </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -86,27 +175,31 @@ export default function Products() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => setSelectedCategory('')}
-              className={`px-6 py-2 rounded-full font-medium transition ${
+              className={`px-6 py-2 rounded-full font-medium transition shadow-sm ${
                 selectedCategory === ''
-                  ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                  ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
               }`}
             >
               All Products
             </button>
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-full font-medium transition capitalize ${
-                  selectedCategory === category
-                    ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+            {categories.map(category => {
+              const IconComponent = category.icon;
+              return (
+                <button
+                  key={category.value}
+                  onClick={() => setSelectedCategory(category.value)}
+                  className={`px-6 py-2 rounded-full font-medium transition shadow-sm flex items-center gap-2 ${
+                    selectedCategory === category.value
+                      ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md'
+                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                  }`}
+                >
+                  <IconComponent className={`text-lg ${selectedCategory === category.value ? 'text-white' : category.color}`} />
+                  {category.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -129,16 +222,16 @@ export default function Products() {
                 to={`/products/${product.id}`}
                 className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group"
               >
-                <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden relative">
+                <div className="h-64 bg-white overflow-hidden relative flex items-center justify-center border-b border-gray-100">
                   {product.images && product.images[0] ? (
                     <img
                       src={product.images[0]}
                       alt={product.name}
                       loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                       <HiSparkles className="text-6xl text-gray-400" />
                     </div>
                   )}

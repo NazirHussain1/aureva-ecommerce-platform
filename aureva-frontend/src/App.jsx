@@ -7,11 +7,14 @@ import Home from './pages/store/Home';
 import Products from './pages/store/Products';
 import ProductDetails from './pages/store/ProductDetails';
 import Cart from './pages/store/Cart';
+import Checkout from './pages/store/Checkout';
+import Orders from './pages/store/Orders';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import AdminLayout from './layouts/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
+import AdminOrders from './pages/admin/Orders';
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const { user } = useSelector((state) => state.auth);
@@ -35,6 +38,8 @@ function AppRoutes() {
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/orders" element={<Orders />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
@@ -45,7 +50,7 @@ function AppRoutes() {
         }>
           <Route index element={<Dashboard />} />
           <Route path="products" element={<AdminProducts />} />
-          <Route path="orders" element={<div className="p-6"><h1 className="text-2xl font-bold">Orders Page - Coming Soon</h1></div>} />
+          <Route path="orders" element={<AdminOrders />} />
           <Route path="customers" element={<div className="p-6"><h1 className="text-2xl font-bold">Customers Page - Coming Soon</h1></div>} />
           <Route path="reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Reports Page - Coming Soon</h1></div>} />
         </Route>

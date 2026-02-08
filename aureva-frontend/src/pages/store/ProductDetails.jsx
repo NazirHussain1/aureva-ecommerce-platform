@@ -108,17 +108,17 @@ export default function ProductDetails() {
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="grid md:grid-cols-2 gap-8 p-8">
             <div>
-              <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden mb-4">
+              <div className="bg-white rounded-xl overflow-hidden mb-4 border border-gray-200">
                 {images[selectedImage] ? (
                   <img
                     src={images[selectedImage]}
                     alt={product.name}
                     loading="lazy"
-                    className="w-full h-96 object-cover"
+                    className="w-full h-96 object-contain p-6"
                   />
                 ) : (
-                  <div className="w-full h-96 flex items-center justify-center text-gray-400">
-                    <HiSparkles className="text-6xl" />
+                  <div className="w-full h-96 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                    <HiSparkles className="text-6xl text-gray-400" />
                   </div>
                 )}
               </div>
@@ -129,8 +129,8 @@ export default function ProductDetails() {
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
-                      className={`bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden transition ${
-                        selectedImage === index ? 'ring-2 ring-purple-600' : 'hover:ring-2 hover:ring-gray-300'
+                      className={`bg-white rounded-lg overflow-hidden transition border ${
+                        selectedImage === index ? 'ring-2 ring-purple-600 border-purple-600' : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
                       {img ? (
@@ -138,11 +138,11 @@ export default function ProductDetails() {
                           src={img}
                           alt={`${product.name} ${index + 1}`}
                           loading="lazy"
-                          className="w-full h-20 object-cover"
+                          className="w-full h-20 object-contain p-2"
                         />
                       ) : (
-                        <div className="w-full h-20 flex items-center justify-center text-gray-400">
-                          <HiSparkles className="text-2xl" />
+                        <div className="w-full h-20 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                          <HiSparkles className="text-2xl text-gray-400" />
                         </div>
                       )}
                     </button>
