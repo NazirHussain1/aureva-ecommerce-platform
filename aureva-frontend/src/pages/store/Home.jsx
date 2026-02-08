@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../features/auth/authSlice';
 import axios from '../../api/axios';
+import toast from 'react-hot-toast';
 import { FiShoppingCart, FiChevronDown, FiLogOut, FiUser, FiPackage, FiSettings, FiSearch } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi';
 import { BiLoaderAlt } from 'react-icons/bi';
@@ -20,6 +21,8 @@ export default function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [subscribing, setSubscribing] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -42,6 +45,27 @@ export default function Home() {
     dispatch(logout());
     setShowDropdown(false);
     navigate('/');
+  };
+
+  const handleNewsletterSubscribe = async (e) => {
+    e.preventDefault();
+    
+    if (!newsletterEmail) {
+      toast.error('Please enter your email');
+      return;
+    }
+
+    try {
+      setSubscribing(true);
+      await axios.post('/api/newsletter/subscribe', { email: newsletterEmail });
+      toast.success('Successfully subscribed to newsletter!');
+      setNewsletterEmail('');
+    } catch (error) {
+      console.error('Newsletter subscription error:', error);
+      toast.error(error.response?.data?.message || 'Failed to subscribe');
+    } finally {
+      setSubscribing(false);
+    }
   };
 
   return (
@@ -164,21 +188,22 @@ export default function Home() {
       
       <div className="py-16 px-8 text-center bg-gray-50">
         <h2 className="text-3xl font-bold mb-8 text-gray-800">Shop by Category</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {[
             { name: 'Skincare', icon: HiSparkles, category: 'skincare', color: 'text-purple-500' },
             { name: 'Haircare', icon: GiComb, category: 'haircare', color: 'text-pink-500' },
             { name: 'Makeup', icon: GiLipstick, category: 'makeup', color: 'text-red-500' },
             { name: 'Fragrance', icon: GiPerfumeBottle, category: 'fragrance', color: 'text-indigo-500' },
-            { name: 'Men', icon: IoManSharp, category: 'men', color: 'text-blue-600' },
-            { name: 'Women', icon: IoWomanSharp, category: 'women', color: 'text-pink-600' },
-            { name: 'Kids', icon: MdChildCare, category: 'kids', color: 'text-orange-500' }
+            { name: "Men's Care", icon: IoManSharp, category: 'men', color: 'text-blue-600' },
+            { name: "Women's Care", icon: IoWomanSharp, category: 'women', color: 'text-pink-600' },
+            { name: "Kids' Care", icon: MdChildCare, category: 'kids', color: 'text-orange-500' },
+            { name: 'Wellness', icon: MdFace, category: 'wellness', color: 'text-green-500' }
           ].map(cat => {
             const IconComponent = cat.icon;
             return (
               <Link
                 key={cat.category}
-                to="/products"
+                to={`/products?category=${cat.category}`}
                 className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition cursor-pointer group border border-gray-100"
               >
                 <IconComponent className={`text-5xl mb-3 mx-auto ${cat.color} group-hover:scale-110 transition-transform`} />
@@ -283,10 +308,23 @@ export default function Home() {
       <div className="bg-purple-600 text-white py-16 px-8 text-center">
         <h2 className="text-3xl font-bold mb-4">Subscribe to Newsletter</h2>
         <p className="mb-8">Get exclusive offers and beauty tips</p>
-        <div className="max-w-md mx-auto flex gap-2">
-          <input type="email" placeholder="Enter your email" className="flex-1 px-4 py-3 rounded-lg text-gray-800 outline-none" />
-          <button className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">Subscribe</button>
-        </div>
+        <form onSubmit={handleNewsletterSubscribe} className="max-w-md mx-auto flex gap-2">
+          <input 
+            type="email" 
+            placeholder="Enter your email" 
+            value={newsletterEmail}
+            onChange={(e) => setNewsletterEmail(e.target.value)}
+            className="flex-1 px-4 py-3 rounded-lg text-gray-800 outline-none" 
+            required
+          />
+          <button 
+            type="submit"
+            disabled={subscribing}
+            className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition disabled:opacity-50"
+          >
+            {subscribing ? 'Subscribing...' : 'Subscribe'}
+          </button>
+        </form>
       </div>
 
       <footer className="bg-gray-900 text-gray-300">

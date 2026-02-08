@@ -17,6 +17,8 @@ import Dashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
 import AdminOrders from './pages/admin/Orders';
 import Customers from './pages/admin/Customers';
+import Reports from './pages/admin/Reports';
+import Coupons from './pages/admin/Coupons';
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const { user } = useSelector((state) => state.auth);
@@ -55,7 +57,8 @@ function AppRoutes() {
           <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="customers" element={<Customers />} />
-          <Route path="reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Reports Page - Coming Soon</h1></div>} />
+          <Route path="coupons" element={<Coupons />} />
+          <Route path="reports" element={<Reports />} />
         </Route>
         
         <Route path="*" element={

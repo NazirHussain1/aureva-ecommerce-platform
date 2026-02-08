@@ -25,8 +25,12 @@ export default function Products() {
 
   useEffect(() => {
     const searchQuery = searchParams.get('search');
+    const categoryQuery = searchParams.get('category');
     if (searchQuery) {
       setSearchTerm(searchQuery);
+    }
+    if (categoryQuery) {
+      setSelectedCategory(categoryQuery);
     }
   }, [searchParams]);
 
@@ -35,9 +39,10 @@ export default function Products() {
     { value: 'haircare', label: 'Haircare', icon: GiComb, color: 'text-pink-500' },
     { value: 'makeup', label: 'Makeup', icon: GiLipstick, color: 'text-red-500' },
     { value: 'fragrance', label: 'Fragrance', icon: GiPerfumeBottle, color: 'text-indigo-500' },
-    { value: 'men', label: 'Men', icon: IoManSharp, color: 'text-blue-600' },
-    { value: 'women', label: 'Women', icon: IoWomanSharp, color: 'text-pink-600' },
-    { value: 'kids', label: 'Kids', icon: MdChildCare, color: 'text-orange-500' }
+    { value: 'men', label: "Men's Care", icon: IoManSharp, color: 'text-blue-600' },
+    { value: 'women', label: "Women's Care", icon: IoWomanSharp, color: 'text-pink-600' },
+    { value: 'kids', label: "Kids' Care", icon: MdChildCare, color: 'text-orange-500' },
+    { value: 'wellness', label: 'Wellness', icon: MdFace, color: 'text-green-500' }
   ];
 
   const handleLogout = () => {

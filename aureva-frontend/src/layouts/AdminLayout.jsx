@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
+import { FiHome, FiPackage, FiShoppingCart, FiUsers, FiBarChart2, FiLogOut, FiMenu, FiX, FiTag } from 'react-icons/fi';
+import { MdDashboard } from 'react-icons/md';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -11,11 +13,12 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const menuItems = [
-    { path: '/admin', icon: '📊', label: 'Dashboard' },
-    { path: '/admin/products', icon: '📦', label: 'Products' },
-    { path: '/admin/orders', icon: '🛒', label: 'Orders' },
-    { path: '/admin/customers', icon: '👥', label: 'Customers' },
-    { path: '/admin/reports', icon: '📈', label: 'Reports' },
+    { path: '/admin', icon: MdDashboard, label: 'Dashboard' },
+    { path: '/admin/products', icon: FiPackage, label: 'Products' },
+    { path: '/admin/orders', icon: FiShoppingCart, label: 'Orders' },
+    { path: '/admin/customers', icon: FiUsers, label: 'Customers' },
+    { path: '/admin/coupons', icon: FiTag, label: 'Coupons' },
+    { path: '/admin/reports', icon: FiBarChart2, label: 'Reports' },
   ];
 
   const handleLogout = () => {
@@ -36,25 +39,28 @@ export default function AdminLayout() {
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-2 hover:bg-white/10 rounded-lg transition"
           >
-            {sidebarOpen ? '◀' : '▶'}
+            {sidebarOpen ? <FiX className="text-xl" /> : <FiMenu className="text-xl" />}
           </button>
         </div>
 
         <nav className="flex-1 p-4">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition ${
-                location.pathname === item.path
-                  ? 'bg-white text-purple-600 font-semibold'
-                  : 'hover:bg-white/10'
-              }`}
-            >
-              <span className="text-xl">{item.icon}</span>
-              {sidebarOpen && <span>{item.label}</span>}
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition ${
+                  location.pathname === item.path
+                    ? 'bg-white text-purple-600 font-semibold shadow-md'
+                    : 'hover:bg-white/10'
+                }`}
+              >
+                <IconComponent className="text-xl" />
+                {sidebarOpen && <span>{item.label}</span>}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="p-4 border-t border-white/20">
@@ -62,14 +68,14 @@ export default function AdminLayout() {
             to="/"
             className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition mb-2"
           >
-            <span className="text-xl">🏠</span>
+            <FiHome className="text-xl" />
             {sidebarOpen && <span>Back to Store</span>}
           </Link>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition"
           >
-            <span className="text-xl">🚪</span>
+            <FiLogOut className="text-xl" />
             {sidebarOpen && <span>Logout</span>}
           </button>
         </div>

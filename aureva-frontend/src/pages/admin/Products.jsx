@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import axios from '../../api/axios';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiPackage, FiImage } from 'react-icons/fi';
+import { BiLoaderAlt } from 'react-icons/bi';
+import { HiSparkles } from 'react-icons/hi';
+import { GiLipstick, GiPerfumeBottle, GiComb } from 'react-icons/gi';
+import { MdFace, MdChildCare } from 'react-icons/md';
+import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -21,7 +27,16 @@ export default function AdminProducts() {
     images: ''
   });
 
-  const categories = ['skincare', 'haircare', 'makeup', 'fragrance', 'personal wellness', 'beauty accessories'];
+  const categories = [
+    { value: 'skincare', label: 'Skincare', icon: HiSparkles, color: 'text-purple-500' },
+    { value: 'haircare', label: 'Haircare', icon: GiComb, color: 'text-pink-500' },
+    { value: 'makeup', label: 'Makeup', icon: GiLipstick, color: 'text-red-500' },
+    { value: 'fragrance', label: 'Fragrance', icon: GiPerfumeBottle, color: 'text-indigo-500' },
+    { value: 'men', label: "Men's Care", icon: IoManSharp, color: 'text-blue-600' },
+    { value: 'women', label: "Women's Care", icon: IoWomanSharp, color: 'text-pink-600' },
+    { value: 'kids', label: "Kids' Care", icon: MdChildCare, color: 'text-orange-500' },
+    { value: 'wellness', label: 'Wellness', icon: MdFace, color: 'text-green-500' }
+  ];
 
   useEffect(() => {
     fetchProducts();
@@ -117,60 +132,101 @@ export default function AdminProducts() {
     return matchesSearch && matchesCategory;
   });
 
+  const stats = {
+    total: products.length,
+    lowStock: products.filter(p => p.stock > 0 && p.stock < 10).length,
+    outOfStock: products.filter(p => p.stock === 0).length,
+    inStock: products.filter(p => p.stock >= 10).length
+  };
+
   return (
     <div className="p-6">
       <div className="mb-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-          <h1 className="text-3xl font-bold text-gray-800">Products Management</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Products Management</h1>
+            <p className="text-gray-600">
+              {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} 
+              {searchTerm || filterCategory ? ' found' : ' total'}
+            </p>
+          </div>
           <button
             onClick={() => {
               resetForm();
               setShowModal(true);
             }}
-            className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold shadow-md"
+            className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold shadow-md flex items-center gap-2"
           >
-            + Add Product
+            <FiPlus className="text-xl" />
+            Add Product
           </button>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-          />
+          <div className="flex-1 relative">
+            <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+            />
+          </div>
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none min-w-[200px]"
           >
             <option value="">All Categories</option>
             {categories.map(cat => (
-              <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+              <option key={cat.value} value={cat.value}>{cat.label}</option>
             ))}
           </select>
         </div>
+
+        {!loading && products.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+            <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-purple-500">
+              <p className="text-sm text-gray-600 mb-1">Total Products</p>
+              <p className="text-2xl font-bold text-gray-800">{stats.total}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-500">
+              <p className="text-sm text-gray-600 mb-1">In Stock</p>
+              <p className="text-2xl font-bold text-green-600">{stats.inStock}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-orange-500">
+              <p className="text-sm text-gray-600 mb-1">Low Stock</p>
+              <p className="text-2xl font-bold text-orange-600">{stats.lowStock}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-red-500">
+              <p className="text-sm text-gray-600 mb-1">Out of Stock</p>
+              <p className="text-2xl font-bold text-red-600">{stats.outOfStock}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {loading ? (
         <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          <BiLoaderAlt className="inline-block animate-spin h-12 w-12 text-purple-600" />
           <p className="text-gray-600 mt-4">Loading products...</p>
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-12 text-center">
-          <div className="text-6xl mb-4">📦</div>
+          <FiPackage className="text-6xl text-gray-400 mx-auto mb-4" />
           <h3 className="text-2xl font-bold text-gray-800 mb-2">No Products Found</h3>
-          <p className="text-gray-600 mb-6">Start by adding your first product</p>
+          <p className="text-gray-600 mb-6">
+            {searchTerm || filterCategory ? 'Try adjusting your filters' : 'Start by adding your first product'}
+          </p>
           <button
             onClick={() => {
               resetForm();
               setShowModal(true);
             }}
-            className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold"
+            className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold inline-flex items-center gap-2"
           >
+            <FiPlus className="text-xl" />
             Add Product
           </button>
         </div>
@@ -192,10 +248,12 @@ export default function AdminProducts() {
                   <tr key={product.id} className="hover:bg-gray-50 transition">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center text-2xl">
+                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
                           {product.images && product.images[0] ? (
-                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover rounded-lg" />
-                          ) : '📦'}
+                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <FiImage className="text-3xl text-gray-400" />
+                          )}
                         </div>
                         <div>
                           <p className="font-semibold text-gray-800">{product.name}</p>
@@ -205,7 +263,7 @@ export default function AdminProducts() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium capitalize">
-                        {product.category}
+                        {categories.find(c => c.value === product.category)?.label || product.category}
                       </span>
                     </td>
                     <td className="px-6 py-4 font-semibold text-gray-800">${product.price}</td>
@@ -222,14 +280,16 @@ export default function AdminProducts() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(product)}
-                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm font-medium"
+                          className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm font-medium flex items-center gap-1"
                         >
+                          <FiEdit2 className="text-base" />
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(product.id)}
-                          className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm font-medium"
+                          className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm font-medium flex items-center gap-1"
                         >
+                          <FiTrash2 className="text-base" />
                           Delete
                         </button>
                       </div>
@@ -311,7 +371,7 @@ export default function AdminProducts() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                   >
                     {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                      <option key={cat.value} value={cat.value}>{cat.label}</option>
                     ))}
                   </select>
                 </div>
@@ -329,14 +389,20 @@ export default function AdminProducts() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Image URLs (comma separated)</label>
-                <input
-                  type="text"
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Image URLs (comma separated)
+                </label>
+                <textarea
                   value={formData.images}
                   onChange={(e) => setFormData({...formData, images: e.target.value})}
+                  rows="3"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                   placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  <FiImage className="inline mr-1" />
+                  Separate multiple image URLs with commas
+                </p>
               </div>
 
               <div className="flex gap-3 pt-4">
