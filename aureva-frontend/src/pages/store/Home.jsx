@@ -116,10 +116,14 @@ export default function Home() {
         <h2 className="text-3xl font-bold mb-8 text-gray-800">Shop by Category</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {['Skincare', 'Haircare', 'Makeup', 'Fragrance'].map(cat => (
-            <div key={cat} className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition cursor-pointer">
+            <Link
+              key={cat}
+              to="/products"
+              className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition cursor-pointer"
+            >
               <div className="text-5xl mb-3">✨</div>
               <h3 className="font-semibold text-gray-800">{cat}</h3>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
