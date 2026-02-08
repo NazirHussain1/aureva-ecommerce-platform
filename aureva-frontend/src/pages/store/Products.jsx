@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../features/auth/authSlice';
 import axios from '../../api/axios';
@@ -14,6 +14,7 @@ import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
 export default function Products() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -21,6 +22,13 @@ export default function Products() {
   const [showDropdown, setShowDropdown] = useState(false);
   const { items } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    const searchQuery = searchParams.get('search');
+    if (searchQuery) {
+      setSearchTerm(searchQuery);
+    }
+  }, [searchParams]);
 
   const categories = [
     { value: 'skincare', label: 'Skincare', icon: HiSparkles, color: 'text-purple-500' },

@@ -3,11 +3,13 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductById } from '../../features/products/productSlice';
 import { addToCart } from '../../features/cart/cartSlice';
+import { addToWishlist, removeFromWishlist } from '../../features/wishlist/wishlistSlice';
 import toast from 'react-hot-toast';
-import { FiShoppingCart, FiMinus, FiPlus } from 'react-icons/fi';
+import { FiShoppingCart, FiMinus, FiPlus, FiHeart } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import { MdCheckCircle, MdCancel } from 'react-icons/md';
 import { HiSparkles } from 'react-icons/hi';
+import { FaHeart } from 'react-icons/fa';
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -15,8 +17,11 @@ export default function ProductDetails() {
   const dispatch = useDispatch();
   const { currentProduct: product, isLoading, error } = useSelector((state) => state.products);
   const { items } = useSelector((state) => state.cart);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+
+  const isInWishlist = product && wishlistItems.some(item => item.id === product.id);
 
   useEffect(() => {
     dispatch(fetchProductById(id));
@@ -35,6 +40,18 @@ export default function ProductDetails() {
     if (product) {
       dispatch(addToCart({ product, quantity }));
       toast.success(`${quantity} ${quantity > 1 ? 'items' : 'item'} added to cart!`);
+    }
+  };
+
+  const handleToggleWishlist = () => {
+    if (!product) return;
+    
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(product.id));
+      toast.success('Removed from wishlist');
+    } else {
+      dispatch(addToWishlist(product));
+      toast.success('Added to wishlist');
     }
   };
 
@@ -220,13 +237,30 @@ export default function ProductDetails() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={handleAddToCart}
-                    className="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white py-4 rounded-xl hover:from-pink-700 hover:to-purple-700 transition font-semibold text-lg shadow-lg flex items-center justify-center gap-2"
-                  >
-                    <FiShoppingCart className="w-5 h-5" />
-                    Add to Cart
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleAddToCart}
+                      className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-4 rounded-xl hover:from-pink-700 hover:to-purple-700 transition font-semibold text-lg shadow-lg flex items-center justify-center gap-2"
+                    >
+                      <FiShoppingCart className="w-5 h-5" />
+                      Add to Cart
+                    </button>
+                    <button
+                      onClick={handleToggleWishlist}
+                      className={`w-14 h-14 rounded-xl transition flex items-center justify-center shadow-lg ${
+                        isInWishlist 
+                          ? 'bg-red-500 text-white hover:bg-red-600' 
+                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}
+                      title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                    >
+                      {isInWishlist ? (
+                        <FaHeart className="w-6 h-6" />
+                      ) : (
+                        <FiHeart className="w-6 h-6" />
+                      )}
+                    </button>
+                  </div>
                 </>
               )}
             </div>
