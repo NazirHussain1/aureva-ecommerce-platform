@@ -33,6 +33,13 @@ export default function Checkout() {
     }
   }, [items, navigate]);
 
+  useEffect(() => {
+    document.title = 'Checkout - Aureva Beauty';
+    return () => {
+      document.title = 'Aureva Beauty';
+    };
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     

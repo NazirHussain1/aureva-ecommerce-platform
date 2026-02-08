@@ -22,6 +22,15 @@ export default function ProductDetails() {
     dispatch(fetchProductById(id));
   }, [dispatch, id]);
 
+  useEffect(() => {
+    if (product) {
+      document.title = `${product.name} - Aureva Beauty`;
+    }
+    return () => {
+      document.title = 'Aureva Beauty';
+    };
+  }, [product]);
+
   const handleAddToCart = () => {
     if (product) {
       dispatch(addToCart({ product, quantity }));

@@ -42,6 +42,13 @@ export default function Products() {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    document.title = 'Products - Aureva Beauty';
+    return () => {
+      document.title = 'Aureva Beauty';
+    };
+  }, []);
+
   const fetchProducts = async () => {
     try {
       setLoading(true);

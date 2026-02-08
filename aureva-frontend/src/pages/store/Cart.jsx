@@ -13,6 +13,13 @@ export default function Cart() {
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+  useEffect(() => {
+    document.title = 'Shopping Cart - Aureva Beauty';
+    return () => {
+      document.title = 'Aureva Beauty';
+    };
+  }, []);
+
   const handleUpdateQuantity = (id, newQuantity) => {
     if (newQuantity > 0) {
       dispatch(updateQuantity({ productId: id, quantity: newQuantity }));

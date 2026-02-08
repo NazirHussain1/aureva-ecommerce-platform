@@ -22,6 +22,13 @@ export default function Orders() {
     fetchOrders();
   }, [user, navigate]);
 
+  useEffect(() => {
+    document.title = 'My Orders - Aureva Beauty';
+    return () => {
+      document.title = 'Aureva Beauty';
+    };
+  }, []);
+
   const fetchOrders = async () => {
     try {
       setLoading(true);
