@@ -1,103 +1,70 @@
-import { useState, useEffect } from 'react';
-import Spinner from '../../components/ui/Spinner';
-
-function StatCard({ title, value, icon, bgColor }) {
-  return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-gray-500 mb-1">{title}</p>
-          <p className="text-2xl font-bold text-gray-800">{value}</p>
-        </div>
-        <div className={`w-12 h-12 ${bgColor} rounded-lg flex items-center justify-center`}>
-          <span className="text-2xl">{icon}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
+import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 export default function Dashboard() {
-  const [stats, setStats] = useState(null);
-  const [recentOrders, setRecentOrders] = useState([]);
-  const [lowStockProducts, setLowStockProducts] = useState([]);
+  const { user } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setStats({
-        totalRevenue: 12450.50,
-        totalOrders: 156,
-        totalProducts: 48,
-        totalCustomers: 234
-      });
+  const stats = [
+    { title: 'Total Products', value: '0', icon: '📦', color: 'from-blue-500 to-blue-600' },
+    { title: 'Total Orders', value: '0', icon: '🛒', color: 'from-green-500 to-green-600' },
+    { title: 'Total Customers', value: '0', icon: '👥', color: 'from-purple-500 to-purple-600' },
+    { title: 'Total Revenue', value: '$0', icon: '💰', color: 'from-pink-500 to-pink-600' },
+  ];
 
-      setRecentOrders([
-        { id: 101, customer: 'Alice', total: 120.5, status: 'Completed' },
-        { id: 102, customer: 'Bob', total: 85.0, status: 'Pending' }
-      ]);
-
-      setLowStockProducts([
-        { id: 1, name: 'Lipstick', stock: 3 },
-        { id: 2, name: 'Eyeliner', stock: 2 }
-      ]);
-    }, 500);
-  }, []);
-
-  if (!stats) return <Spinner size="lg" />;
+  const quickLinks = [
+    { title: 'Manage Products', path: '/admin/products', icon: '📦', desc: 'Add, edit, delete products' },
+    { title: 'View Orders', path: '/admin/orders', icon: '🛒', desc: 'Manage customer orders' },
+    { title: 'Customers', path: '/admin/customers', icon: '👥', desc: 'View customer list' },
+    { title: 'Reports', path: '/admin/reports', icon: '📊', desc: 'View analytics' },
+  ];
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
-
-      {/* Stats Cards */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard title="Total Revenue" value={`$${stats.totalRevenue.toFixed(2)}`} icon="💰" bgColor="bg-green-100" />
-        <StatCard title="Total Orders" value={stats.totalOrders} icon="📦" bgColor="bg-blue-100" />
-        <StatCard title="Total Products" value={stats.totalProducts} icon="🛍️" bgColor="bg-purple-100" />
-        <StatCard title="Total Customers" value={stats.totalCustomers} icon="👥" bgColor="bg-pink-100" />
+    <div className="p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
+        <p className="text-gray-600">Welcome back, {user?.name}! 👋</p>
       </div>
 
-      {/* Recent Orders & Low Stock */}
-      <div className="grid lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Recent Orders</h2>
-          {recentOrders.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No recent orders</p>
-          ) : (
-            <div className="space-y-3">
-              {recentOrders.map((order) => (
-                <div key={order.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-800">Order #{order.id}</p>
-                    <p className="text-sm text-gray-500">{order.customer}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-800">${order.total}</p>
-                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {stats.map((stat, index) => (
+          <div key={index} className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition">
+            <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-lg flex items-center justify-center text-2xl mb-4`}>
+              {stat.icon}
             </div>
-          )}
-        </div>
+            <h3 className="text-gray-600 text-sm font-medium mb-1">{stat.title}</h3>
+            <p className="text-3xl font-bold text-gray-800">{stat.value}</p>
+          </div>
+        ))}
+      </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Low Stock Products</h2>
-          {lowStockProducts.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">All products are well stocked</p>
-          ) : (
-            <ul className="space-y-2">
-              {lowStockProducts.map((product) => (
-                <li key={product.id} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
-                  <span className="text-gray-800">{product.name}</span>
-                  <span className="text-red-600 font-medium">{product.stock} left</span>
-                </li>
-              ))}
-            </ul>
-          )}
+      <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+        <h2 className="text-xl font-bold text-gray-800 mb-6">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {quickLinks.map((link, index) => (
+            <Link
+              key={index}
+              to={link.path}
+              className="p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:shadow-md transition group"
+            >
+              <div className="text-4xl mb-3">{link.icon}</div>
+              <h3 className="font-semibold text-gray-800 mb-1 group-hover:text-purple-600 transition">
+                {link.title}
+              </h3>
+              <p className="text-sm text-gray-600">{link.desc}</p>
+            </Link>
+          ))}
         </div>
+      </div>
+
+      <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-md p-8 text-white text-center">
+        <h2 className="text-2xl font-bold mb-2">🚀 Get Started</h2>
+        <p className="mb-4">Add your first product to start selling!</p>
+        <Link
+          to="/admin/products"
+          className="inline-block bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+        >
+          Add Product
+        </Link>
       </div>
     </div>
   );
