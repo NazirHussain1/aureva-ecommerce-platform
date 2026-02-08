@@ -8,11 +8,12 @@ const cartSlice = createSlice({
   },
   reducers: {
     addToCart: (state, action) => {
-      const existingItem = state.items.find(item => item.id === action.payload.id);
+      const { product, quantity } = action.payload;
+      const existingItem = state.items.find(item => item.id === product.id);
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += quantity;
       } else {
-        state.items.push({ ...action.payload, quantity: 1 });
+        state.items.push({ ...product, quantity });
       }
       state.total = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     },

@@ -5,6 +5,8 @@ import { Toaster } from 'react-hot-toast';
 import store from './app/store';
 import Home from './pages/store/Home';
 import Products from './pages/store/Products';
+import ProductDetails from './pages/store/ProductDetails';
+import Cart from './pages/store/Cart';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import AdminLayout from './layouts/AdminLayout';
@@ -31,6 +33,8 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/products/:id" element={<ProductDetails />} />
+        <Route path="/cart" element={<Cart />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         

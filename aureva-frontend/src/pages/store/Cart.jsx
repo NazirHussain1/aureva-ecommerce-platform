@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { removeFromCart, updateQuantity } from '../../features/cart/cartSlice';
+import toast from 'react-hot-toast';
 
 export default function Cart() {
   const dispatch = useDispatch();
@@ -17,86 +18,107 @@ export default function Cart() {
 
   const handleRemove = (id, name) => {
     dispatch(removeFromCart(id));
-    console.log(`${name} removed from cart`);
+    toast.success(`${name} removed from cart`);
   };
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🛒</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Your cart is empty</h2>
-          <button
-            onClick={() => navigate('/products')}
-            className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition"
-          >
-            Continue Shopping
-          </button>
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white shadow-sm sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <Link to="/">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                Aureva Beauty
+              </h1>
+            </Link>
+            <Link to="/products" className="text-gray-600 hover:text-gray-800">
+              ← Continue Shopping
+            </Link>
+          </div>
+        </header>
+
+        <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 80px)' }}>
+          <div className="text-center">
+            <div className="text-8xl mb-6">🛒</div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Your cart is empty</h2>
+            <p className="text-gray-600 mb-8">Add some products to get started!</p>
+            <button
+              onClick={() => navigate('/products')}
+              className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-3 rounded-full hover:from-pink-700 hover:to-purple-700 transition font-semibold shadow-lg"
+            >
+              Start Shopping
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container-custom">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Shopping Cart</h1>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+          <Link to="/">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+              Aureva Beauty
+            </h1>
+          </Link>
+          <Link to="/products" className="text-gray-600 hover:text-gray-800">
+            ← Continue Shopping
+          </Link>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold text-gray-800 mb-8">Shopping Cart</h1>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md">
+            <div className="bg-white rounded-2xl shadow-lg">
               {items.map((item) => (
                 <div key={item.id} className="p-6 border-b last:border-b-0">
                   <div className="flex gap-4">
-                    {/* Item Image */}
-                    <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="w-24 h-24 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
                       {item.images && item.images.length > 0 ? (
                         <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">📦</div>
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-3xl">🧴</div>
                       )}
                     </div>
 
-                    {/* Item Info */}
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg text-gray-800 mb-1">{item.name}</h3>
                       <p className="text-sm text-gray-500 mb-2 capitalize">{item.category}</p>
-                      <p className="text-pink-600 font-bold">${item.price.toFixed(2)}</p>
+                      <p className="text-purple-600 font-bold text-xl">${item.price.toFixed(2)}</p>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex flex-col items-end justify-between">
                       <button
                         onClick={() => handleRemove(item.id, item.name)}
-                        className="text-red-600 hover:text-red-700"
-                        aria-label={`Remove ${item.name} from cart`}
+                        className="text-red-600 hover:text-red-700 font-medium"
                       >
-                        Remove
+                        ✕ Remove
                       </button>
 
                       <div className="flex items-center space-x-2 mt-2">
                         <button
                           onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                          className="w-8 h-8 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                          className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50 font-bold"
                           disabled={item.quantity === 1}
-                          aria-label={`Decrease quantity of ${item.name}`}
                         >
                           -
                         </button>
-                        <span className="w-12 text-center font-semibold">{item.quantity}</span>
+                        <span className="w-12 text-center font-semibold text-lg">{item.quantity}</span>
                         <button
                           onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                          className="w-8 h-8 bg-gray-200 rounded hover:bg-gray-300"
-                          aria-label={`Increase quantity of ${item.name}`}
+                          className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 font-bold"
                         >
                           +
                         </button>
                       </div>
 
-                      {/* Item total */}
-                      <span className="mt-2 font-medium text-gray-800">
-                        Total: ${(item.price * item.quantity).toFixed(2)}
+                      <span className="mt-2 font-bold text-gray-800 text-lg">
+                        ${(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -105,40 +127,41 @@ export default function Cart() {
             </div>
           </div>
 
-          {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 lg:sticky lg:top-24">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Order Summary</h2>
+            <div className="bg-white rounded-2xl shadow-lg p-6 lg:sticky lg:top-24">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Order Summary</h2>
 
               <div className="space-y-3 mb-6">
                 {items.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm text-gray-600">
-                    <span>
-                      {item.name} x {item.quantity}
+                    <span className="line-clamp-1">
+                      {item.name} × {item.quantity}
                     </span>
-                    <span>${(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="border-t pt-3 space-y-2">
+              <div className="border-t pt-4 space-y-3">
                 <div className="flex justify-between text-gray-600">
-                  <span>Subtotal ({items.length} items)</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>Subtotal ({items.length} {items.length === 1 ? 'item' : 'items'})</span>
+                  <span className="font-medium">${total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
-                  <span>Free</span>
+                  <span className="font-medium text-green-600">Free</span>
                 </div>
-                <div className="flex justify-between font-bold text-lg">
+                <div className="flex justify-between font-bold text-2xl pt-3 border-t">
                   <span>Total</span>
-                  <span className="text-pink-600">${total.toFixed(2)}</span>
+                  <span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                    ${total.toFixed(2)}
+                  </span>
                 </div>
               </div>
 
               <button
                 onClick={() => navigate('/checkout')}
-                className="w-full mt-4 bg-pink-600 text-white py-3 rounded-lg hover:bg-pink-700 transition font-semibold"
+                className="w-full mt-6 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-4 rounded-xl hover:from-pink-700 hover:to-purple-700 transition font-semibold text-lg shadow-lg"
               >
                 Proceed to Checkout
               </button>
