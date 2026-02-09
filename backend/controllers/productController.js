@@ -101,7 +101,15 @@ const getProducts = async (req, res) => {
 
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id);
+    const { id } = req.params;
+    let product;
+    
+    if (isNaN(id)) {
+      product = await Product.findOne({ where: { slug: id } });
+    } else {
+      product = await Product.findByPk(id);
+    }
+    
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.status(200).json(product);
   } catch (err) {

@@ -43,8 +43,14 @@ export default function Login() {
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Login</h2>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
-              {error}
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-red-600 mb-2">{error}</p>
+              <Link 
+                to="/forgot-password" 
+                className="text-sm text-purple-600 hover:text-purple-700 font-medium underline"
+              >
+                Forgot your password? Click here to reset
+              </Link>
             </div>
           )}
 

@@ -1,29 +1,48 @@
-import { Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../features/cart/cartSlice';
 import { addToWishlist } from '../../features/wishlist/wishlistSlice';
+import toast from 'react-hot-toast';
 import { formatPrice } from '../../utils/formatters';
-import { getImageUrl } from '../../utils/helpers';
+import { getImageUrl, getProductUrl } from '../../utils/helpers';
 import { isLowStock, isOutOfStock } from '../../utils/productHelpers';
 
 export default function ProductCard({ product }) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast.error('Please login to add items to cart');
+      navigate('/login');
+      return;
+    }
+    
     if (!isOutOfStock(product.stock)) {
       dispatch(addToCart({ product, quantity: 1 }));
+      toast.success(`${product.name} added to cart!`);
     }
   };
 
   const handleAddToWishlist = (e) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast.error('Please login to add items to wishlist');
+      navigate('/login');
+      return;
+    }
+    
     dispatch(addToWishlist(product));
+    toast.success(`${product.name} added to wishlist!`);
   };
 
   return (
     <div className="card group overflow-hidden bg-white rounded-lg shadow-md hover:shadow-xl transition relative flex flex-col">
-      <Link to={`/products/${product.id}`} className="flex-1">
+      <Link to={getProductUrl(product)} className="flex-1">
         <div className="relative overflow-hidden">
           <img
             src={getImageUrl(product.images?.[0]) || '/placeholder.png'}

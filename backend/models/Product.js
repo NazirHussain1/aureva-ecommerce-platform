@@ -5,6 +5,7 @@ const Product = sequelize.define(
   "Product",
   {
     name: { type: DataTypes.STRING, allowNull: false },
+    slug: { type: DataTypes.STRING, allowNull: true, unique: true },
     category: { 
       type: DataTypes.ENUM(
         "skincare",

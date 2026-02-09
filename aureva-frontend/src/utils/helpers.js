@@ -28,3 +28,18 @@ export const debounce = (func, wait) => {
     timeout = setTimeout(later, wait);
   };
 };
+
+export const generateSlug = (name) => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
+export const getProductUrl = (product) => {
+  if (product.slug) {
+    return `/products/${product.slug}`;
+  }
+  const slug = generateSlug(product.name);
+  return `/products/${slug}-${product.id}`;
+};
