@@ -122,22 +122,22 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                <Link to="/careers" className="hover:text-pink-400 transition flex items-center gap-2">
                   <span className="text-pink-500">›</span>
                   Careers
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                <Link to="/privacy" className="hover:text-pink-400 transition flex items-center gap-2">
                   <span className="text-pink-500">›</span>
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                <Link to="/terms" className="hover:text-pink-400 transition flex items-center gap-2">
                   <span className="text-pink-500">›</span>
                   Terms of Service
-                </a>
+                </Link>
               </li>
             </ul>
             
@@ -180,8 +180,8 @@ export default function Footer() {
             © 2026 Aureva Beauty. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm">
-            <a href="#" className="text-gray-500 hover:text-pink-400 transition">Privacy</a>
-            <a href="#" className="text-gray-500 hover:text-pink-400 transition">Terms</a>
+            <Link to="/privacy" className="text-gray-500 hover:text-pink-400 transition">Privacy</Link>
+            <Link to="/terms" className="text-gray-500 hover:text-pink-400 transition">Terms</Link>
             <a href="#" className="text-gray-500 hover:text-pink-400 transition">Cookies</a>
             <a href="#" className="text-gray-500 hover:text-pink-400 transition">Sitemap</a>
           </div>

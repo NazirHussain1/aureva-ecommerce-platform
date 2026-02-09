@@ -15,6 +15,7 @@ require("./models/Coupon");
 require("./models/Newsletter");
 require("./models/Payment");
 require("./models/Notification");
+require("./models/Settings");
 
 const app = express();
 
@@ -44,6 +45,8 @@ app.use("/api/admin/inventory", require("./routes/adminInventoryRoutes"));
 app.use("/api/admin/analytics", require("./routes/adminAnalyticsRoutes"));
 app.use("/api/admin/coupons", require("./routes/adminCouponRoutes"));
 app.use("/api/admin/newsletter", require("./routes/adminNewsletterRoutes"));
+app.use("/api/admin/settings", require("./routes/adminSettingsRoutes"));
+app.use("/api/settings", require("./routes/settingsRoutes"));
 
 const PORT = process.env.PORT || 5000;
 

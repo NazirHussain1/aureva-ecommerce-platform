@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
-import { FiHome, FiPackage, FiShoppingCart, FiUsers, FiBarChart2, FiLogOut, FiMenu, FiX, FiTag } from 'react-icons/fi';
+import { FiHome, FiPackage, FiShoppingCart, FiUsers, FiBarChart2, FiLogOut, FiMenu, FiX, FiTag, FiSettings } from 'react-icons/fi';
 import { MdDashboard } from 'react-icons/md';
 
 export default function AdminLayout() {
@@ -19,6 +19,7 @@ export default function AdminLayout() {
     { path: '/admin/customers', icon: FiUsers, label: 'Customers' },
     { path: '/admin/coupons', icon: FiTag, label: 'Coupons' },
     { path: '/admin/reports', icon: FiBarChart2, label: 'Reports' },
+    { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
   ];
 
   const handleLogout = () => {

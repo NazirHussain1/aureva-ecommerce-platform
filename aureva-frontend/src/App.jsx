@@ -23,11 +23,15 @@ import AdminOrders from './pages/admin/Orders';
 import Customers from './pages/admin/Customers';
 import Reports from './pages/admin/Reports';
 import Coupons from './pages/admin/Coupons';
+import Settings from './pages/admin/Settings';
 import AboutUs from './pages/info/AboutUs';
 import ContactUs from './pages/info/ContactUs';
 import FAQ from './pages/info/FAQ';
 import Returns from './pages/info/Returns';
 import ShippingInfo from './pages/info/ShippingInfo';
+import TermsOfService from './pages/info/TermsOfService';
+import PrivacyPolicy from './pages/info/PrivacyPolicy';
+import Careers from './pages/info/Careers';
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const { user } = useSelector((state) => state.auth);
@@ -66,6 +70,9 @@ function AppRoutes() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/returns" element={<Returns />} />
         <Route path="/shipping" element={<ShippingInfo />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/careers" element={<Careers />} />
         
         <Route path="/admin" element={
           <ProtectedRoute adminOnly>
@@ -78,6 +85,7 @@ function AppRoutes() {
           <Route path="customers" element={<Customers />} />
           <Route path="coupons" element={<Coupons />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
         
         <Route path="*" element={
