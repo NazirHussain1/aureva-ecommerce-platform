@@ -5,7 +5,7 @@ const User = require("../models/User");
 const { sendOrderConfirmationEmail } = require("../services/emailService");
 
 const placeOrder = async (req, res) => {
-  const { items, shippingAddress, paymentMethod, totalAmount } = req.body;
+  const { items, shippingAddress, paymentMethod, paymentDetails, totalAmount } = req.body;
 
   if (!items || items.length === 0) {
     return res.status(400).json({ message: "No order items" });
@@ -30,6 +30,7 @@ const placeOrder = async (req, res) => {
       UserId: req.user.id,
       shippingAddress,
       paymentMethod,
+      paymentDetails: paymentDetails || null,
       totalAmount,
     });
 

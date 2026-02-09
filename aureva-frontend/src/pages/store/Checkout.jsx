@@ -23,7 +23,10 @@ export default function Checkout() {
     city: '',
     state: '',
     zipCode: '',
-    paymentMethod: 'cash_on_delivery'
+    paymentMethod: 'cash_on_delivery',
+    accountNumber: '',
+    accountTitle: '',
+    bankName: ''
   });
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -68,6 +71,11 @@ export default function Checkout() {
           zipCode: formData.zipCode
         },
         paymentMethod: formData.paymentMethod,
+        paymentDetails: {
+          accountNumber: formData.accountNumber,
+          accountTitle: formData.accountTitle,
+          bankName: formData.bankName
+        },
         totalAmount: total
       };
 
@@ -218,7 +226,7 @@ export default function Checkout() {
                 </div>
 
                 <div className="pt-4 border-t">
-                  <label htmlFor="paymentMethod" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="paymentMethod" className="block text-sm font-semibold text-gray-700 mb-3">
                     <FiCreditCard className="inline mr-2" />
                     Payment Method
                   </label>
@@ -226,13 +234,123 @@ export default function Checkout() {
                     id="paymentMethod"
                     value={formData.paymentMethod}
                     onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none mb-4"
                   >
-                    <option value="cash_on_delivery">Cash on Delivery</option>
-                    <option value="credit_card">Credit Card</option>
-                    <option value="debit_card">Debit Card</option>
-                    <option value="paypal">PayPal</option>
+                    <option value="cash_on_delivery">💵 Cash on Delivery (COD)</option>
+                    <optgroup label="Mobile Wallets">
+                      <option value="jazzcash">📱 JazzCash</option>
+                      <option value="easypaisa">📱 EasyPaisa</option>
+                    </optgroup>
+                    <optgroup label="Bank Transfer">
+                      <option value="bank_transfer">🏦 Bank Transfer</option>
+                    </optgroup>
+                    <optgroup label="Cards">
+                      <option value="debit_card">💳 Debit Card</option>
+                      <option value="credit_card">💳 Credit Card</option>
+                    </optgroup>
                   </select>
+
+                  {(formData.paymentMethod === 'jazzcash' || formData.paymentMethod === 'easypaisa') && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                      <h4 className="font-semibold text-blue-900 mb-3">
+                        {formData.paymentMethod === 'jazzcash' ? 'JazzCash' : 'EasyPaisa'} Payment Instructions
+                      </h4>
+                      <div className="space-y-2 text-sm text-blue-800">
+                        <p><strong>Step 1:</strong> Send payment to: <span className="font-mono bg-white px-2 py-1 rounded">03XX-XXXXXXX</span></p>
+                        <p><strong>Step 2:</strong> Enter your account number below</p>
+                        <p><strong>Step 3:</strong> We'll verify and confirm your order</p>
+                      </div>
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-blue-900 mb-2">
+                          Your {formData.paymentMethod === 'jazzcash' ? 'JazzCash' : 'EasyPaisa'} Number *
+                        </label>
+                        <input
+                          type="tel"
+                          value={formData.accountNumber}
+                          onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
+                          className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                          placeholder="03XX-XXXXXXX"
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.paymentMethod === 'bank_transfer' && (
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+                      <h4 className="font-semibold text-green-900 mb-3">Bank Transfer Details</h4>
+                      <div className="space-y-2 text-sm text-green-800 mb-4">
+                        <p><strong>Bank:</strong> Meezan Bank</p>
+                        <p><strong>Account Title:</strong> Aureva Beauty</p>
+                        <p><strong>Account Number:</strong> <span className="font-mono bg-white px-2 py-1 rounded">0123456789012345</span></p>
+                        <p><strong>IBAN:</strong> <span className="font-mono bg-white px-2 py-1 rounded">PK12MEZN0001230123456789</span></p>
+                      </div>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-green-900 mb-2">
+                            Your Bank Name *
+                          </label>
+                          <select
+                            value={formData.bankName}
+                            onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                            className="w-full px-4 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                            required
+                          >
+                            <option value="">Select Bank</option>
+                            <option value="Meezan Bank">Meezan Bank</option>
+                            <option value="HBL">Habib Bank Limited (HBL)</option>
+                            <option value="UBL">United Bank Limited (UBL)</option>
+                            <option value="MCB">MCB Bank</option>
+                            <option value="Allied Bank">Allied Bank</option>
+                            <option value="Bank Alfalah">Bank Alfalah</option>
+                            <option value="Faysal Bank">Faysal Bank</option>
+                            <option value="Standard Chartered">Standard Chartered</option>
+                            <option value="Askari Bank">Askari Bank</option>
+                            <option value="Soneri Bank">Soneri Bank</option>
+                            <option value="Bank Al Habib">Bank Al Habib</option>
+                            <option value="JS Bank">JS Bank</option>
+                            <option value="Silk Bank">Silk Bank</option>
+                            <option value="Summit Bank">Summit Bank</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-green-900 mb-2">
+                            Account Title *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.accountTitle}
+                            onChange={(e) => setFormData({ ...formData, accountTitle: e.target.value })}
+                            className="w-full px-4 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                            placeholder="Your Name"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-green-900 mb-2">
+                            Account Number *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.accountNumber}
+                            onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
+                            className="w-full px-4 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                            placeholder="Your Account Number"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {(formData.paymentMethod === 'debit_card' || formData.paymentMethod === 'credit_card') && (
+                    <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-4">
+                      <h4 className="font-semibold text-purple-900 mb-2">Card Payment</h4>
+                      <p className="text-sm text-purple-800">
+                        You will be redirected to a secure payment gateway to complete your card payment.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
