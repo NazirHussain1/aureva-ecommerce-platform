@@ -11,6 +11,10 @@ const Order = sequelize.define("Order", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  paymentDetails: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
   paymentStatus: {
     type: DataTypes.ENUM("pending", "paid", "failed"),
     defaultValue: "pending",
