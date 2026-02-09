@@ -255,8 +255,18 @@ export default function Careers() {
       </div>
 
       {showApplicationForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => {
+            setShowApplicationForm(false);
+            setSelectedJob(null);
+            setFormData({ name: '', email: '', phone: '', resume: '', coverLetter: '' });
+          }}
+        >
+          <div 
+            className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-6 rounded-t-2xl">
               <h2 className="text-2xl font-bold">Apply for {selectedJob?.title}</h2>
               <p className="text-white/90 mt-1">{selectedJob?.department} • {selectedJob?.location}</p>

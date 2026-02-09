@@ -60,14 +60,17 @@ const getUserOrders = async (req, res) => {
   try {
     const orders = await Order.findAll({
       where: { UserId: req.user.id },
-      include: [{ model: OrderItem, include: [Product] }],
+      include: [{ 
+        model: OrderItem, 
+        include: [Product] 
+      }],
       order: [['createdAt', 'DESC']],
     });
 
     res.status(200).json(orders);
   } catch (error) {
     console.error("Get user orders error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Failed to fetch orders", error: error.message });
   }
 };
 
