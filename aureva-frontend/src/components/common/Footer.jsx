@@ -86,22 +86,22 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                <Link to="/shipping" className="hover:text-pink-400 transition flex items-center gap-2">
                   <span className="text-pink-500">›</span>
                   Shipping Info
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                <Link to="/returns" className="hover:text-pink-400 transition flex items-center gap-2">
                   <span className="text-pink-500">›</span>
                   Returns & Exchanges
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                <Link to="/faq" className="hover:text-pink-400 transition flex items-center gap-2">
                   <span className="text-pink-500">›</span>
                   FAQ
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -110,10 +110,16 @@ export default function Footer() {
             <h4 className="text-white font-bold mb-4 text-lg">About Us</h4>
             <ul className="space-y-2 text-sm mb-6">
               <li>
-                <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">
+                <Link to="/about" className="hover:text-pink-400 transition flex items-center gap-2">
                   <span className="text-pink-500">›</span>
                   Our Story
-                </a>
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:text-pink-400 transition flex items-center gap-2">
+                  <span className="text-pink-500">›</span>
+                  Contact Us
+                </Link>
               </li>
               <li>
                 <a href="#" className="hover:text-pink-400 transition flex items-center gap-2">

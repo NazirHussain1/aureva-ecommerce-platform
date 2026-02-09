@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../features/auth/authSlice';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
-import { FiShoppingCart, FiChevronDown, FiLogOut, FiUser, FiPackage, FiSettings, FiSearch, FiMapPin } from 'react-icons/fi';
+import { FiShoppingCart, FiChevronDown, FiLogOut, FiUser, FiPackage, FiSettings, FiSearch, FiMapPin, FiHeart } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import { GiLipstick, GiPerfumeBottle, GiComb } from 'react-icons/gi';
@@ -150,6 +150,15 @@ export default function Home() {
                     >
                       <FiMapPin className="w-4 h-4" />
                       My Addresses
+                    </Link>
+                    
+                    <Link
+                      to="/wishlist"
+                      onClick={() => setShowDropdown(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"
+                    >
+                      <FiHeart className="w-4 h-4" />
+                      My Wishlist
                     </Link>
                     
                     <Link

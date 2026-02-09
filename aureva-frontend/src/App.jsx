@@ -11,8 +11,11 @@ import Checkout from './pages/store/Checkout';
 import Orders from './pages/store/Orders';
 import Profile from './pages/store/Profile';
 import Addresses from './pages/store/Addresses';
+import Wishlist from './pages/store/Wishlist';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 import AdminLayout from './layouts/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
@@ -20,6 +23,11 @@ import AdminOrders from './pages/admin/Orders';
 import Customers from './pages/admin/Customers';
 import Reports from './pages/admin/Reports';
 import Coupons from './pages/admin/Coupons';
+import AboutUs from './pages/info/AboutUs';
+import ContactUs from './pages/info/ContactUs';
+import FAQ from './pages/info/FAQ';
+import Returns from './pages/info/Returns';
+import ShippingInfo from './pages/info/ShippingInfo';
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const { user } = useSelector((state) => state.auth);
@@ -47,8 +55,17 @@ function AppRoutes() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/addresses" element={<Addresses />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/returns" element={<Returns />} />
+        <Route path="/shipping" element={<ShippingInfo />} />
         
         <Route path="/admin" element={
           <ProtectedRoute adminOnly>
