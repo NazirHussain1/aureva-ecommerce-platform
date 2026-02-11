@@ -330,6 +330,22 @@ const getProductSuggestions = async (req, res) => {
   }
 };
 
+const getProductBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const product = await Product.findOne({ where: { slug } });
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(product);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   getProducts,
   getProductById,
@@ -339,5 +355,6 @@ module.exports = {
   getCategories,
   getBrands,
   searchProducts,
-  getProductSuggestions
+  getProductSuggestions,
+  getProductBySlug
 };

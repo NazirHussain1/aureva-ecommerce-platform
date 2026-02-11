@@ -22,8 +22,12 @@ export default function Cart() {
     };
   }, []);
 
-  const handleUpdateQuantity = (id, newQuantity) => {
+  const handleUpdateQuantity = (id, newQuantity, stock) => {
     if (newQuantity > 0) {
+      if (newQuantity > stock) {
+        toast.error(`Only ${stock} items available in stock`);
+        return;
+      }
       dispatch(updateQuantity({ productId: id, quantity: newQuantity }));
     }
   };
@@ -104,6 +108,11 @@ export default function Cart() {
                       <h3 className="font-semibold text-lg text-gray-800 mb-1">{item.name}</h3>
                       <p className="text-sm text-gray-500 mb-2 capitalize">{item.category}</p>
                       <p className="text-purple-600 font-bold text-xl">${item.price.toFixed(2)}</p>
+                      {item.stock && (
+                        <p className={`text-xs mt-1 ${item.stock < 10 ? 'text-red-600' : 'text-gray-500'}`}>
+                          {item.stock < 10 ? `Only ${item.stock} left in stock!` : `${item.stock} in stock`}
+                        </p>
+                      )}
                     </div>
 
                     <div className="flex flex-col items-end justify-between">
@@ -117,7 +126,7 @@ export default function Cart() {
 
                       <div className="flex items-center space-x-2 mt-2">
                         <button
-                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1, item.stock)}
                           className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
                           disabled={item.quantity === 1}
                         >
@@ -125,8 +134,9 @@ export default function Cart() {
                         </button>
                         <span className="w-12 text-center font-semibold text-lg">{item.quantity}</span>
                         <button
-                          onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                          className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 flex items-center justify-center"
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item.stock)}
+                          className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                          disabled={item.quantity >= item.stock}
                         >
                           <FiPlus className="w-4 h-4" />
                         </button>

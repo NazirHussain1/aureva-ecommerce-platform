@@ -9,20 +9,20 @@ const {
   getCategories,
   getBrands,
   searchProducts,
-  getProductSuggestions
+  getProductSuggestions,
+  getProductBySlug
 } = require("../controllers/productController");
 const { protect, admin } = require("../middleware/authMiddleware");
 const { validateProduct } = require("../middleware/validationMiddleware");
 
-// Public routes
 router.get("/", getProducts);
 router.get("/search", searchProducts);
 router.get("/suggestions", getProductSuggestions);
 router.get("/categories", getCategories);
 router.get("/brands", getBrands);
+router.get("/slug/:slug", getProductBySlug);
 router.get("/:id", getProductById);
 
-// Admin routes
 router.post("/", protect, admin, validateProduct, createProduct);
 router.put("/:id", protect, admin, validateProduct, updateProduct);
 router.delete("/:id", protect, admin, deleteProduct);

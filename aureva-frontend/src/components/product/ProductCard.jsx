@@ -21,10 +21,13 @@ export default function ProductCard({ product }) {
       return;
     }
     
-    if (!isOutOfStock(product.stock)) {
-      dispatch(addToCart({ product, quantity: 1 }));
-      toast.success(`${product.name} added to cart!`);
+    if (isOutOfStock(product.stock)) {
+      toast.error('This product is out of stock');
+      return;
     }
+    
+    dispatch(addToCart({ product, quantity: 1 }));
+    toast.success(`${product.name} added to cart!`);
   };
 
   const handleAddToWishlist = (e) => {

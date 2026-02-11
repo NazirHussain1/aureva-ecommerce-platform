@@ -1,5 +1,0 @@
-To add charts to the dashboard, run this command in aureva-frontend folder:
-
-npm install recharts
-
-This will add the Recharts library for beautiful data visualization.

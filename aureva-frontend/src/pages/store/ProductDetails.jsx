@@ -14,7 +14,7 @@ import { FaHeart, FaStar, FaRegStar } from 'react-icons/fa';
 import Footer from '../../components/common/Footer';
 
 export default function ProductDetails() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { currentProduct: product, isLoading, error } = useSelector((state) => state.products);
@@ -31,9 +31,32 @@ export default function ProductDetails() {
   const isInWishlist = product && wishlistItems.some(item => item.id === product.id);
 
   useEffect(() => {
-    dispatch(fetchProductById(id));
+    fetchProductBySlug();
     fetchReviews();
-  }, [dispatch, id]);
+  }, [slug]);
+
+  const fetchProductBySlug = async () => {
+    try {
+      const response = await axios.get(`/api/products/slug/${slug}`);
+      dispatch({ type: 'products/setCurrentProduct', payload: response.data });
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      toast.error('Product not found');
+      navigate('/products');
+    }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      setLoadingReviews(true);
+      const response = await axios.get(`/api/products/slug/${slug}/reviews`);
+      setReviews(response.data || []);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
 
   useEffect(() => {
     if (product) {
@@ -45,10 +68,20 @@ export default function ProductDetails() {
   }, [product]);
 
   const handleAddToCart = () => {
-    if (product) {
-      dispatch(addToCart({ product, quantity }));
-      toast.success(`${quantity} ${quantity > 1 ? 'items' : 'item'} added to cart!`);
+    if (!product) return;
+    
+    if (product.stock === 0) {
+      toast.error('This product is out of stock');
+      return;
     }
+    
+    if (quantity > product.stock) {
+      toast.error(`Only ${product.stock} items available in stock`);
+      return;
+    }
+    
+    dispatch(addToCart({ product, quantity }));
+    toast.success(`${quantity} ${quantity > 1 ? 'items' : 'item'} added to cart!`);
   };
 
   const handleToggleWishlist = () => {
@@ -63,18 +96,6 @@ export default function ProductDetails() {
     }
   };
 
-  const fetchReviews = async () => {
-    try {
-      setLoadingReviews(true);
-      const response = await axios.get(`/api/products/${id}/reviews`);
-      setReviews(response.data || []);
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
-    } finally {
-      setLoadingReviews(false);
-    }
-  };
-
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     
@@ -84,13 +105,15 @@ export default function ProductDetails() {
       return;
     }
 
+    if (!product) return;
+
     try {
-      await axios.post(`/api/products/${id}/reviews`, reviewForm);
+      await axios.post(`/api/products/${product.id}/reviews`, reviewForm);
       toast.success('Review submitted successfully!');
       setShowReviewForm(false);
       setReviewForm({ rating: 5, comment: '' });
       fetchReviews();
-      dispatch(fetchProductById(id));
+      fetchProductBySlug();
     } catch (error) {
       console.error('Error submitting review:', error);
       toast.error(error.response?.data?.message || 'Failed to submit review');
