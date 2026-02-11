@@ -11,6 +11,28 @@ const getProductReviews = async (req, res) => {
   res.json(reviews);
 };
 
+const getProductReviewsBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const product = await Product.findOne({ where: { slug } });
+    
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const reviews = await Review.findAll({
+      where: { productId: product.id },
+      include: ["User"],
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.json(reviews);
+  } catch (error) {
+    console.error("Get reviews by slug error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 const createReview = async (req, res) => {
   const { rating, comment } = req.body;
   const { productId } = req.params;
@@ -79,6 +101,7 @@ const deleteReview = async (req, res) => {
 
 module.exports = {
   getProductReviews,
+  getProductReviewsBySlug,
   createReview,
   deleteReview,
 };
