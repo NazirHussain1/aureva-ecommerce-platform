@@ -22,6 +22,7 @@ import { HiSparkles } from 'react-icons/hi';
 import { FaHeart, FaStar, FaRegStar } from 'react-icons/fa';
 import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
+import { ReviewSkeleton } from '../../components/common/SkeletonLoader';
 
 export default function ProductDetails() {
   const { slug } = useParams();
@@ -223,7 +224,7 @@ export default function ProductDetails() {
             <h2 className="text-3xl font-bold text-gray-800 mb-4">Product not found</h2>
             <button
               onClick={() => navigate('/products')}
-              className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-3 rounded-full hover:from-pink-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-105"
+              className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-3 rounded-full hover:from-pink-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 touch-target"
             >
               Back to Products
             </button>
@@ -396,7 +397,7 @@ export default function ProductDetails() {
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-12 h-12 bg-gray-100 rounded-xl hover:bg-purple-100 hover:text-purple-600 transition-all duration-300 flex items-center justify-center font-bold text-lg hover:scale-110"
+                      className="w-12 h-12 bg-gray-100 rounded-xl hover:bg-purple-100 hover:text-purple-600 transition-all duration-300 flex items-center justify-center font-bold text-lg hover:scale-110 active:scale-95 touch-target"
                     >
                       <FiMinus className="w-5 h-5" />
                     </button>
@@ -404,7 +405,7 @@ export default function ProductDetails() {
                     <button
                       onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                       disabled={quantity >= product.stock}
-                      className="w-12 h-12 bg-gray-100 rounded-xl hover:bg-purple-100 hover:text-purple-600 transition-all duration-300 flex items-center justify-center font-bold text-lg hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-12 h-12 bg-gray-100 rounded-xl hover:bg-purple-100 hover:text-purple-600 transition-all duration-300 flex items-center justify-center font-bold text-lg hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed touch-target"
                     >
                       <FiPlus className="w-5 h-5" />
                     </button>
@@ -417,14 +418,14 @@ export default function ProductDetails() {
                 <div className="flex gap-3">
                   <button
                     onClick={handleAddToCart}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-2xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 flex items-center justify-center gap-3"
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-2xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 flex items-center justify-center gap-3 touch-target"
                   >
                     <FiShoppingCart className="w-6 h-6" />
                     Add to Cart
                   </button>
                   <button
                     onClick={handleToggleWishlist}
-                    className={`w-16 h-16 rounded-2xl transition-all duration-300 flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-110 ${
+                    className={`w-16 h-16 rounded-2xl transition-all duration-300 flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 touch-target ${
                       isInWishlist 
                         ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white' 
                         : 'bg-white text-gray-600 hover:bg-gray-50 border-2 border-gray-200'
@@ -441,7 +442,7 @@ export default function ProductDetails() {
 
                 <button
                   onClick={handleBuyNow}
-                  className="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white py-4 rounded-2xl hover:from-pink-700 hover:to-purple-700 transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105"
+                  className="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white py-4 rounded-2xl hover:from-pink-700 hover:to-purple-700 transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 touch-target"
                 >
                   Buy Now
                 </button>
@@ -511,7 +512,7 @@ export default function ProductDetails() {
             {user && (
               <button
                 onClick={() => setShowReviewForm(!showReviewForm)}
-                className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-4 rounded-2xl hover:from-pink-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-105"
+                className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-4 rounded-2xl hover:from-pink-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 touch-target"
               >
                 {showReviewForm ? 'Cancel' : 'Write a Review'}
               </button>
@@ -547,7 +548,7 @@ export default function ProductDetails() {
 
               <button
                 type="submit"
-                className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-10 py-4 rounded-2xl hover:from-pink-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-105"
+                className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-10 py-4 rounded-2xl hover:from-pink-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 touch-target"
               >
                 Submit Review
               </button>
@@ -555,10 +556,8 @@ export default function ProductDetails() {
           )}
 
           {loadingReviews ? (
-            <div className="text-center py-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full mb-4">
-                <BiLoaderAlt className="animate-spin h-8 w-8 text-purple-600" />
-              </div>
+            <div className="space-y-6">
+              <ReviewSkeleton count={3} />
             </div>
           ) : reviews.length === 0 ? (
             <div className="text-center py-16 bg-gray-50 rounded-2xl">
@@ -599,6 +598,26 @@ export default function ProductDetails() {
       </div>
 
       <Footer />
+
+      {product && product.stock > 0 && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 p-4 shadow-2xl z-40 animate-slideInUp">
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <p className="text-sm text-gray-600 mb-1">Price</p>
+              <p className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                ${Number(product.price).toFixed(2)}
+              </p>
+            </div>
+            <button
+              onClick={handleAddToCart}
+              className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-2xl font-bold shadow-xl hover:shadow-2xl active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 touch-target"
+            >
+              <FiShoppingCart className="w-5 h-5" />
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -12,6 +12,19 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+p {
+  color: #4B5563;
+  line-height: 1.75;
 }
 
 #root {
@@ -97,6 +110,15 @@ body {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
 .animate-blob {
   animation: blob 7s infinite;
 }
@@ -123,6 +145,18 @@ body {
 
 .animate-modalFadeIn {
   animation: modalFadeIn 0.3s ease-out;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    to right,
+    #f3f4f6 0%,
+    #e5e7eb 20%,
+    #f3f4f6 40%,
+    #f3f4f6 100%
+  );
+  background-size: 1000px 100%;
 }
 
 .page-enter {
@@ -204,19 +238,36 @@ body {
 
   /* Heading Styles */
   .heading-1 {
-    @apply text-4xl lg:text-5xl font-bold text-gray-900 leading-tight;
+    @apply text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight tracking-tight mb-6;
   }
 
   .heading-2 {
-    @apply text-3xl lg:text-4xl font-bold text-gray-900;
+    @apply text-3xl lg:text-4xl font-semibold text-gray-900 leading-tight tracking-tight mb-4;
   }
 
   .heading-3 {
-    @apply text-2xl font-bold text-gray-900;
+    @apply text-2xl lg:text-3xl font-semibold text-gray-900 leading-snug tracking-tight mb-3;
   }
 
   .heading-4 {
-    @apply text-xl font-bold text-gray-800;
+    @apply text-xl lg:text-2xl font-semibold text-gray-800 leading-snug tracking-tight mb-3;
+  }
+
+  .heading-5 {
+    @apply text-lg lg:text-xl font-semibold text-gray-800 leading-snug tracking-tight mb-2;
+  }
+
+  .heading-6 {
+    @apply text-base lg:text-lg font-semibold text-gray-700 leading-normal tracking-tight mb-2;
+  }
+
+  /* Section Titles */
+  .section-title {
+    @apply text-4xl font-semibold text-gray-900 tracking-tight mb-8;
+  }
+
+  .section-subtitle {
+    @apply text-xl text-gray-600 leading-relaxed mb-12;
   }
 
   /* Body Text */
@@ -225,11 +276,28 @@ body {
   }
 
   .body {
-    @apply text-base text-gray-700 leading-relaxed;
+    @apply text-base text-gray-600 leading-relaxed;
   }
 
   .body-small {
-    @apply text-sm text-gray-600;
+    @apply text-sm text-gray-600 leading-relaxed;
+  }
+
+  .body-xs {
+    @apply text-xs text-gray-500 leading-normal;
+  }
+
+  /* Text Emphasis */
+  .text-emphasis {
+    @apply font-semibold text-gray-900;
+  }
+
+  .text-muted {
+    @apply text-gray-500;
+  }
+
+  .text-subtle {
+    @apply text-gray-400;
   }
 
   /* Badge */
@@ -320,5 +388,18 @@ body {
 
   .button-hover:active {
     transform: translateY(0);
+  }
+
+  .button-press {
+    transition: transform 0.1s ease;
+  }
+
+  .button-press:active {
+    transform: scale(0.95);
+  }
+
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
   }
 }

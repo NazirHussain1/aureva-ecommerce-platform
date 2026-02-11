@@ -40,7 +40,7 @@ export default function Wishlist() {
           <p className="text-gray-600 mb-6">Save your favorite products for later</p>
           <button
             onClick={() => navigate('/login')}
-            className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold"
+            className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold active:scale-95 touch-target"
           >
             Login
           </button>
@@ -61,7 +61,7 @@ export default function Wishlist() {
             <p className="text-gray-600 mb-8">Start adding products you love!</p>
             <button
               onClick={() => navigate('/products')}
-              className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-3 rounded-full hover:from-pink-700 hover:to-purple-700 transition font-semibold shadow-lg"
+              className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-3 rounded-full hover:from-pink-700 hover:to-purple-700 transition font-semibold shadow-lg active:scale-95 touch-target"
             >
               Browse Products
             </button>
@@ -83,7 +83,7 @@ export default function Wishlist() {
           {items.length > 0 && (
             <button
               onClick={handleClearWishlist}
-              className="text-red-600 hover:text-red-700 font-medium flex items-center gap-2"
+              className="text-red-600 hover:text-red-700 font-medium flex items-center gap-2 active:scale-95 transition touch-target"
             >
               <FiTrash2 />
               Clear All
@@ -152,14 +152,14 @@ export default function Wishlist() {
                   <button
                     onClick={() => handleAddToCart(product)}
                     disabled={product.stock === 0}
-                    className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:from-pink-700 hover:to-purple-700 transition shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:from-pink-700 hover:to-purple-700 transition shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 touch-target"
                   >
                     <FiShoppingCart />
                     {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                   </button>
                   <button
                     onClick={() => handleRemove(product.id, product.name)}
-                    className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition"
+                    className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition active:scale-95 touch-target"
                     title="Remove from wishlist"
                   >
                     <FiTrash2 />

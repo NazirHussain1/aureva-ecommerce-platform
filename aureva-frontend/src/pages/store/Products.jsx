@@ -12,6 +12,7 @@ import { MdFace, MdChildCare } from 'react-icons/md';
 import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
 import Footer from '../../components/common/Footer';
 import NotificationBell from '../../components/common/NotificationBell';
+import { ProductCardSkeleton } from '../../components/common/SkeletonLoader';
 
 export default function Products() {
   const navigate = useNavigate();
@@ -226,7 +227,7 @@ export default function Products() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => setSelectedCategory('')}
-              className={`px-6 py-2 rounded-full font-medium transition shadow-sm ${
+              className={`px-6 py-2 rounded-full font-medium transition shadow-sm active:scale-95 touch-target ${
                 selectedCategory === ''
                   ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md'
                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -240,7 +241,7 @@ export default function Products() {
                 <button
                   key={category.value}
                   onClick={() => setSelectedCategory(category.value)}
-                  className={`px-6 py-2 rounded-full font-medium transition shadow-sm flex items-center gap-2 ${
+                  className={`px-6 py-2 rounded-full font-medium transition shadow-sm flex items-center gap-2 active:scale-95 touch-target ${
                     selectedCategory === category.value
                       ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md'
                       : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -255,9 +256,8 @@ export default function Products() {
         </div>
 
         {loading ? (
-          <div className="text-center py-20">
-            <BiLoaderAlt className="inline-block animate-spin h-16 w-16 text-purple-600" />
-            <p className="text-gray-600 mt-4 text-lg">Loading products...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <ProductCardSkeleton count={12} />
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-2xl shadow-md">
@@ -315,7 +315,7 @@ export default function Products() {
                     </span>
                   </div>
                   
-                  <button className="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:from-pink-700 hover:to-purple-700 transition shadow-md">
+                  <button className="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:from-pink-700 hover:to-purple-700 transition shadow-md active:scale-95 touch-target">
                     View Details
                   </button>
                 </div>

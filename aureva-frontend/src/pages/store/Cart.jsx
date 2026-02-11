@@ -97,7 +97,7 @@ export default function Cart() {
                     <div className="flex flex-col items-end justify-between">
                       <button
                         onClick={() => handleRemove(item.id, item.name)}
-                        className="text-red-600 hover:text-red-700 font-medium flex items-center gap-1"
+                        className="text-red-600 hover:text-red-700 font-medium flex items-center gap-1 active:scale-95 transition touch-target"
                       >
                         <FiTrash2 className="w-4 h-4" />
                         Remove
@@ -106,7 +106,7 @@ export default function Cart() {
                       <div className="flex items-center space-x-2 mt-2">
                         <button
                           onClick={() => handleUpdateQuantity(item.id, item.quantity - 1, item.stock)}
-                          className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                          className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center active:scale-95 transition touch-target"
                           disabled={item.quantity === 1}
                         >
                           <FiMinus className="w-4 h-4" />
@@ -114,7 +114,7 @@ export default function Cart() {
                         <span className="w-12 text-center font-semibold text-lg">{item.quantity}</span>
                         <button
                           onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item.stock)}
-                          className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                          className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center active:scale-95 transition touch-target"
                           disabled={item.quantity >= item.stock}
                         >
                           <FiPlus className="w-4 h-4" />
@@ -165,7 +165,7 @@ export default function Cart() {
 
               <button
                 onClick={() => navigate('/checkout')}
-                className="w-full mt-6 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-4 rounded-xl hover:from-pink-700 hover:to-purple-700 transition font-semibold text-lg shadow-lg"
+                className="w-full mt-6 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-4 rounded-xl hover:from-pink-700 hover:to-purple-700 transition font-semibold text-lg shadow-lg active:scale-95 touch-target"
               >
                 Proceed to Checkout
               </button>

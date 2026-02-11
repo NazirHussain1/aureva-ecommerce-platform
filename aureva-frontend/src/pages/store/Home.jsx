@@ -10,6 +10,7 @@ import { MdFace, MdChildCare } from 'react-icons/md';
 import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
 import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
+import { ProductCardSkeleton } from '../../components/common/SkeletonLoader';
 
 export default function Home() {
   const { user } = useSelector((state) => state.auth);
@@ -91,7 +92,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   to="/products"
-                  className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                  className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 touch-target"
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     Shop Now
@@ -104,7 +105,7 @@ export default function Home() {
                 
                 <Link
                   to="/products"
-                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-700 bg-white rounded-2xl border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-300 shadow-sm hover:shadow-md"
+                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-700 bg-white rounded-2xl border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-300 shadow-sm hover:shadow-md active:scale-95 touch-target"
                 >
                   Explore Categories
                 </Link>
@@ -258,11 +259,8 @@ export default function Home() {
           </div>
 
           {loading ? (
-            <div className="text-center py-16">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full mb-4">
-                <BiLoaderAlt className="animate-spin h-8 w-8 text-purple-600" />
-              </div>
-              <p className="text-gray-600 text-lg">Loading products...</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+              <ProductCardSkeleton count={8} />
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-16 bg-gray-50 rounded-3xl">
@@ -339,7 +337,7 @@ export default function Home() {
                           </div>
                         </div>
                         
-                        <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2 group-hover:scale-105">
+                        <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2 group-hover:scale-105 active:scale-95 touch-target">
                           <span>View Details</span>
                           <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -354,7 +352,7 @@ export default function Home() {
               <div className="text-center">
                 <Link
                   to="/products"
-                  className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105"
+                  className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 touch-target"
                 >
                   <span>View All Products</span>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -396,7 +394,7 @@ export default function Home() {
               <button 
                 type="submit"
                 disabled={subscribing}
-                className="bg-white text-purple-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl hover:scale-105 whitespace-nowrap"
+                className="bg-white text-purple-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 whitespace-nowrap touch-target"
               >
                 {subscribing ? (
                   <span className="flex items-center gap-2">
