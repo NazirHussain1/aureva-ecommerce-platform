@@ -6,7 +6,9 @@ import toast from 'react-hot-toast';
 import { FiShoppingCart, FiMinus, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { MdRemoveShoppingCart } from 'react-icons/md';
 import { HiSparkles } from 'react-icons/hi';
+import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
+import EmptyState from '../../components/common/EmptyState';
 
 export default function Cart() {
   const dispatch = useDispatch();
@@ -40,53 +42,30 @@ export default function Cart() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <Link to="/">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                Aureva Beauty
-              </h1>
-            </Link>
-            <Link to="/products" className="text-gray-600 hover:text-gray-800">
-              ← Continue Shopping
-            </Link>
-          </div>
-        </header>
-
-        <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 80px)' }}>
-          <div className="text-center">
-            <MdRemoveShoppingCart className="text-8xl mb-6 mx-auto text-gray-300" />
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Your cart is empty</h2>
-            <p className="text-gray-600 mb-8">Add some products to get started!</p>
-            <button
-              onClick={() => navigate('/products')}
-              className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-3 rounded-full hover:from-pink-700 hover:to-purple-700 transition font-semibold shadow-lg"
-            >
-              Start Shopping
-            </button>
-          </div>
+        <Navbar />
+        
+        <div className="max-w-4xl mx-auto px-4 py-16 mt-20">
+          <EmptyState
+            icon={MdRemoveShoppingCart}
+            title="Your cart is empty"
+            message="Looks like you haven't added any items to your cart yet. Start shopping and discover amazing beauty products!"
+            actionText="Start Shopping"
+            actionLink="/products"
+            variant="cart"
+          />
         </div>
+        
+        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-              Aureva Beauty
-            </h1>
-          </Link>
-          <Link to="/products" className="text-gray-600 hover:text-gray-800">
-            ← Continue Shopping
-          </Link>
-        </div>
-      </header>
+      <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">Shopping Cart</h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20">
+        <h1 className="text-4xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
