@@ -1,28 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../../features/auth/authSlice';
+import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
-import { FiShoppingCart, FiChevronDown, FiLogOut, FiUser, FiPackage, FiSettings, FiSearch, FiMapPin, FiHeart } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import { GiLipstick, GiPerfumeBottle, GiComb } from 'react-icons/gi';
 import { MdFace, MdChildCare } from 'react-icons/md';
 import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
-import SearchBar from '../../components/common/SearchBar';
+import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
-import NotificationBell from '../../components/common/NotificationBell';
 
 export default function Home() {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { items } = useSelector((state) => state.cart);
-  const [showDropdown, setShowDropdown] = useState(false);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showSearch, setShowSearch] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribing, setSubscribing] = useState(false);
 
@@ -41,12 +33,6 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLogout = () => {
-    dispatch(logout());
-    setShowDropdown(false);
-    navigate('/');
   };
 
   const handleNewsletterSubscribe = async (e) => {
@@ -72,131 +58,9 @@ export default function Home() {
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-              Aureva Beauty
-            </h1>
-          </Link>
-          
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setShowSearch(true)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition"
-              title="Search products"
-            >
-              <FiSearch className="w-6 h-6 text-gray-700" />
-            </button>
+      <Navbar />
 
-            <NotificationBell />
-
-            <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg transition">
-              <FiShoppingCart className="w-6 h-6 text-gray-700" />
-              {items.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {items.length}
-                </span>
-              )}
-            </Link>
-
-            {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="flex items-center gap-2 hover:bg-gray-100 px-3 py-2 rounded-lg transition"
-                >
-                  <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                    {user.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="text-left hidden md:block">
-                    <p className="text-sm font-semibold text-gray-800">{user.name}</p>
-                    <p className="text-xs text-gray-500 capitalize">{user.role}</p>
-                  </div>
-                  <FiChevronDown className="w-4 h-4 text-gray-600" />
-                </button>
-
-                {showDropdown && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 py-2">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-800">{user.name}</p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
-                    </div>
-                    
-                    {user.role === 'admin' && (
-                      <Link
-                        to="/admin"
-                        onClick={() => setShowDropdown(false)}
-                        className="block px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 transition font-medium flex items-center gap-2"
-                      >
-                        <FiSettings className="w-4 h-4" />
-                        Admin Dashboard
-                      </Link>
-                    )}
-                    
-                    <Link
-                      to="/profile"
-                      onClick={() => setShowDropdown(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"
-                    >
-                      <FiUser className="w-4 h-4" />
-                      My Profile
-                    </Link>
-                    
-                    <Link
-                      to="/addresses"
-                      onClick={() => setShowDropdown(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"
-                    >
-                      <FiMapPin className="w-4 h-4" />
-                      My Addresses
-                    </Link>
-                    
-                    <Link
-                      to="/wishlist"
-                      onClick={() => setShowDropdown(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"
-                    >
-                      <FiHeart className="w-4 h-4" />
-                      My Wishlist
-                    </Link>
-                    
-                    <Link
-                      to="/orders"
-                      onClick={() => setShowDropdown(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"
-                    >
-                      <FiPackage className="w-4 h-4" />
-                      My Orders
-                    </Link>
-                    
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2"
-                    >
-                      <FiLogOut className="w-4 h-4" />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex gap-3">
-                <Link to="/login" className="text-purple-600 hover:text-purple-700 font-medium px-4 py-2">
-                  Login
-                </Link>
-                <Link to="/register" className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-medium shadow-sm">
-                  Sign Up
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {showSearch && <SearchBar onClose={() => setShowSearch(false)} />}
-
-      <section className="relative bg-gradient-to-br from-purple-50 via-pink-50 to-white overflow-hidden">
+      <section className="relative bg-gradient-to-br from-purple-50 via-pink-50 to-white overflow-hidden mt-20">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
