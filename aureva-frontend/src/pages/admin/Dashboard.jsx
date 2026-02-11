@@ -5,10 +5,12 @@ import axios from '../../api/axios';
 import { FiPackage, FiShoppingBag, FiUsers, FiDollarSign, FiTrendingUp, FiClock, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import { MdInventory, MdShoppingCart, MdPeople, MdAttachMoney } from 'react-icons/md';
+import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function Dashboard() {
   const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState('week');
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalOrders: 0,
@@ -19,10 +21,44 @@ export default function Dashboard() {
     lowStockProducts: 0,
     recentOrders: []
   });
+  const [salesData, setSalesData] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [dailySales, setDailySales] = useState(null);
+  const [monthlyRevenue, setMonthlyRevenue] = useState(null);
+  const [repeatCustomers, setRepeatCustomers] = useState(null);
+
+  const COLORS = ['#8b5cf6', '#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#6366f1'];
 
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  useEffect(() => {
+    fetchChartData();
+  }, [timeRange]);
+
+  const fetchChartData = async () => {
+    try {
+      const [salesRes, categoryRes, topProductsRes, dailySalesRes, monthlyRevenueRes, repeatCustomersRes] = await Promise.all([
+        axios.get(`/api/admin/analytics/sales-chart?range=${timeRange}`),
+        axios.get('/api/admin/analytics/category-revenue'),
+        axios.get('/api/admin/analytics/top-products?limit=5'),
+        axios.get('/api/admin/analytics/daily-sales'),
+        axios.get('/api/admin/analytics/monthly-revenue'),
+        axios.get('/api/admin/analytics/repeat-customers')
+      ]);
+
+      setSalesData(salesRes.data || []);
+      setCategoryData(categoryRes.data || []);
+      setTopProducts(topProductsRes.data || []);
+      setDailySales(dailySalesRes.data || null);
+      setMonthlyRevenue(monthlyRevenueRes.data || null);
+      setRepeatCustomers(repeatCustomersRes.data || null);
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -121,9 +157,22 @@ export default function Dashboard() {
 
   return (
     <div className="p-6">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
-        <p className="text-gray-600 text-lg">Welcome back, {user?.name}! 👋</p>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
+          <p className="text-gray-600 text-lg">Welcome back, {user?.name}! 👋</p>
+        </div>
+        <select
+          value={timeRange}
+          onChange={(e) => setTimeRange(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
+        >
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+          <option value="year">This Year</option>
+          <option value="all">All Time</option>
+        </select>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -161,6 +210,250 @@ export default function Dashboard() {
             </div>
           );
         })}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <p className="text-blue-100 text-sm mb-1">Daily Sales</p>
+              <p className="text-3xl font-bold">${dailySales?.totalSales || 0}</p>
+            </div>
+            <FiDollarSign className="text-4xl opacity-80" />
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <span className={`px-2 py-1 rounded-full ${
+              dailySales?.growthPercentage >= 0 ? 'bg-green-400' : 'bg-red-400'
+            } text-white font-semibold`}>
+              {dailySales?.growthPercentage >= 0 ? '+' : ''}{dailySales?.growthPercentage || 0}%
+            </span>
+            <span className="text-blue-100">vs yesterday</span>
+          </div>
+          <p className="text-xs text-blue-100 mt-2">{dailySales?.totalOrders || 0} orders today</p>
+        </div>
+
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <p className="text-green-100 text-sm mb-1">Monthly Revenue</p>
+              <p className="text-3xl font-bold">${monthlyRevenue?.totalRevenue || 0}</p>
+            </div>
+            <FiTrendingUp className="text-4xl opacity-80" />
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <span className={`px-2 py-1 rounded-full ${
+              monthlyRevenue?.growthPercentage >= 0 ? 'bg-green-400' : 'bg-red-400'
+            } text-white font-semibold`}>
+              {monthlyRevenue?.growthPercentage >= 0 ? '+' : ''}{monthlyRevenue?.growthPercentage || 0}%
+            </span>
+            <span className="text-green-100">vs last month</span>
+          </div>
+          <p className="text-xs text-green-100 mt-2">{monthlyRevenue?.monthName || 'Current Month'}</p>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <p className="text-purple-100 text-sm mb-1">Top Product Sales</p>
+              <p className="text-3xl font-bold">{topProducts[0]?.quantity || 0}</p>
+            </div>
+            <FiPackage className="text-4xl opacity-80" />
+          </div>
+          <p className="text-sm text-purple-100 truncate">{topProducts[0]?.name || 'No sales yet'}</p>
+          <p className="text-xs text-purple-100 mt-2">Revenue: ${topProducts[0]?.revenue?.toFixed(2) || 0}</p>
+        </div>
+
+        <div className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <p className="text-pink-100 text-sm mb-1">Repeat Customers</p>
+              <p className="text-3xl font-bold">{repeatCustomers?.repeatCustomerPercentage || 0}%</p>
+            </div>
+            <FiUsers className="text-4xl opacity-80" />
+          </div>
+          <p className="text-sm text-pink-100">{repeatCustomers?.repeatCustomers || 0} of {repeatCustomers?.totalCustomers || 0} customers</p>
+          <p className="text-xs text-pink-100 mt-2">Customer loyalty metric</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Sales Trend</h2>
+          {salesData.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">No sales data available</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={salesData}>
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="date" stroke="#6b7280" style={{ fontSize: '12px' }} />
+                <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                  formatter={(value) => [`$${value}`, 'Revenue']}
+                />
+                <Area type="monotone" dataKey="revenue" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorRevenue)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Revenue by Category</h2>
+          {categoryData.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">No category data available</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={categoryData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {categoryData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Top Selling Products</h2>
+          {topProducts.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">No product data available</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={topProducts}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="name" stroke="#6b7280" style={{ fontSize: '11px' }} angle={-15} textAnchor="end" height={80} />
+                <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                  formatter={(value, name) => [name === 'quantity' ? `${value} units` : `$${value}`, name === 'quantity' ? 'Units Sold' : 'Revenue']}
+                />
+                <Legend />
+                <Bar dataKey="quantity" fill="#8b5cf6" name="Units Sold" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="revenue" fill="#ec4899" name="Revenue" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Order Volume</h2>
+          {salesData.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">No order data available</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={salesData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="date" stroke="#6b7280" style={{ fontSize: '12px' }} />
+                <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                  formatter={(value) => [`${value} orders`, 'Orders']}
+                />
+                <Line type="monotone" dataKey="orders" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Monthly Revenue Breakdown</h2>
+          {monthlyRevenue?.dailyBreakdown?.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">No revenue data for this month</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={monthlyRevenue?.dailyBreakdown || []}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="day" stroke="#6b7280" style={{ fontSize: '12px' }} />
+                <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                  formatter={(value, name) => [name === 'revenue' ? `$${value}` : value, name === 'revenue' ? 'Revenue' : 'Orders']}
+                />
+                <Legend />
+                <Bar dataKey="revenue" fill="#10b981" name="Revenue ($)" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="orders" fill="#3b82f6" name="Orders" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+          <div className="mt-4 grid grid-cols-3 gap-4">
+            <div className="text-center p-3 bg-green-50 rounded-xl">
+              <p className="text-xs text-gray-600 mb-1">Total Revenue</p>
+              <p className="text-lg font-bold text-green-600">${monthlyRevenue?.totalRevenue || 0}</p>
+            </div>
+            <div className="text-center p-3 bg-blue-50 rounded-xl">
+              <p className="text-xs text-gray-600 mb-1">Total Orders</p>
+              <p className="text-lg font-bold text-blue-600">{monthlyRevenue?.totalOrders || 0}</p>
+            </div>
+            <div className="text-center p-3 bg-purple-50 rounded-xl">
+              <p className="text-xs text-gray-600 mb-1">Avg Order</p>
+              <p className="text-lg font-bold text-purple-600">${monthlyRevenue?.averageOrderValue || 0}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Customer Loyalty Analysis</h2>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200">
+              <p className="text-sm text-gray-600 mb-2">Repeat Customers</p>
+              <p className="text-4xl font-bold text-purple-600">{repeatCustomers?.repeatCustomerPercentage || 0}%</p>
+              <p className="text-xs text-gray-500 mt-1">{repeatCustomers?.repeatCustomers || 0} customers</p>
+            </div>
+            <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border-2 border-blue-200">
+              <p className="text-sm text-gray-600 mb-2">One-Time Buyers</p>
+              <p className="text-4xl font-bold text-blue-600">
+                {repeatCustomers?.totalCustomers > 0 
+                  ? ((repeatCustomers.oneTimeCustomers / repeatCustomers.totalCustomers) * 100).toFixed(1)
+                  : 0}%
+              </p>
+              <p className="text-xs text-gray-500 mt-1">{repeatCustomers?.oneTimeCustomers || 0} customers</p>
+            </div>
+          </div>
+          {repeatCustomers?.orderFrequency?.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Order Frequency Distribution</h3>
+              <div className="space-y-2">
+                {repeatCustomers.orderFrequency.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">{item.range}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-32 bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full"
+                          style={{ 
+                            width: `${(item.count / repeatCustomers.repeatCustomers) * 100}%` 
+                          }}
+                        ></div>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-800 w-8">{item.count}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

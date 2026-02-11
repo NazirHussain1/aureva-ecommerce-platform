@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { getSettings, updateSettings } = require('../controllers/adminSettingsController');
 const { protect } = require('../middleware/authMiddleware');
-const { admin } = require('../middleware/adminMiddleware');
+const isAdmin = require('../middleware/adminMiddleware');
 
-router.get('/', protect, admin, getSettings);
-router.put('/', protect, admin, updateSettings);
+router.get('/', protect, isAdmin, getSettings);
+router.put('/', protect, isAdmin, updateSettings);
 
 module.exports = router;

@@ -701,29 +701,257 @@ DELETE /admin/coupons/:id
 
 ### Analytics
 
-#### Get Analytics Data
+#### Get Dashboard Stats
 ```http
-GET /admin/analytics
+GET /admin/analytics/stats
 ```
 🔒 **Admin Only**
 
 **Response:** `200 OK`
 ```json
 {
-  "totalRevenue": 10000,
-  "totalOrders": 150,
-  "totalCustomers": 75,
-  "averageOrderValue": 66.67,
-  "revenueByCategory": {
-    "skincare": 4000,
-    "makeup": 3000,
-    "haircare": 3000
+  "totalUsers": 150,
+  "totalOrders": 500,
+  "totalRevenue": 25000,
+  "orderStatus": {
+    "placed": 50,
+    "processing": 30,
+    "shipped": 20,
+    "delivered": 380,
+    "cancelled": 20
+  }
+}
+```
+
+#### Get Monthly Sales
+```http
+GET /admin/analytics/monthly-sales
+```
+🔒 **Admin Only**
+
+**Response:** `200 OK`
+```json
+{
+  "2026-01": 5000,
+  "2026-02": 6500,
+  "2026-03": 7200
+}
+```
+
+#### Get Sales Chart Data
+```http
+GET /admin/analytics/sales-chart?range=week
+```
+🔒 **Admin Only**
+
+**Query Parameters:**
+- `range` - Time range: `today`, `week`, `month`, `year`, `all` (default: `week`)
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "date": "2026-02-05",
+    "revenue": 1250.50,
+    "orders": 15
   },
-  "topProducts": [
+  {
+    "date": "2026-02-06",
+    "revenue": 1580.75,
+    "orders": 18
+  }
+]
+```
+
+#### Get Category Revenue
+```http
+GET /admin/analytics/category-revenue
+```
+🔒 **Admin Only**
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "name": "skincare",
+    "value": 8500.00
+  },
+  {
+    "name": "makeup",
+    "value": 6200.00
+  },
+  {
+    "name": "haircare",
+    "value": 4800.00
+  }
+]
+```
+
+#### Get Top Products
+```http
+GET /admin/analytics/top-products?limit=10
+```
+🔒 **Admin Only**
+
+**Query Parameters:**
+- `limit` - Number of products to return (default: 10)
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "name": "Hydrating Face Serum",
+    "quantity": 150,
+    "revenue": 4497.50
+  },
+  {
+    "name": "Vitamin C Cream",
+    "quantity": 120,
+    "revenue": 3598.80
+  }
+]
+```
+
+#### Get Customer Growth
+```http
+GET /admin/analytics/customer-growth?range=year
+```
+🔒 **Admin Only**
+
+**Query Parameters:**
+- `range` - Time range: `week`, `month`, `year`, `all` (default: `year`)
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "date": "2026-01",
+    "newCustomers": 25,
+    "totalCustomers": 125
+  },
+  {
+    "date": "2026-02",
+    "newCustomers": 30,
+    "totalCustomers": 155
+  }
+]
+```
+
+#### Get Order Status Distribution
+```http
+GET /admin/analytics/order-status
+```
+🔒 **Admin Only**
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "name": "Placed",
+    "value": 50
+  },
+  {
+    "name": "Processing",
+    "value": 30
+  },
+  {
+    "name": "Shipped",
+    "value": 20
+  },
+  {
+    "name": "Delivered",
+    "value": 380
+  },
+  {
+    "name": "Cancelled",
+    "value": 20
+  }
+]
+```
+
+#### Get Daily Sales
+```http
+GET /admin/analytics/daily-sales
+```
+🔒 **Admin Only**
+
+**Response:** `200 OK`
+```json
+{
+  "totalSales": 1250.50,
+  "totalOrders": 15,
+  "averageOrderValue": 83.37,
+  "growthPercentage": 12.5,
+  "comparisonDate": "2026-02-10"
+}
+```
+
+#### Get Monthly Revenue
+```http
+GET /admin/analytics/monthly-revenue
+```
+🔒 **Admin Only**
+
+**Response:** `200 OK`
+```json
+{
+  "totalRevenue": 25000.00,
+  "totalOrders": 300,
+  "averageOrderValue": 83.33,
+  "growthPercentage": 15.2,
+  "monthName": "February 2026",
+  "dailyBreakdown": [
     {
-      "name": "Product Name",
-      "totalSold": 50,
-      "revenue": 1500
+      "day": 1,
+      "revenue": 850.00,
+      "orders": 10
+    },
+    {
+      "day": 2,
+      "revenue": 920.50,
+      "orders": 12
+    }
+  ]
+}
+```
+
+#### Get Repeat Customers
+```http
+GET /admin/analytics/repeat-customers
+```
+🔒 **Admin Only**
+
+**Response:** `200 OK`
+```json
+{
+  "totalCustomers": 150,
+  "repeatCustomers": 65,
+  "repeatCustomerPercentage": 43.3,
+  "oneTimeCustomers": 85,
+  "orderFrequency": [
+    {
+      "range": "2 orders",
+      "count": 30
+    },
+    {
+      "range": "3-4 orders",
+      "count": 20
+    },
+    {
+      "range": "5-9 orders",
+      "count": 10
+    },
+    {
+      "range": "10+ orders",
+      "count": 5
+    }
+  ],
+  "topCustomers": [
+    {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "orderCount": 15,
+      "totalSpent": 2500.00
     }
   ]
 }
