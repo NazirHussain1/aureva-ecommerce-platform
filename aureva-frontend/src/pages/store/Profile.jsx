@@ -4,8 +4,25 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../features/auth/authSlice';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
-import { FiUser, FiMail, FiShield, FiCalendar, FiEdit2, FiSave, FiX } from 'react-icons/fi';
+import { 
+  FiUser, 
+  FiMail, 
+  FiShield, 
+  FiCalendar, 
+  FiEdit2, 
+  FiSave, 
+  FiX,
+  FiLock,
+  FiEye,
+  FiEyeOff,
+  FiPackage,
+  FiHeart,
+  FiMapPin
+} from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
+import { HiSparkles } from 'react-icons/hi';
+import { MdVerified } from 'react-icons/md';
+import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
 
 export default function Profile() {
@@ -14,6 +31,9 @@ export default function Profile() {
   const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -98,182 +118,306 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-              Aureva Beauty
-            </h1>
-          </Link>
-          <Link to="/" className="text-gray-600 hover:text-gray-800">
-            ← Back to Home
-          </Link>
+      <Navbar />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">My Profile</h1>
+          <p className="text-gray-600">Manage your account settings and preferences</p>
         </div>
-      </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-pink-600 to-purple-600 px-8 py-12 text-center">
-            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-4xl font-bold text-purple-600 mx-auto mb-4 shadow-lg">
-              {user.name?.charAt(0).toUpperCase()}
-            </div>
-            <h1 className="text-3xl font-bold text-white mb-2">{user.name}</h1>
-            <p className="text-purple-100">{user.email}</p>
-          </div>
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 sticky top-24">
+              <div className="text-center mb-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-4xl font-bold text-white mx-auto mb-4 shadow-xl ring-4 ring-purple-100">
+                  {user.name?.charAt(0).toUpperCase()}
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-1">{user.name}</h2>
+                <p className="text-gray-600 mb-2">{user.email}</p>
+                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${
+                  user.role === 'admin' 
+                    ? 'bg-purple-100 text-purple-700' 
+                    : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {user.role === 'admin' && <MdVerified className="w-4 h-4" />}
+                  {user.role === 'admin' ? 'Admin' : 'Customer'}
+                </span>
+              </div>
 
-          <div className="p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">Profile Information</h2>
-              {!editing && (
-                <button
-                  onClick={() => setEditing(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+              <div className="space-y-3">
+                <Link
+                  to="/orders"
+                  className="flex items-center gap-3 p-4 rounded-2xl hover:bg-purple-50 transition-all duration-300 group"
                 >
-                  <FiEdit2 />
-                  Edit Profile
-                </button>
-              )}
-            </div>
-
-            {!editing ? (
-              <div className="space-y-6">
-                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                  <FiUser className="text-2xl text-purple-600" />
-                  <div>
-                    <p className="text-sm text-gray-500">Full Name</p>
-                    <p className="text-lg font-semibold text-gray-800">{user.name}</p>
+                  <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <FiPackage className="text-purple-600" />
                   </div>
-                </div>
-
-                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                  <FiMail className="text-2xl text-purple-600" />
-                  <div>
-                    <p className="text-sm text-gray-500">Email Address</p>
-                    <p className="text-lg font-semibold text-gray-800">{user.email}</p>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900">My Orders</p>
+                    <p className="text-sm text-gray-500">Track your purchases</p>
                   </div>
-                </div>
+                </Link>
 
-                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                  <FiShield className="text-2xl text-purple-600" />
-                  <div>
-                    <p className="text-sm text-gray-500">Account Role</p>
-                    <p className="text-lg font-semibold text-gray-800 capitalize">{user.role}</p>
+                <Link
+                  to="/wishlist"
+                  className="flex items-center gap-3 p-4 rounded-2xl hover:bg-pink-50 transition-all duration-300 group"
+                >
+                  <div className="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <FiHeart className="text-pink-600" />
                   </div>
-                </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900">My Wishlist</p>
+                    <p className="text-sm text-gray-500">Saved items</p>
+                  </div>
+                </Link>
 
-                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                  <FiCalendar className="text-2xl text-purple-600" />
-                  <div>
-                    <p className="text-sm text-gray-500">Member Since</p>
-                    <p className="text-lg font-semibold text-gray-800">
-                      {new Date(user.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
+                <Link
+                  to="/addresses"
+                  className="flex items-center gap-3 p-4 rounded-2xl hover:bg-indigo-50 transition-all duration-300 group"
+                >
+                  <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <FiMapPin className="text-indigo-600" />
                   </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900">My Addresses</p>
+                    <p className="text-sm text-gray-500">Manage addresses</p>
+                  </div>
+                </Link>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                  <FiCalendar className="w-4 h-4" />
+                  <span>Member since {new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
                 </div>
               </div>
-            ) : (
-              <form onSubmit={handleUpdateProfile} className="space-y-6">
+            </div>
+          </div>
+
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+              <div className="flex justify-between items-center mb-8">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                    required
-                  />
+                  <h2 className="text-2xl font-bold text-gray-900 mb-1">Account Information</h2>
+                  <p className="text-gray-600">Update your personal details</p>
                 </div>
+                {!editing && (
+                  <button
+                    onClick={() => setEditing(true)}
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-2xl hover:from-pink-700 hover:to-purple-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 touch-target"
+                  >
+                    <FiEdit2 className="w-5 h-5" />
+                    Edit Profile
+                  </button>
+                )}
+              </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                    required
-                  />
-                </div>
-
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4">Change Password (Optional)</h3>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Current Password
-                      </label>
-                      <input
-                        type="password"
-                        value={formData.currentPassword}
-                        onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                      />
+              {!editing ? (
+                <div className="space-y-4 animate-fadeIn">
+                  <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border border-purple-100">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                        <FiUser className="text-2xl text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Full Name</p>
+                        <p className="text-lg font-bold text-gray-900">{user.name}</p>
+                      </div>
                     </div>
+                  </div>
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        New Password
-                      </label>
-                      <input
-                        type="password"
-                        value={formData.newPassword}
-                        onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                      />
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                        <FiMail className="text-2xl text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Email Address</p>
+                        <p className="text-lg font-bold text-gray-900">{user.email}</p>
+                      </div>
                     </div>
+                  </div>
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Confirm New Password
-                      </label>
-                      <input
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                      />
+                  <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-100">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                        <FiShield className="text-2xl text-green-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Account Role</p>
+                        <p className="text-lg font-bold text-gray-900 capitalize">{user.role}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl border border-orange-100">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                        <FiCalendar className="text-2xl text-orange-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Member Since</p>
+                        <p className="text-lg font-bold text-gray-900">
+                          {new Date(user.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
+              ) : (
+                <form onSubmit={handleUpdateProfile} className="space-y-6 animate-fadeIn">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Full Name
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <FiUser className="text-gray-400 text-lg" />
+                      </div>
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="input pl-12"
+                        required
+                      />
+                    </div>
+                  </div>
 
-                <div className="flex gap-4">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-3 rounded-xl hover:from-pink-700 hover:to-purple-700 transition font-semibold disabled:opacity-50"
-                  >
-                    {loading ? (
-                      <>
-                        <BiLoaderAlt className="animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <FiSave />
-                        Save Changes
-                      </>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="flex-1 flex items-center justify-center gap-2 bg-gray-200 text-gray-700 py-3 rounded-xl hover:bg-gray-300 transition font-semibold"
-                  >
-                    <FiX />
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <FiMail className="text-gray-400 text-lg" />
+                      </div>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="input pl-12"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <FiLock className="text-purple-600" />
+                      Change Password (Optional)
+                    </h3>
+                    
+                    <div className="space-y-5">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Current Password
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <FiLock className="text-gray-400 text-lg" />
+                          </div>
+                          <input
+                            type={showCurrentPassword ? 'text' : 'password'}
+                            value={formData.currentPassword}
+                            onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
+                            className="input pl-12 pr-12"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition"
+                          >
+                            {showCurrentPassword ? <FiEyeOff className="text-lg" /> : <FiEye className="text-lg" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          New Password
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <FiLock className="text-gray-400 text-lg" />
+                          </div>
+                          <input
+                            type={showNewPassword ? 'text' : 'password'}
+                            value={formData.newPassword}
+                            onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+                            className="input pl-12 pr-12"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition"
+                          >
+                            {showNewPassword ? <FiEyeOff className="text-lg" /> : <FiEye className="text-lg" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Confirm New Password
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <FiShield className="text-gray-400 text-lg" />
+                          </div>
+                          <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            value={formData.confirmPassword}
+                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                            className="input pl-12 pr-12"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition"
+                          >
+                            {showConfirmPassword ? <FiEyeOff className="text-lg" /> : <FiEye className="text-lg" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 pt-6">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-4 rounded-2xl hover:from-pink-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 touch-target"
+                    >
+                      {loading ? (
+                        <>
+                          <BiLoaderAlt className="animate-spin text-xl" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <FiSave className="w-5 h-5" />
+                          Save Changes
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      className="flex-1 flex items-center justify-center gap-2 bg-gray-200 text-gray-700 py-4 rounded-2xl hover:bg-gray-300 transition-all duration-300 font-bold active:scale-95 touch-target"
+                    >
+                      <FiX className="w-5 h-5" />
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       </div>
