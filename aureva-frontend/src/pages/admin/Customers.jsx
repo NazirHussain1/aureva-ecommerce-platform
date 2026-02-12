@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
-import { FiUsers, FiMail, FiCalendar, FiShoppingBag, FiSearch } from 'react-icons/fi';
-import { BiLoaderAlt } from 'react-icons/bi';
-import { MdAdminPanelSettings, MdPerson } from 'react-icons/md';
+import { FiSearch, FiEye, FiUserX, FiUsers, FiUserPlus, FiUserCheck, FiMail, FiShoppingBag } from 'react-icons/fi';
+import { MdPeople, MdPersonAdd, MdVerifiedUser } from 'react-icons/md';
+import SkeletonLoader from '../../components/common/SkeletonLoader';
 
-export default function Customers() {
+export default function AdminCustomers() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchCustomers();
@@ -27,161 +30,270 @@ export default function Customers() {
     }
   };
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleBlockUser = async (userId, currentStatus) => {
+    const action = currentStatus === 'active' ? 'block' : 'unblock';
+    if (window.confirm(`Are you sure you want to ${action} this user?`)) {
+      try {
+        await axios.put(`/api/admin/users/${userId}/status`, {
+          status: currentStatus === 'active' ? 'blocked' : 'active'
+        });
+        toast.success(`User ${action}ed successfully!`);
+        fetchCustomers();
+      } catch (error) {
+        console.error('Error updating user status:', error);
+        toast.error(`Failed to ${action} user`);
+      }
+    }
+  };
+
+  const filteredCustomers = customers.filter(customer => {
+    const matchesSearch = 
+      customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || 
+      (filterStatus === 'active' && customer.status === 'active') ||
+      (filterStatus === 'blocked' && customer.status === 'blocked');
+    return matchesSearch && matchesStatus;
+  });
+
+  const stats = {
+    total: customers.length,
+    newThisMonth: customers.filter(c => {
+      const createdDate = new Date(c.createdAt);
+      const now = new Date();
+      return createdDate.getMonth() === now.getMonth() && createdDate.getFullYear() === now.getFullYear();
+    }).length,
+    active: customers.filter(c => c.status === 'active').length
+  };
+
+  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+  const paginatedCustomers = filteredCustomers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="text-center">
-          <BiLoaderAlt className="inline-block animate-spin h-16 w-16 text-purple-600" />
-          <p className="text-gray-600 mt-4 text-lg">Loading customers...</p>
-        </div>
-      </div>
-    );
-  }
+  const getCustomerBadge = (customer) => {
+    const orderCount = customer.Orders?.length || 0;
+    if (orderCount >= 10) return { text: 'VIP', class: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' };
+    if (orderCount >= 5) return { text: 'Regular', class: 'bg-blue-100 text-blue-700' };
+    return { text: 'New', class: 'bg-gray-100 text-gray-700' };
+  };
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 flex items-center gap-3">
-          <FiUsers className="text-purple-600" />
-          Customers Management
-        </h1>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="mb-8 animate-fadeIn">
+        <h1 className="text-3xl font-bold text-gray-900 mb-1">Customers</h1>
+        <p className="text-gray-600">{filteredCustomers.length} total customers</p>
       </div>
 
-      <div className="mb-6 relative">
-        <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
-        <input
-          type="text"
-          placeholder="Search customers by name or email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-12 pr-6 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-        />
-      </div>
-
-      {filteredCustomers.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-          <FiUsers className="text-8xl mb-4 mx-auto text-gray-300" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">No customers found</h2>
-          <p className="text-gray-600">Customers will appear here once they register</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-slideInUp">
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 hover:shadow-lg transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+              <MdPeople className="text-2xl text-blue-600" />
+            </div>
+            <span className="text-2xl font-bold text-gray-900">{stats.total}</span>
+          </div>
+          <p className="text-sm font-semibold text-gray-600">Total Customers</p>
         </div>
-      ) : (
-        <>
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 hover:shadow-lg transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+              <MdPersonAdd className="text-2xl text-green-600" />
+            </div>
+            <span className="text-2xl font-bold text-gray-900">{stats.newThisMonth}</span>
+          </div>
+          <p className="text-sm font-semibold text-gray-600">New This Month</p>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 hover:shadow-lg transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+              <MdVerifiedUser className="text-2xl text-purple-600" />
+            </div>
+            <span className="text-2xl font-bold text-gray-900">{stats.active}</span>
+          </div>
+          <p className="text-sm font-semibold text-gray-600">Active Users</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 p-6 animate-fadeIn">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative">
+            <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
+            <input
+              type="text"
+              placeholder="Search customers..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300"
+            />
+          </div>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300 font-medium"
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="blocked">Blocked</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-fadeIn">
+        {loading ? (
+          <div className="p-6 space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <SkeletonLoader key={i} variant="card" />
+            ))}
+          </div>
+        ) : filteredCustomers.length === 0 ? (
+          <div className="text-center py-20">
+            <FiUsers className="text-6xl text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No Customers Found</h3>
+            <p className="text-gray-600">
+              {searchTerm || filterStatus !== 'all' ? 'Try adjusting your filters' : 'No customers registered yet'}
+            </p>
+          </div>
+        ) : (
+          <>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[800px]">
-                <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Customer
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Role
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Joined Date
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Total Orders
-                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Customer</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Orders</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Total Spent</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {filteredCustomers.map((customer) => (
-                    <tr key={customer.id} className="hover:bg-gray-50 transition">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                            {customer.name?.charAt(0).toUpperCase()}
+                  {paginatedCustomers.map((customer) => {
+                    const badge = getCustomerBadge(customer);
+                    const orderCount = customer.Orders?.length || 0;
+                    const totalSpent = customer.Orders?.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0) || 0;
+                    
+                    return (
+                      <tr key={customer.id} className="hover:bg-gray-50 transition-colors duration-200">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                              {getInitials(customer.name)}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">{customer.name}</p>
+                              <span className={`inline-block px-2 py-0.5 rounded-lg text-xs font-bold ${badge.class}`}>
+                                {badge.text}
+                              </span>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-semibold text-gray-900">{customer.name}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2 text-gray-700">
+                            <FiMail className="text-gray-400" />
+                            <span className="text-sm">{customer.email}</span>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <FiMail className="text-gray-400" />
-                          {customer.email}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full flex items-center gap-1 w-fit ${
-                          customer.role === 'admin' 
-                            ? 'bg-purple-100 text-purple-800' 
-                            : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {customer.role === 'admin' ? (
-                            <MdAdminPanelSettings className="w-4 h-4" />
-                          ) : (
-                            <MdPerson className="w-4 h-4" />
-                          )}
-                          {customer.role?.charAt(0).toUpperCase() + customer.role?.slice(1)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <FiCalendar className="text-gray-400" />
-                          {new Date(customer.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                          <FiShoppingBag className="text-purple-600" />
-                          {customer.Orders?.length || 0} orders
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <FiShoppingBag className="text-purple-600" />
+                            <span className="font-semibold text-gray-900">{orderCount}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="font-bold text-gray-900">${totalSpent.toFixed(2)}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                            customer.status === 'active' 
+                              ? 'bg-green-100 text-green-700' 
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            {customer.status === 'active' ? 'Active' : 'Blocked'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleBlockUser(customer.id, customer.status)}
+                              className={`px-4 py-2 rounded-lg transition-colors duration-200 font-medium text-sm flex items-center gap-1 ${
+                                customer.status === 'active'
+                                  ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+                              }`}
+                            >
+                              {customer.status === 'active' ? (
+                                <>
+                                  <FiUserX className="w-4 h-4" />
+                                  Block
+                                </>
+                              ) : (
+                                <>
+                                  <FiUserCheck className="w-4 h-4" />
+                                  Unblock
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-          </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Customer Statistics</h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
-                <FiUsers className="text-3xl text-purple-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-gray-800">{customers.length}</p>
-                <p className="text-xs text-gray-600">Total Customers</p>
-              </div>
-              <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
-                <MdPerson className="text-3xl text-blue-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-gray-800">
-                  {customers.filter(c => c.role === 'customer').length}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredCustomers.length)} of {filteredCustomers.length} customers
                 </p>
-                <p className="text-xs text-gray-600">Regular Customers</p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
+                  >
+                    Previous
+                  </button>
+                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                          currentPage === pageNum
+                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
-              <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl">
-                <MdAdminPanelSettings className="text-3xl text-purple-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-gray-800">
-                  {customers.filter(c => c.role === 'admin').length}
-                </p>
-                <p className="text-xs text-gray-600">Administrators</p>
-              </div>
-              <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
-                <FiShoppingBag className="text-3xl text-green-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-gray-800">
-                  {customers.reduce((sum, c) => sum + (c.Orders?.length || 0), 0)}
-                </p>
-                <p className="text-xs text-gray-600">Total Orders</p>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
