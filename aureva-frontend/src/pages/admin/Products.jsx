@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import axios from '../../api/axios';
-import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiPackage, FiImage } from 'react-icons/fi';
-import { BiLoaderAlt } from 'react-icons/bi';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiX, FiImage, FiPackage } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi';
-import { GiLipstick, GiPerfumeBottle, GiComb } from 'react-icons/gi';
-import { MdFace, MdChildCare } from 'react-icons/md';
-import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
+import { MdFilterList } from 'react-icons/md';
+import SkeletonLoader from '../../components/common/SkeletonLoader';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -15,7 +13,10 @@ export default function AdminProducts() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
+  const [filterStock, setFilterStock] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   
   const [formData, setFormData] = useState({
     name: '',
@@ -28,14 +29,22 @@ export default function AdminProducts() {
   });
 
   const categories = [
-    { value: 'skincare', label: 'Skincare', icon: HiSparkles, color: 'text-purple-500' },
-    { value: 'haircare', label: 'Haircare', icon: GiComb, color: 'text-pink-500' },
-    { value: 'makeup', label: 'Makeup', icon: GiLipstick, color: 'text-red-500' },
-    { value: 'fragrance', label: 'Fragrance', icon: GiPerfumeBottle, color: 'text-indigo-500' },
-    { value: 'men', label: "Men's Care", icon: IoManSharp, color: 'text-blue-600' },
-    { value: 'women', label: "Women's Care", icon: IoWomanSharp, color: 'text-pink-600' },
-    { value: 'kids', label: "Kids' Care", icon: MdChildCare, color: 'text-orange-500' },
-    { value: 'wellness', label: 'Wellness', icon: MdFace, color: 'text-green-500' }
+    { value: '', label: 'All Categories' },
+    { value: 'skincare', label: 'Skincare' },
+    { value: 'haircare', label: 'Haircare' },
+    { value: 'makeup', label: 'Makeup' },
+    { value: 'fragrance', label: 'Fragrance' },
+    { value: 'men', label: "Men's Care" },
+    { value: 'women', label: "Women's Care" },
+    { value: 'kids', label: "Kids' Care" },
+    { value: 'wellness', label: 'Wellness' }
+  ];
+
+  const stockFilters = [
+    { value: '', label: 'All Stock' },
+    { value: 'in_stock', label: 'In Stock' },
+    { value: 'low_stock', label: 'Low Stock (<10)' },
+    { value: 'out_of_stock', label: 'Out of Stock' }
   ];
 
   useEffect(() => {
@@ -68,10 +77,10 @@ export default function AdminProducts() {
       };
 
       if (editingProduct) {
-        await axios.put(`/api/products/${editingProduct.id}`, productData);
+        await axios.put(`/api/admin/products/${editingProduct.id}`, productData);
         toast.success('Product updated successfully!');
       } else {
-        await axios.post('/api/products', productData);
+        await axios.post('/api/admin/products', productData);
         toast.success('Product created successfully!');
       }
 
@@ -103,7 +112,7 @@ export default function AdminProducts() {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`/api/products/${id}`);
+        await axios.delete(`/api/admin/products/${id}`);
         toast.success('Product deleted successfully!');
         fetchProducts();
       } catch (error) {
@@ -127,308 +136,355 @@ export default function AdminProducts() {
   };
 
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.brand?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !filterCategory || product.category === filterCategory;
-    return matchesSearch && matchesCategory;
+    const matchesStock = !filterStock || 
+      (filterStock === 'in_stock' && product.stock > 10) ||
+      (filterStock === 'low_stock' && product.stock > 0 && product.stock <= 10) ||
+      (filterStock === 'out_of_stock' && product.stock === 0);
+    
+    return matchesSearch && matchesCategory && matchesStock;
   });
 
-  const stats = {
-    total: products.length,
-    lowStock: products.filter(p => p.stock > 0 && p.stock < 10).length,
-    outOfStock: products.filter(p => p.stock === 0).length,
-    inStock: products.filter(p => p.stock >= 10).length
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const getStockBadge = (stock) => {
+    if (stock === 0) return { text: 'Out of Stock', class: 'bg-red-100 text-red-700' };
+    if (stock <= 10) return { text: 'Low Stock', class: 'bg-yellow-100 text-yellow-700' };
+    return { text: 'In Stock', class: 'bg-green-100 text-green-700' };
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Products Management</h1>
-            <p className="text-gray-600">
-              {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} 
-              {searchTerm || filterCategory ? ' found' : ' total'}
-            </p>
-          </div>
-          <button
-            onClick={() => {
-              resetForm();
-              setShowModal(true);
-            }}
-            className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold shadow-md flex items-center gap-2"
-          >
-            <FiPlus className="text-xl" />
-            Add Product
-          </button>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-fadeIn">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">Products</h1>
+          <p className="text-gray-600">{filteredProducts.length} total products</p>
         </div>
+        <button
+          onClick={() => {
+            resetForm();
+            setShowModal(true);
+          }}
+          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex items-center gap-2"
+        >
+          <FiPlus className="text-xl" />
+          Add Product
+        </button>
+      </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 p-6 animate-slideInUp">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="relative">
+            <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
             <input
               type="text"
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+              className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300"
             />
           </div>
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none min-w-[200px]"
+            className="px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300 font-medium"
           >
-            <option value="">All Categories</option>
             {categories.map(cat => (
               <option key={cat.value} value={cat.value}>{cat.label}</option>
             ))}
           </select>
+          <select
+            value={filterStock}
+            onChange={(e) => setFilterStock(e.target.value)}
+            className="px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300 font-medium"
+          >
+            {stockFilters.map(filter => (
+              <option key={filter.value} value={filter.value}>{filter.label}</option>
+            ))}
+          </select>
         </div>
+      </div>
 
-        {!loading && products.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-            <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-purple-500">
-              <p className="text-sm text-gray-600 mb-1">Total Products</p>
-              <p className="text-2xl font-bold text-gray-800">{stats.total}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-500">
-              <p className="text-sm text-gray-600 mb-1">In Stock</p>
-              <p className="text-2xl font-bold text-green-600">{stats.inStock}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-orange-500">
-              <p className="text-sm text-gray-600 mb-1">Low Stock</p>
-              <p className="text-2xl font-bold text-orange-600">{stats.lowStock}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-red-500">
-              <p className="text-sm text-gray-600 mb-1">Out of Stock</p>
-              <p className="text-2xl font-bold text-red-600">{stats.outOfStock}</p>
-            </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-fadeIn">
+        {loading ? (
+          <div className="p-6 space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <SkeletonLoader key={i} variant="card" />
+            ))}
           </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="text-center py-20">
+            <FiPackage className="text-6xl text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No Products Found</h3>
+            <p className="text-gray-600 mb-6">
+              {searchTerm || filterCategory || filterStock 
+                ? 'Try adjusting your filters' 
+                : 'Get started by adding your first product'}
+            </p>
+            {!searchTerm && !filterCategory && !filterStock && (
+              <button
+                onClick={() => {
+                  resetForm();
+                  setShowModal(true);
+                }}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 font-bold shadow-lg"
+              >
+                Add Your First Product
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Product</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Price</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Category</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Stock</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {paginatedProducts.map((product) => {
+                    const stockBadge = getStockBadge(product.stock);
+                    return (
+                      <tr key={product.id} className="hover:bg-gray-50 transition-colors duration-200">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                              {product.images && product.images[0] ? (
+                                <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <HiSparkles className="text-2xl text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">{product.name}</p>
+                              <p className="text-sm text-gray-500">{product.brand || 'No brand'}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="font-bold text-gray-900">${product.price.toFixed(2)}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium capitalize">
+                            {product.category}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="font-semibold text-gray-900">{product.stock}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-lg text-sm font-medium ${stockBadge.class}`}>
+                            {stockBadge.text}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleEdit(product)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                              title="Edit"
+                            >
+                              <FiEdit2 className="w-5 h-5" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(product.id)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                              title="Delete"
+                            >
+                              <FiTrash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} products
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
+                  >
+                    Previous
+                  </button>
+                  {[...Array(totalPages)].map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                        currentPage === i + 1
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {loading ? (
-        <div className="text-center py-12">
-          <BiLoaderAlt className="inline-block animate-spin h-12 w-12 text-purple-600" />
-          <p className="text-gray-600 mt-4">Loading products...</p>
-        </div>
-      ) : filteredProducts.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-md p-12 text-center">
-          <FiPackage className="text-6xl text-gray-400 mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-gray-800 mb-2">No Products Found</h3>
-          <p className="text-gray-600 mb-6">
-            {searchTerm || filterCategory ? 'Try adjusting your filters' : 'Start by adding your first product'}
-          </p>
-          <button
-            onClick={() => {
-              resetForm();
-              setShowModal(true);
-            }}
-            className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold inline-flex items-center gap-2"
-          >
-            <FiPlus className="text-xl" />
-            Add Product
-          </button>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gradient-to-r from-pink-50 to-purple-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">Product</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">Category</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">Price</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">Stock</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredProducts.map(product => (
-                  <tr key={product.id} className="hover:bg-gray-50 transition">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
-                          {product.images && product.images[0] ? (
-                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <FiImage className="text-3xl text-gray-400" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-800">{product.name}</p>
-                          <p className="text-sm text-gray-500">{product.brand || 'No brand'}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium capitalize">
-                        {categories.find(c => c.value === product.category)?.label || product.category}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-semibold text-gray-800">${product.price}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        product.stock === 0 ? 'bg-red-100 text-red-700' :
-                        product.stock < 10 ? 'bg-orange-100 text-orange-700' :
-                        'bg-green-100 text-green-700'
-                      }`}>
-                        {product.stock} units
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(product)}
-                          className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm font-medium flex items-center gap-1"
-                        >
-                          <FiEdit2 className="text-base" />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm font-medium flex items-center gap-1"
-                        >
-                          <FiTrash2 className="text-base" />
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
       {showModal && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-          onClick={() => {
-            setShowModal(false);
-            resetForm();
-          }}
-        >
-          <div 
-            className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-6 rounded-t-2xl">
-              <h2 className="text-2xl font-bold">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn" onClick={() => { setShowModal(false); resetForm(); }}>
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-modalFadeIn" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8 rounded-t-3xl relative">
+              <button
+                onClick={() => { setShowModal(false); resetForm(); }}
+                className="absolute top-6 right-6 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+              >
+                <FiX className="text-2xl" />
+              </button>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <FiPackage className="text-2xl" />
+                </div>
+                <h2 className="text-3xl font-bold">
+                  {editingProduct ? 'Edit Product' : 'Add New Product'}
+                </h2>
+              </div>
+              <p className="text-purple-100">
+                {editingProduct ? 'Update product details' : 'Fill in the product information'}
+              </p>
             </div>
-            
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+
+            <form onSubmit={handleSubmit} className="p-8 space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name *</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="input"
                   placeholder="e.g., Hydrating Face Serum"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
                 <textarea
                   required
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  rows="3"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                  placeholder="Product description..."
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="textarea"
+                  rows="4"
+                  placeholder="Describe your product..."
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Price ($) *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Price ($) *</label>
                   <input
                     type="number"
-                    required
                     step="0.01"
+                    required
                     value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    className="input"
                     placeholder="29.99"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Stock *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Stock Quantity *</label>
                   <input
                     type="number"
                     required
                     value={formData.stock}
-                    onChange={(e) => setFormData({...formData, stock: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                    className="input"
                     placeholder="100"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
                   <select
                     required
                     value={formData.category}
-                    onChange={(e) => setFormData({...formData, category: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="input"
                   >
-                    {categories.map(cat => (
+                    {categories.filter(c => c.value).map(cat => (
                       <option key={cat.value} value={cat.value}>{cat.label}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Brand</label>
                   <input
                     type="text"
                     value={formData.brand}
-                    onChange={(e) => setFormData({...formData, brand: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                    placeholder="Brand name"
+                    onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                    className="input"
+                    placeholder="e.g., Aureva"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image URLs (comma separated)
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <FiImage className="inline mr-2" />
+                  Image URLs (comma-separated)
                 </label>
                 <textarea
                   value={formData.images}
-                  onChange={(e) => setFormData({...formData, images: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, images: e.target.value })}
+                  className="textarea"
                   rows="3"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                   placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  <FiImage className="inline mr-1" />
-                  Separate multiple image URLs with commas
-                </p>
+                <p className="text-xs text-gray-500 mt-1">Enter multiple image URLs separated by commas</p>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-4 pt-6">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold disabled:opacity-50"
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 font-bold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? 'Saving...' : editingProduct ? 'Update Product' : 'Add Product'}
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    resetForm();
-                  }}
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-semibold"
+                  onClick={() => { setShowModal(false); resetForm(); }}
+                  className="px-8 py-4 bg-gray-200 text-gray-700 rounded-2xl hover:bg-gray-300 transition-all duration-300 font-bold active:scale-95"
                 >
                   Cancel
                 </button>
