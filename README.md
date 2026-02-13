@@ -265,13 +265,43 @@ npm run build
 
 ## 🧪 Testing
 
+### Backend Testing (Jest & Supertest)
+
+The backend includes comprehensive test coverage using Jest and Supertest.
+
+```bash
+# Run all backend tests
+cd backend
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run specific test file
+npm test auth.test.js
+```
+
+#### Test Coverage
+- **Authentication Tests** - 14 test cases
+- **Product Tests** - 22 test cases
+- **Cart Tests** - 17 test cases
+- **Order Tests** - 17 test cases
+- **Total**: 70+ comprehensive test cases
+
+#### Documentation
+- 📖 **Main Guide**: `backend/TESTING_GUIDE.md`
+- 📋 **Quick Start**: `backend/__tests__/QUICK_START.md`
+- 📊 **Summary**: `backend/TEST_SUMMARY.md`
+- ✅ **Checklist**: `backend/TESTING_CHECKLIST.md`
+
+### Frontend Testing
+
 ```bash
 # Run frontend tests
 cd aureva-frontend
-npm test
-
-# Run backend tests
-cd backend
 npm test
 ```
 
