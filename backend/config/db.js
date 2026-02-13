@@ -7,10 +7,10 @@ if (process.env.NODE_ENV === 'test') {
   sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: ':memory:',
-    logging: false, // Disable SQL logging in tests
+    logging: false,
   });
 } else {
-  // Use MySQL for development and production
+  // Use MySQL for local development
   sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USER,

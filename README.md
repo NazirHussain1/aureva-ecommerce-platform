@@ -346,6 +346,34 @@ This project is licensed under the MIT License.
 
 For support, email support@aureva.com or open an issue in the repository.
 
+## 🚀 Deployment
+
+### Deploy to Railway
+
+This application is ready to deploy to Railway in ~10 minutes!
+
+**Quick Start**: See [QUICK_RAILWAY_SETUP.md](QUICK_RAILWAY_SETUP.md)
+
+**Complete Guide**: See [RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md)
+
+**Checklist**: See [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)
+
+#### What You'll Need
+- Railway account ([railway.app](https://railway.app))
+- Cloudinary account for images
+- Gmail app password for emails
+
+#### Deployment Steps
+1. Create Railway project
+2. Add MySQL database
+3. Deploy backend (5 min)
+4. Deploy frontend (3 min)
+5. Test application ✅
+
+See deployment guides for detailed instructions.
+
+---
+
 ## 🔮 Future Enhancements
 
 - [ ] Payment gateway integration (Stripe/PayPal)
