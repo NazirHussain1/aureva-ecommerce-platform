@@ -64,20 +64,37 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4 mb-6 animate-slideInDown">
+            <div className="bg-red-50 border-l-4 border-red-500 rounded-xl p-4 mb-6 animate-shake">
               <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white text-sm font-bold">!</span>
+                <div className="flex-shrink-0">
+                  <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
                 </div>
                 <div className="flex-1">
-                  <p className="text-red-800 font-medium mb-2">{error}</p>
-                  <Link 
-                    to="/forgot-password" 
-                    className="text-sm text-purple-600 hover:text-purple-700 font-semibold underline inline-flex items-center gap-1"
-                  >
-                    Reset your password
-                    <FiArrowRight className="w-4 h-4" />
-                  </Link>
+                  <h3 className="text-sm font-bold text-red-800 mb-1">Login Failed</h3>
+                  <p className="text-sm text-red-700 mb-3">{error}</p>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Link 
+                      to="/forgot-password" 
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                      </svg>
+                      Reset Password
+                    </Link>
+                    <span className="hidden sm:inline text-gray-400">•</span>
+                    <Link 
+                      to="/register" 
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                      </svg>
+                      Create New Account
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
