@@ -136,25 +136,25 @@ export default function Navbar() {
           ? 'bg-white/98 backdrop-blur-xl shadow-xl' 
           : 'bg-white/95 backdrop-blur-md shadow-md'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+          <div className="flex items-center justify-between h-16 sm:h-20">
             
-            <div className="flex items-center gap-10">
-              <Link to="/" className="flex items-center gap-2.5 group">
-                <div className="w-11 h-11 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
-                  <HiSparkles className="text-white text-xl" />
+            <div className="flex items-center gap-4 lg:gap-10">
+              <Link to="/" className="flex items-center gap-2 sm:gap-2.5 group flex-shrink-0">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
+                  <HiSparkles className="text-white text-lg sm:text-xl" />
                 </div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                   Aureva
                 </h1>
               </Link>
 
-              <div className="hidden lg:flex items-center gap-1">
+              <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
                 {navLinks.map((link) => (
                   <Link
                     key={link.path}
                     to={link.path}
-                    className={`relative px-5 py-2.5 text-sm font-semibold transition-all duration-300 rounded-xl group ${
+                    className={`relative px-3 xl:px-5 py-2.5 text-sm font-semibold transition-all duration-300 rounded-xl group whitespace-nowrap ${
                       isActive(link.path)
                         ? 'text-purple-600 bg-purple-50'
                         : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
@@ -171,7 +171,7 @@ export default function Navbar() {
                   <button
                     onClick={() => setShowCategoriesDropdown(!showCategoriesDropdown)}
                     onMouseEnter={() => setShowCategoriesDropdown(true)}
-                    className={`flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold transition-all duration-300 rounded-xl ${
+                    className={`flex items-center gap-1.5 px-3 xl:px-5 py-2.5 text-sm font-semibold transition-all duration-300 rounded-xl whitespace-nowrap ${
                       showCategoriesDropdown
                         ? 'text-purple-600 bg-purple-50'
                         : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
@@ -216,20 +216,20 @@ export default function Navbar() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
               <div ref={searchRef} className="hidden md:block relative">
                 <form onSubmit={handleSearchSubmit} className="relative">
                   <div className={`flex items-center transition-all duration-300 ${
-                    searchFocused ? 'w-80' : 'w-64'
+                    searchFocused ? 'w-56 lg:w-80' : 'w-44 lg:w-64'
                   }`}>
-                    <FiSearch className="absolute left-4 w-5 h-5 text-gray-400 pointer-events-none" />
+                    <FiSearch className="absolute left-3 lg:left-4 w-4 h-4 lg:w-5 lg:h-5 text-gray-400 pointer-events-none" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onFocus={() => setSearchFocused(true)}
-                      placeholder="Search products..."
-                      className={`w-full pl-12 pr-4 py-2.5 bg-gray-50 border-2 rounded-full text-sm font-medium text-gray-700 placeholder:text-gray-400 outline-none transition-all duration-300 ${
+                      placeholder="Search..."
+                      className={`w-full pl-9 lg:pl-12 pr-3 lg:pr-4 py-2 lg:py-2.5 bg-gray-50 border-2 rounded-full text-xs lg:text-sm font-medium text-gray-700 placeholder:text-gray-400 outline-none transition-all duration-300 ${
                         searchFocused 
                           ? 'border-purple-300 bg-white shadow-lg' 
                           : 'border-transparent hover:bg-gray-100'
@@ -307,12 +307,12 @@ export default function Navbar() {
 
                   <Link 
                     to="/wishlist" 
-                    className="relative p-3 hover:bg-purple-50 rounded-full transition-all duration-300 hover:scale-110 group"
+                    className="relative p-2 lg:p-3 hover:bg-purple-50 rounded-full transition-all duration-300 hover:scale-110 group"
                     title="Wishlist"
                   >
-                    <FiHeart className="w-5 h-5 text-gray-700 group-hover:text-purple-600 transition-colors" />
+                    <FiHeart className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700 group-hover:text-purple-600 transition-colors" />
                     {wishlistItems?.length > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg animate-pulse">
+                      <span className="absolute -top-0.5 -right-0.5 lg:-top-1 lg:-right-1 bg-gradient-to-r from-pink-500 to-red-500 text-white text-[10px] lg:text-xs font-bold rounded-full w-4 h-4 lg:w-5 lg:h-5 flex items-center justify-center shadow-lg animate-pulse">
                         {wishlistItems.length}
                       </span>
                     )}
@@ -322,12 +322,12 @@ export default function Navbar() {
 
               <Link 
                 to="/cart" 
-                className="relative p-3 hover:bg-purple-50 rounded-full transition-all duration-300 hover:scale-110 group"
+                className="relative p-2 lg:p-3 hover:bg-purple-50 rounded-full transition-all duration-300 hover:scale-110 group"
                 title="Shopping cart"
               >
-                <FiShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-purple-600 transition-colors" />
+                <FiShoppingCart className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700 group-hover:text-purple-600 transition-colors" />
                 {items?.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg animate-pulse">
+                  <span className="absolute -top-0.5 -right-0.5 lg:-top-1 lg:-right-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white text-[10px] lg:text-xs font-bold rounded-full w-4 h-4 lg:w-5 lg:h-5 flex items-center justify-center shadow-lg animate-pulse">
                     {items.length}
                   </span>
                 )}
@@ -337,12 +337,12 @@ export default function Navbar() {
                 <div className="relative hidden lg:block">
                   <button
                     onClick={() => setShowUserDropdown(!showUserDropdown)}
-                    className="flex items-center gap-2.5 hover:bg-purple-50 px-3 py-2 rounded-full transition-all duration-300 group"
+                    className="flex items-center gap-1.5 lg:gap-2.5 hover:bg-purple-50 px-2 lg:px-3 py-1.5 lg:py-2 rounded-full transition-all duration-300 group"
                   >
-                    <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xs lg:text-sm shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                       {user.name?.charAt(0).toUpperCase()}
                     </div>
-                    <FiChevronDown className={`w-4 h-4 text-gray-600 transition-transform duration-300 ${
+                    <FiChevronDown className={`w-3 h-3 lg:w-4 lg:h-4 text-gray-600 transition-transform duration-300 ${
                       showUserDropdown ? 'rotate-180' : ''
                     }`} />
                   </button>
@@ -429,16 +429,16 @@ export default function Navbar() {
                   )}
                 </div>
               ) : (
-                <div className="hidden lg:flex items-center gap-3">
+                <div className="hidden lg:flex items-center gap-2">
                   <Link 
                     to="/login" 
-                    className="px-5 py-2.5 text-sm font-semibold text-gray-700 hover:text-purple-600 transition-all duration-300 rounded-xl hover:bg-gray-50"
+                    className="px-3 xl:px-5 py-2 xl:py-2.5 text-xs xl:text-sm font-semibold text-gray-700 hover:text-purple-600 transition-all duration-300 rounded-xl hover:bg-gray-50 whitespace-nowrap"
                   >
                     Login
                   </Link>
                   <Link 
                     to="/register" 
-                    className="px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-pink-600 to-purple-600 rounded-full hover:from-pink-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                    className="px-4 xl:px-6 py-2 xl:py-2.5 text-xs xl:text-sm font-bold text-white bg-gradient-to-r from-pink-600 to-purple-600 rounded-full hover:from-pink-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 whitespace-nowrap"
                   >
                     Sign Up
                   </Link>
@@ -447,12 +447,12 @@ export default function Navbar() {
 
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="lg:hidden p-3 hover:bg-purple-50 rounded-full transition-all duration-300"
+                className="lg:hidden p-2 hover:bg-purple-50 rounded-full transition-all duration-300"
               >
                 {showMobileMenu ? (
-                  <FiX className="w-6 h-6 text-gray-700" />
+                  <FiX className="w-5 h-5 text-gray-700" />
                 ) : (
-                  <FiMenu className="w-6 h-6 text-gray-700" />
+                  <FiMenu className="w-5 h-5 text-gray-700" />
                 )}
               </button>
             </div>
