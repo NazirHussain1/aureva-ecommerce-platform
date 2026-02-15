@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
@@ -34,14 +34,27 @@ import PrivacyPolicy from './pages/info/PrivacyPolicy';
 import Careers from './pages/info/Careers';
 
 function ProtectedRoute({ children, adminOnly = false }) {
-  const { user } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const location = useLocation();
   
-  if (!user) {
-    return <Navigate to="/login" />;
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
   if (adminOnly && user.role !== 'admin') {
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
+  }
+  
+  return children;
+}
+
+function PublicRoute({ children }) {
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const location = useLocation();
+  
+  if (isAuthenticated && user) {
+    const from = location.state?.from?.pathname || '/';
+    return <Navigate to={from} replace />;
   }
   
   return children;
@@ -55,15 +68,60 @@ function AppRoutes() {
         <Route path="/products" element={<Products />} />
         <Route path="/products/:slug" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/addresses" element={<Addresses />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        
+        <Route path="/checkout" element={
+          <ProtectedRoute>
+            <Checkout />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/orders" element={
+          <ProtectedRoute>
+            <Orders />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/addresses" element={
+          <ProtectedRoute>
+            <Addresses />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/wishlist" element={
+          <ProtectedRoute>
+            <Wishlist />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/login" element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        } />
+        
+        <Route path="/register" element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        } />
+        
+        <Route path="/forgot-password" element={
+          <PublicRoute>
+            <ForgotPassword />
+          </PublicRoute>
+        } />
+        
+        <Route path="/reset-password/:token" element={
+          <PublicRoute>
+            <ResetPassword />
+          </PublicRoute>
+        } />
         
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
