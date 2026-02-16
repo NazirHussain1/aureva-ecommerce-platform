@@ -1,6 +1,21 @@
 const { Op } = require("sequelize");
 const Product = require("../models/Product");
 const NotificationService = require("../services/notificationService");
+const { PrismaClient } = require("@prisma/client");
+const { PrismaPg } = require("@prisma/adapter-pg");
+const { Pool } = require("pg");
+
+const prismaConnectionString = process.env.DATABASE_URL;
+const prismaPool = prismaConnectionString
+  ? new Pool({
+      connectionString: prismaConnectionString,
+      ssl: prismaConnectionString.includes("supabase.co")
+        ? { rejectUnauthorized: false }
+        : undefined,
+      allowExitOnIdle: true,
+    })
+  : null;
+const prisma = prismaPool ? new PrismaClient({ adapter: new PrismaPg(prismaPool) }) : null;
 
 const getProducts = async (req, res) => {
   try {
@@ -120,11 +135,35 @@ const getProductById = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const product = await Product.create(req.body);
-    res.status(201).json(product);
+    if (!prisma) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Prisma database is not configured" });
+    }
+
+    const { name, description, price, stock, category, brand } = req.body;
+
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = req.file.path;
+    }
+
+    const product = await prisma.product.create({
+      data: {
+        name,
+        description,
+        price: parseFloat(price),
+        stock: parseInt(stock, 10),
+        category,
+        brand,
+        image: imageUrl,
+      },
+    });
+
+    res.status(201).json({ success: true, product });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 

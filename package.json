@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
+    "seed": "node prisma/seed.mjs",
     "test": "cross-env NODE_ENV=test jest --detectOpenHandles --forceExit",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "test:coverage": "cross-env NODE_ENV=test jest --coverage"
@@ -23,7 +24,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^7.4.0",
+    "@prisma/adapter-pg": "^7.4.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^1.41.3",
     "cors": "^2.8.6",
@@ -38,18 +39,19 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^8.0.0",
-    "pg": "^8.18.0",
-    "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.7",
     "socket.io": "^4.8.3",
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
+    "@prisma/client": "^7.4.0",
     "@types/jest": "^30.0.0",
     "@types/supertest": "^6.0.3",
     "cross-env": "^10.1.0",
     "jest": "^30.2.0",
     "nodemon": "^3.1.11",
+    "pg": "^8.18.0",
+    "pg-hstore": "^2.3.4",
     "prisma": "^7.4.0",
     "sqlite3": "^5.1.7",
     "supertest": "^7.2.2"
