@@ -164,13 +164,16 @@ aureva/
 
 ## 🔐 Default Admin Account
 
-After running the application, you can create an admin account by:
-1. Registering a new user
-2. Manually updating the user's role to 'admin' in the database
+Public registration always creates `customer` users.
 
-```sql
-UPDATE Users SET role = 'admin' WHERE email = 'your_email@example.com';
+Create a dedicated admin user with:
+
+```bash
+cd backend
+npm run create-admin -- --email admin@example.com --password "StrongPass123!" --name "Store Admin"
 ```
+
+If the email already exists, the script will not overwrite that account.
 
 ## 📱 API Endpoints
 
@@ -178,7 +181,7 @@ UPDATE Users SET role = 'admin' WHERE email = 'your_email@example.com';
 - `POST /api/users/register` - Register new user
 - `POST /api/users/login` - User login
 - `POST /api/users/forgot-password` - Request password reset
-- `POST /api/users/reset-password/:token` - Reset password
+- `POST /api/users/reset-password` - Reset password
 
 ### Products
 - `GET /api/products` - Get all products
@@ -313,9 +316,13 @@ npm test
 - `DB_USER` - MySQL username
 - `DB_PASSWORD` - MySQL password
 - `DB_NAME` - Database name
+- `DB_SYNC_ALTER` (optional) - Set `true` only for controlled local schema auto-alter
 - `JWT_SECRET` - JWT secret key
 - `EMAIL_*` - Email service configuration
 - `CLOUDINARY_*` - Image hosting configuration
+- `ADMIN_EMAIL` (optional) - Default admin email for bootstrap script
+- `ADMIN_PASSWORD` (optional) - Default admin password for bootstrap script
+- `ADMIN_NAME` (optional) - Default admin display name for bootstrap script
 
 ### Frontend (.env)
 - `VITE_API_URL` - Backend API URL

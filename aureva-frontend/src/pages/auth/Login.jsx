@@ -31,8 +31,12 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await dispatch(login(formData)).unwrap();
-      navigate('/');
+      const result = await dispatch(login(formData)).unwrap();
+      if (result?.user?.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       console.error('Login error:', err);
     }

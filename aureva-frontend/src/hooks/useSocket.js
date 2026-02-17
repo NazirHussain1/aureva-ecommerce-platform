@@ -14,11 +14,11 @@ export default function useAuth() {
 
   const handleLogout = useCallback(() => {
     dispatch(logout());
-    navigate('/auth/login', { replace: true });
+    navigate('/login', { replace: true });
   }, [dispatch, navigate]);
 
   const requireAuth = useCallback(
-    (redirectPath = '/auth/login') => {
+    (redirectPath = '/login') => {
       if (!isAuthenticated) navigate(redirectPath, { replace: true });
     },
     [isAuthenticated, navigate]

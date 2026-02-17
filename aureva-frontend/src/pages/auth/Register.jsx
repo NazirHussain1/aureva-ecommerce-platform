@@ -16,8 +16,7 @@ export default function Register() {
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    role: 'customer'
+    confirmPassword: ''
   });
   const [localError, setLocalError] = useState('');
   const [showPassword, setShowPassword] = useState(false);

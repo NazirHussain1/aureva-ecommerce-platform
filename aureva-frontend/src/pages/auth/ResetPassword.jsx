@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from '../../api/axios';
+import authApi from '../../api/authApi';
 import toast from 'react-hot-toast';
 import { FiLock, FiEye, FiEyeOff, FiShield } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
@@ -42,9 +42,7 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      await axios.post(`/api/users/reset-password/${token}`, {
-        password: formData.password
-      });
+      await authApi.resetPassword(token, formData.password);
       setSuccess(true);
       toast.success('Password reset successful!');
       setTimeout(() => {

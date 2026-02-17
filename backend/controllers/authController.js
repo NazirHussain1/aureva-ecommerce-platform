@@ -13,23 +13,27 @@ const generateToken = (user) => {
 };
 
 const signup = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
 
   try {
+    if (req.body.role === "admin") {
+      return res.status(403).json({
+        message: "Admin accounts cannot be created from public registration",
+      });
+    }
+
     const userExists = await User.findOne({ where: { email } });
     if (userExists) {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    const userRole = role === 'admin' ? 'admin' : 'customer';
-
-    const user = await User.create({ 
-      name, 
-      email, 
+    const user = await User.create({
+      name,
+      email,
       password,
-      role: userRole 
+      role: "customer",
     });
-    
+
     const token = generateToken(user);
 
     await sendWelcomeEmail(user);

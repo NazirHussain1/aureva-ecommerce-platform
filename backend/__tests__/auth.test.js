@@ -43,6 +43,22 @@ describe('Auth Controller Tests', () => {
       expect(response.body.user).not.toHaveProperty('password');
     });
 
+    it('should block admin role from public registration', async () => {
+      const userData = {
+        name: 'Admin Attempt',
+        email: `admin-attempt-${Date.now()}@example.com`,
+        password: 'Password123!',
+        role: 'admin'
+      };
+
+      const response = await request(app)
+        .post('/api/users/register')
+        .send(userData)
+        .expect(403);
+
+      expect(response.body.message).toBe('Admin accounts cannot be created from public registration');
+    });
+
     it('should return 400 if email already exists', async () => {
       const email = `existing${Date.now()}@example.com`;
       const userData = {
@@ -86,13 +102,12 @@ describe('Auth Controller Tests', () => {
     
     it('should successfully login with valid credentials', async () => {
       const password = 'Password123!';
-      const hashedPassword = await bcrypt.hash(password, 10);
       const email = `login${Date.now()}@example.com`;
       
       const user = await User.create({
         name: 'Login Test',
         email: email,
-        password: hashedPassword,
+        password: password,
         role: 'customer'
       });
 
@@ -127,13 +142,12 @@ describe('Auth Controller Tests', () => {
 
     it('should return 401 with invalid password', async () => {
       const password = 'Password123!';
-      const hashedPassword = await bcrypt.hash(password, 10);
       const email = `wrongpass${Date.now()}@example.com`;
       
       await User.create({
         name: 'Wrong Password Test',
         email: email,
-        password: hashedPassword,
+        password: password,
         role: 'customer'
       });
 

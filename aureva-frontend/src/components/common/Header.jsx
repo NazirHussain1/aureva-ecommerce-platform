@@ -83,8 +83,8 @@ export default function Header() {
               </div>
             ) : (
               <div className="hidden sm:flex items-center gap-2 text-sm">
-                <Link to="/auth/login" className="px-3 py-2 text-pink-600 hover:text-pink-700 transition font-medium">Login</Link>
-                <Link to="/auth/register" className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-medium shadow-sm">
+                <Link to="/login" className="px-3 py-2 text-pink-600 hover:text-pink-700 transition font-medium">Login</Link>
+                <Link to="/register" className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-medium shadow-sm">
                   Sign Up
                 </Link>
               </div>

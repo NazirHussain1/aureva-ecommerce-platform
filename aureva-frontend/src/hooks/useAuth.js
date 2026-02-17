@@ -13,7 +13,7 @@ export default function useAuth() {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/auth/login', { replace: true });
+    navigate('/login', { replace: true });
   };
 
   return {
