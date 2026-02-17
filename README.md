@@ -72,6 +72,7 @@ cd aureva
 ```bash
 cd backend
 npm install
+npm run migrate:product-categories
 ```
 
 Create a `.env` file in the backend directory:

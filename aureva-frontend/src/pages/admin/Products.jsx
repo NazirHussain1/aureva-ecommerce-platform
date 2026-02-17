@@ -55,7 +55,8 @@ export default function AdminProducts() {
     try {
       setLoading(true);
       const response = await axios.get('/api/products');
-      setProducts(response.data.data || []);
+      const apiProducts = response.data.products || response.data.data || [];
+      setProducts(Array.isArray(apiProducts) ? apiProducts : []);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to fetch products');
