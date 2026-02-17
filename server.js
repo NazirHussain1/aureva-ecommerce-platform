@@ -46,9 +46,11 @@ app.use("/api/admin/settings", require("./routes/adminSettingsRoutes"));
 app.use("/api/settings", require("./routes/settingsRoutes"));
 
 const PORT = process.env.PORT || 5000;
+const shouldAlterSchema = process.env.DB_SYNC_ALTER === "true";
+const syncOptions = shouldAlterSchema ? { alter: true } : {};
 
 sequelize
-  .sync({ alter: true })
+  .sync(syncOptions)
   .then(() => {
     console.log("Database synced");
     app.listen(PORT, () => {
