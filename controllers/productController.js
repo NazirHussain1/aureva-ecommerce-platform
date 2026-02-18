@@ -122,12 +122,34 @@ const getProducts = async (req, res) => {
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
+    const normalizedParam = decodeURIComponent(String(id || "")).trim();
     let product;
-    
-    if (isNaN(id)) {
-      product = await Product.findOne({ where: { slug: id } });
+
+    if (!normalizedParam) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (!Number.isNaN(Number(normalizedParam))) {
+      product = await Product.findByPk(Number(normalizedParam));
     } else {
-      product = await Product.findByPk(id);
+      // Legacy URLs like "my-product-12"
+      const legacyIdMatch = normalizedParam.match(/-(\d+)$/);
+      if (legacyIdMatch) {
+        product = await Product.findByPk(Number(legacyIdMatch[1]));
+      }
+
+      if (!product) {
+        product = await Product.findOne({ where: { slug: normalizedParam } });
+      }
+
+      if (!product) {
+        product = await Product.findOne({
+          where: require("sequelize").where(
+            require("sequelize").fn("lower", require("sequelize").col("name")),
+            normalizedParam.toLowerCase()
+          ),
+        });
+      }
     }
     
     if (!product) return res.status(404).json({ message: "Product not found" });
