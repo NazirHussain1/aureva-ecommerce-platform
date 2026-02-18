@@ -228,6 +228,29 @@ export default function Orders() {
         </div>
       </div>
 
+      {selectedOrder && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Order #{selectedOrder.id}</h2>
+              <button
+                type="button"
+                onClick={() => setSelectedOrder(null)}
+                className="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700"
+              >
+                Close
+              </button>
+            </div>
+            <div className="space-y-2 text-sm text-gray-700">
+              <p><span className="font-semibold">Status:</span> {selectedOrder.orderStatus}</p>
+              <p><span className="font-semibold">Payment:</span> {selectedOrder.paymentMethod?.replace('_', ' ')}</p>
+              <p><span className="font-semibold">Total:</span> ${Number(selectedOrder.totalAmount).toFixed(2)}</p>
+              <p><span className="font-semibold">Placed:</span> {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );

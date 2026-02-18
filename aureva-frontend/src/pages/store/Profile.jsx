@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../../features/auth/authSlice';
+import { useSelector } from 'react-redux';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
 import { 
@@ -27,7 +26,6 @@ import Footer from '../../components/common/Footer';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);

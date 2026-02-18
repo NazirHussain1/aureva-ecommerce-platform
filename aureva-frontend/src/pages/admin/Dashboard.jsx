@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from '../../api/axios';
@@ -24,24 +24,16 @@ export default function Dashboard() {
   });
   const [salesData, setSalesData] = useState([]);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  useEffect(() => {
-    fetchChartData();
-  }, [timeRange]);
-
-  const fetchChartData = async () => {
+  const fetchChartData = useCallback(async () => {
     try {
       const salesRes = await axios.get(`/api/admin/analytics/sales-chart?range=${timeRange}`);
       setSalesData(salesRes.data || []);
     } catch (error) {
       console.error('Error fetching chart data:', error);
     }
-  };
+  }, [timeRange]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       const [ordersRes, customersRes] = await Promise.all([
@@ -71,7 +63,15 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  useEffect(() => {
+    fetchChartData();
+  }, [fetchChartData]);
 
   const statCards = [
     {

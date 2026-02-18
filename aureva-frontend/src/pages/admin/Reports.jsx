@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from '../../api/axios';
 import { FiDollarSign, FiShoppingBag, FiTrendingUp, FiUsers, FiDownload } from 'react-icons/fi';
 import { MdAttachMoney, MdShoppingCart, MdPeople, MdTrendingUp } from 'react-icons/md';
@@ -18,11 +18,7 @@ export default function Reports() {
   const [categoryData, setCategoryData] = useState([]);
   const [orderStatusData, setOrderStatusData] = useState([]);
 
-  useEffect(() => {
-    fetchReportsData();
-  }, [timeRange]);
-
-  const fetchReportsData = async () => {
+  const fetchReportsData = useCallback(async () => {
     try {
       setLoading(true);
       const [ordersRes, customersRes, salesRes] = await Promise.all([
@@ -75,7 +71,11 @@ export default function Reports() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeRange]);
+
+  useEffect(() => {
+    fetchReportsData();
+  }, [fetchReportsData]);
 
   const statCards = [
     {

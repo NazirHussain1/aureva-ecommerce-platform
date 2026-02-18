@@ -151,7 +151,7 @@ export default function Checkout() {
         totalAmount: total
       };
 
-      const response = await axios.post('/api/orders', orderData);
+      await axios.post('/api/orders', orderData);
       
       toast.success('Order placed successfully!');
       dispatch(clearCart());

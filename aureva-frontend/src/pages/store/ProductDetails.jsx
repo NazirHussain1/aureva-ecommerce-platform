@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../features/cart/cartSlice';
@@ -43,12 +43,7 @@ export default function ProductDetails() {
 
   const isInWishlist = product && wishlistItems.some(item => item.id === product.id);
 
-  useEffect(() => {
-    fetchProductBySlug();
-    fetchReviews();
-  }, [slug]);
-
-  const fetchProductBySlug = async () => {
+  const fetchProductBySlug = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await axios.get(`/api/products/slug/${slug}`);
@@ -60,9 +55,9 @@ export default function ProductDetails() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [navigate, slug]);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       setLoadingReviews(true);
       const response = await axios.get(`/api/products/slug/${slug}/reviews`);
@@ -72,7 +67,12 @@ export default function ProductDetails() {
     } finally {
       setLoadingReviews(false);
     }
-  };
+  }, [slug]);
+
+  useEffect(() => {
+    fetchProductBySlug();
+    fetchReviews();
+  }, [fetchProductBySlug, fetchReviews]);
 
   useEffect(() => {
     if (product) {
