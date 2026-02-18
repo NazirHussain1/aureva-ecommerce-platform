@@ -16,6 +16,11 @@ const prismaPool = prismaConnectionString
     })
   : null;
 const prisma = prismaPool ? new PrismaClient({ adapter: new PrismaPg(prismaPool) }) : null;
+const dialect = Product.sequelize?.getDialect?.() || "postgres";
+const textLikeOp = dialect === "postgres" ? Op.iLike : Op.like;
+const textLikeKeyword = dialect === "postgres" ? "ILIKE" : "LIKE";
+
+const escapeSqlString = (value = "") => String(value).replace(/'/g, "''");
 
 const getProducts = async (req, res) => {
   try {
@@ -38,12 +43,12 @@ const getProducts = async (req, res) => {
 
     // Category filter
     if (category) {
-      filter.category = { [Op.iLike]: `%${category}%` };
+      filter.category = { [textLikeOp]: `%${category}%` };
     }
 
     // Brand filter
     if (brand) {
-      filter.brand = { [Op.iLike]: `%${brand}%` };
+      filter.brand = { [textLikeOp]: `%${brand}%` };
     }
 
     // Price range filter
@@ -56,10 +61,10 @@ const getProducts = async (req, res) => {
     // Search functionality
     if (search) {
       filter[Op.or] = [
-        { name: { [Op.iLike]: `%${search}%` } },
-        { description: { [Op.iLike]: `%${search}%` } },
-        { category: { [Op.iLike]: `%${search}%` } },
-        { brand: { [Op.iLike]: `%${search}%` } }
+        { name: { [textLikeOp]: `%${search}%` } },
+        { description: { [textLikeOp]: `%${search}%` } },
+        { category: { [textLikeOp]: `%${search}%` } },
+        { brand: { [textLikeOp]: `%${search}%` } }
       ];
     }
 
@@ -278,12 +283,12 @@ const searchProducts = async (req, res) => {
 
     // Category filter
     if (category) {
-      filter.category = { [Op.iLike]: `%${category}%` };
+      filter.category = { [textLikeOp]: `%${category}%` };
     }
 
     // Brand filter
     if (brand) {
-      filter.brand = { [Op.iLike]: `%${brand}%` };
+      filter.brand = { [textLikeOp]: `%${brand}%` };
     }
 
     // Price range filter
@@ -295,10 +300,10 @@ const searchProducts = async (req, res) => {
 
     // Search across multiple fields
     filter[Op.or] = [
-      { name: { [Op.iLike]: `%${searchQuery}%` } },
-      { description: { [Op.iLike]: `%${searchQuery}%` } },
-      { category: { [Op.iLike]: `%${searchQuery}%` } },
-      { brand: { [Op.iLike]: `%${searchQuery}%` } }
+      { name: { [textLikeOp]: `%${searchQuery}%` } },
+      { description: { [textLikeOp]: `%${searchQuery}%` } },
+      { category: { [textLikeOp]: `%${searchQuery}%` } },
+      { brand: { [textLikeOp]: `%${searchQuery}%` } }
     ];
 
     // Pagination
@@ -309,7 +314,12 @@ const searchProducts = async (req, res) => {
       where: filter,
       order: [
         // Prioritize exact matches in name
-        [require('sequelize').literal(`CASE WHEN name ILIKE '%${searchQuery}%' THEN 1 ELSE 2 END`), 'ASC'],
+        [
+          require("sequelize").literal(
+            `CASE WHEN name ${textLikeKeyword} '%${escapeSqlString(searchQuery)}%' THEN 1 ELSE 2 END`
+          ),
+          "ASC",
+        ],
         ['createdAt', 'DESC']
       ],
       limit: parsedLimit,
@@ -350,13 +360,18 @@ const getProductSuggestions = async (req, res) => {
       where: {
         stock: { [Op.gt]: 0 },
         [Op.or]: [
-          { name: { [Op.iLike]: `%${searchQuery}%` } },
-          { category: { [Op.iLike]: `%${searchQuery}%` } },
-          { brand: { [Op.iLike]: `%${searchQuery}%` } }
+          { name: { [textLikeOp]: `%${searchQuery}%` } },
+          { category: { [textLikeOp]: `%${searchQuery}%` } },
+          { brand: { [textLikeOp]: `%${searchQuery}%` } }
         ]
       },
       order: [
-        [require('sequelize').literal(`CASE WHEN name ILIKE '${searchQuery}%' THEN 1 ELSE 2 END`), 'ASC'],
+        [
+          require("sequelize").literal(
+            `CASE WHEN name ${textLikeKeyword} '${escapeSqlString(searchQuery)}%' THEN 1 ELSE 2 END`
+          ),
+          "ASC",
+        ],
         ['name', 'ASC']
       ],
       limit: parseInt(limit)
