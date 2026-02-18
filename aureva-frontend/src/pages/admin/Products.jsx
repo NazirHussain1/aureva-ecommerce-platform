@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import axios from '../../api/axios';
-import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiX, FiImage, FiPackage } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiX, FiImage, FiPackage, FiUpload } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi';
-import { MdFilterList } from 'react-icons/md';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 
 export default function AdminProducts() {
@@ -16,6 +15,8 @@ export default function AdminProducts() {
   const [filterStock, setFilterStock] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedImagePreviews, setSelectedImagePreviews] = useState([]);
   const itemsPerPage = 10;
   
   const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ export default function AdminProducts() {
     category: 'skincare',
     stock: '',
     brand: '',
-    images: ''
+    images: []
   });
 
   const categories = [
@@ -51,6 +52,69 @@ export default function AdminProducts() {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      selectedImagePreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [selectedImagePreviews]);
+
+  const clearSelectedImages = () => {
+    selectedImagePreviews.forEach((url) => URL.revokeObjectURL(url));
+    setSelectedImages([]);
+    setSelectedImagePreviews([]);
+  };
+
+  const handleImageSelect = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    const validFiles = files.filter((file) => allowedTypes.includes(file.type));
+
+    if (validFiles.length !== files.length) {
+      toast.error('Only JPG and PNG images are allowed');
+    }
+
+    if (!validFiles.length) {
+      event.target.value = '';
+      return;
+    }
+
+    const remainingSlots = 5 - formData.images.length - selectedImages.length;
+    if (remainingSlots <= 0) {
+      toast.error('You can upload up to 5 images');
+      event.target.value = '';
+      return;
+    }
+
+    const filesToAdd = validFiles.slice(0, remainingSlots);
+    if (validFiles.length > remainingSlots) {
+      toast.error('Only 5 images are allowed per product');
+    }
+
+    const previews = filesToAdd.map((file) => URL.createObjectURL(file));
+    setSelectedImages((prev) => [...prev, ...filesToAdd]);
+    setSelectedImagePreviews((prev) => [...prev, ...previews]);
+    event.target.value = '';
+  };
+
+  const removeExistingImage = (indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, index) => index !== indexToRemove),
+    }));
+  };
+
+  const removeSelectedImage = (indexToRemove) => {
+    const preview = selectedImagePreviews[indexToRemove];
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
+
+    setSelectedImages((prev) => prev.filter((_, index) => index !== indexToRemove));
+    setSelectedImagePreviews((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -70,12 +134,34 @@ export default function AdminProducts() {
     setSubmitting(true);
 
     try {
+      let uploadedImages = [];
+
+      if (selectedImages.length > 0) {
+        const uploadFormData = new FormData();
+        selectedImages.forEach((file) => {
+          uploadFormData.append('images', file);
+        });
+
+        const uploadResponse = await axios.post('/api/uploads', uploadFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        uploadedImages = uploadResponse.data?.urls || [];
+      }
+
       const productData = {
         ...formData,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
-        images: formData.images ? formData.images.split(',').map(img => img.trim()) : []
+        images: [...formData.images, ...uploadedImages],
       };
+
+      if (!productData.images.length) {
+        toast.error('Please add at least one product image');
+        return;
+      }
 
       if (editingProduct) {
         await axios.put(`/api/admin/products/${editingProduct.id}`, productData);
@@ -98,6 +184,7 @@ export default function AdminProducts() {
 
   const handleEdit = (product) => {
     setEditingProduct(product);
+    clearSelectedImages();
     setFormData({
       name: product.name,
       description: product.description,
@@ -105,7 +192,7 @@ export default function AdminProducts() {
       category: product.category,
       stock: product.stock.toString(),
       brand: product.brand || '',
-      images: Array.isArray(product.images) ? product.images.join(', ') : ''
+      images: Array.isArray(product.images) ? product.images : product.images ? [product.images] : [],
     });
     setShowModal(true);
   };
@@ -124,6 +211,7 @@ export default function AdminProducts() {
   };
 
   const resetForm = () => {
+    clearSelectedImages();
     setFormData({
       name: '',
       description: '',
@@ -131,7 +219,7 @@ export default function AdminProducts() {
       category: 'skincare',
       stock: '',
       brand: '',
-      images: ''
+      images: []
     });
     setEditingProduct(null);
   };
@@ -460,18 +548,72 @@ export default function AdminProducts() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <FiImage className="inline mr-2" />
-                  Image URLs (comma-separated)
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    <FiImage className="inline mr-2" />
+                    Product Images *
+                  </label>
+                  <span className="text-xs font-medium text-gray-500">
+                    {formData.images.length + selectedImages.length}/5
+                  </span>
+                </div>
+
+                <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-purple-200 bg-purple-50/60 rounded-2xl cursor-pointer hover:border-purple-300 hover:bg-purple-50 transition-all duration-300">
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg"
+                    multiple
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+                  <div className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center mb-3">
+                    <FiUpload className="w-7 h-7 text-purple-600" />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800 mb-1">Click to choose images</p>
+                  <p className="text-xs text-gray-500">JPG/PNG only, up to 5 images</p>
                 </label>
-                <textarea
-                  value={formData.images}
-                  onChange={(e) => setFormData({ ...formData, images: e.target.value })}
-                  className="textarea"
-                  rows="3"
-                  placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-                />
-                <p className="text-xs text-gray-500 mt-1">Enter multiple image URLs separated by commas</p>
+
+                {formData.images.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Existing Images</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {formData.images.map((imageUrl, index) => (
+                        <div key={`${imageUrl}-${index}`} className="relative group rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                          <img src={imageUrl} alt={`Product ${index + 1}`} className="w-full h-28 object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => removeExistingImage(index)}
+                            className="absolute top-2 right-2 w-7 h-7 bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Remove image"
+                          >
+                            <FiX className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedImagePreviews.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">New Images To Upload</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {selectedImagePreviews.map((previewUrl, index) => (
+                        <div key={`${previewUrl}-${index}`} className="relative group rounded-xl overflow-hidden border border-purple-200 bg-white">
+                          <img src={previewUrl} alt={`Upload ${index + 1}`} className="w-full h-28 object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => removeSelectedImage(index)}
+                            className="absolute top-2 right-2 w-7 h-7 bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Remove selected image"
+                          >
+                            <FiX className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-4 pt-6">
