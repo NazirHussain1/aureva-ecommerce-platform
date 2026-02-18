@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateUser } from '../../features/auth/authSlice';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
 import { 
@@ -26,6 +27,7 @@ import Footer from '../../components/common/Footer';
 
 export default function Profile() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -63,17 +65,36 @@ export default function Profile() {
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
-    
+
+    const isProfileChanged =
+      formData.name.trim() !== (user.name || '') || formData.email.trim() !== (user.email || '');
+    const isPasswordChange = !!formData.newPassword;
+
+    if (!isProfileChanged && !isPasswordChange) {
+      toast.error('No changes to update');
+      return;
+    }
+
     if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
       toast.error('New passwords do not match');
+      return;
+    }
+
+    if (formData.newPassword && !formData.currentPassword) {
+      toast.error('Current password is required to set a new password');
+      return;
+    }
+
+    if (formData.newPassword && formData.newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters');
       return;
     }
 
     try {
       setLoading(true);
       const updateData = {
-        name: formData.name,
-        email: formData.email
+        name: formData.name.trim(),
+        email: formData.email.trim()
       };
 
       if (formData.newPassword) {
@@ -81,12 +102,19 @@ export default function Profile() {
         updateData.newPassword = formData.newPassword;
       }
 
-      await axios.put('/api/users/profile', updateData);
-      
+      const response = await axios.put('/api/users/profile', updateData);
+      const updatedUser = response.data?.user;
+      if (updatedUser) {
+        dispatch(updateUser(updatedUser));
+      } else {
+        dispatch(updateUser({ name: updateData.name, email: updateData.email }));
+      }
+
       toast.success('Profile updated successfully');
       setEditing(false);
       setFormData({
-        ...formData,
+        name: updatedUser?.name || updateData.name,
+        email: updatedUser?.email || updateData.email,
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
