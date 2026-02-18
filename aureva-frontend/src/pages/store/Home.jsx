@@ -11,6 +11,7 @@ import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
 import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
 import { ProductCardSkeleton } from '../../components/common/SkeletonLoader';
+import { getProductUrl } from '../../utils/helpers';
 
 export default function Home() {
   const { user } = useSelector((state) => state.auth);
@@ -287,7 +288,7 @@ export default function Home() {
                     key={product.id}
                     className="group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100"
                   >
-                    <Link to={`/products/${product.id}`} className="block">
+                    <Link to={getProductUrl(product)} className="block">
                       <div className="relative h-56 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                         {product.images && product.images[0] ? (
                           <img

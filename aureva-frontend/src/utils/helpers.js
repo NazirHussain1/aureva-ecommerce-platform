@@ -37,9 +37,17 @@ export const generateSlug = (name) => {
 };
 
 export const getProductUrl = (product) => {
-  if (product.slug) {
-    return `/products/${product.slug}`;
+  if (product?.slug) {
+    return `/products/${encodeURIComponent(product.slug)}`;
   }
-  const slug = generateSlug(product.name);
-  return `/products/${slug}-${product.id}`;
+
+  if (product?.name) {
+    return `/products/${encodeURIComponent(product.name)}`;
+  }
+
+  if (product?.id !== undefined && product?.id !== null) {
+    return `/products/${product.id}`;
+  }
+
+  return '/products';
 };

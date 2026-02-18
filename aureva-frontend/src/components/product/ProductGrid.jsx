@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '../../features/cart/cartSlice';
 import { addToWishlist } from '../../features/wishlist/wishlistSlice';
 import { formatPrice } from '../../utils/formatters';
-import { getImageUrl } from '../../utils/helpers';
+import { getImageUrl, getProductUrl } from '../../utils/helpers';
 
 export default function ProductGrid({ products = [], isLoading = false }) {
   const dispatch = useDispatch();
@@ -44,7 +44,7 @@ export default function ProductGrid({ products = [], isLoading = false }) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {products.map((product) => (
         <Link
-          to={`/products/${product.id}`}
+          to={getProductUrl(product)}
           key={product.id}
           className="card overflow-hidden group bg-white rounded-lg shadow hover:shadow-lg transition"
         >

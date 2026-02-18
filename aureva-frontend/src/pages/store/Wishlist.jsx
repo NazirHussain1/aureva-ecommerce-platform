@@ -7,6 +7,7 @@ import { FiShoppingCart, FiTrash2, FiHeart } from 'react-icons/fi';
 import { MdFavoriteBorder } from 'react-icons/md';
 import { HiSparkles } from 'react-icons/hi';
 import Footer from '../../components/common/Footer';
+import { getProductUrl } from '../../utils/helpers';
 
 export default function Wishlist() {
   const navigate = useNavigate();
@@ -97,7 +98,7 @@ export default function Wishlist() {
               key={product.id}
               className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 group"
             >
-              <Link to={`/products/${product.id}`} className="block">
+              <Link to={getProductUrl(product)} className="block">
                 <div className="h-64 bg-white overflow-hidden relative flex items-center justify-center border-b border-gray-100">
                   {product.images && product.images[0] ? (
                     <img
@@ -130,7 +131,7 @@ export default function Wishlist() {
                     {product.brand}
                   </p>
                 )}
-                <Link to={`/products/${product.id}`}>
+                <Link to={getProductUrl(product)}>
                   <h3 className="font-bold text-lg text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-600 transition min-h-[3.5rem]">
                     {product.name}
                   </h3>

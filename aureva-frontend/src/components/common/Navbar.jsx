@@ -21,6 +21,7 @@ import { GiLipstick, GiPerfumeBottle, GiComb } from 'react-icons/gi';
 import { MdFace, MdChildCare } from 'react-icons/md';
 import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
 import NotificationBell from './NotificationBell';
+import { getProductUrl } from '../../utils/helpers';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -103,8 +104,8 @@ export default function Navbar() {
     }
   };
 
-  const handleProductClick = (productId) => {
-    navigate(`/products/${productId}`);
+  const handleProductClick = (product) => {
+    navigate(getProductUrl(product));
     setSearchFocused(false);
     setSearchQuery('');
   };
@@ -253,7 +254,7 @@ export default function Navbar() {
                         {searchResults.map((product) => (
                           <button
                             key={product.id}
-                            onClick={() => handleProductClick(product.id)}
+                            onClick={() => handleProductClick(product)}
                             className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300 group"
                           >
                             <div className="w-12 h-12 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">

@@ -13,6 +13,7 @@ import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
 import Footer from '../../components/common/Footer';
 import NotificationBell from '../../components/common/NotificationBell';
 import { ProductCardSkeleton } from '../../components/common/SkeletonLoader';
+import { getProductUrl } from '../../utils/helpers';
 
 export default function Products() {
   const navigate = useNavigate();
@@ -270,7 +271,7 @@ export default function Products() {
             {filteredProducts.map(product => (
               <Link
                 key={product.id}
-                to={`/products/${product.id}`}
+                to={getProductUrl(product)}
                 className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group"
               >
                 <div className="h-64 bg-white overflow-hidden relative flex items-center justify-center border-b border-gray-100">

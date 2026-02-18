@@ -25,7 +25,7 @@ import Footer from '../../components/common/Footer';
 import { ReviewSkeleton } from '../../components/common/SkeletonLoader';
 
 export default function ProductDetails() {
-  const { slug } = useParams();
+  const { identifier } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
@@ -43,36 +43,45 @@ export default function ProductDetails() {
 
   const isInWishlist = product && wishlistItems.some(item => item.id === product.id);
 
-  const fetchProductBySlug = useCallback(async () => {
+  const fetchProductByIdentifier = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`/api/products/slug/${slug}`);
+      const response = await axios.get(`/api/products/${encodeURIComponent(identifier)}`);
       setProduct(response.data);
+      return response.data;
     } catch (error) {
       console.error('Error fetching product:', error);
       toast.error('Product not found');
       navigate('/products');
+      return null;
     } finally {
       setIsLoading(false);
     }
-  }, [navigate, slug]);
+  }, [identifier, navigate]);
 
-  const fetchReviews = useCallback(async () => {
+  const fetchReviewsByProductId = useCallback(async (productId) => {
+    if (!productId) return;
+
     try {
       setLoadingReviews(true);
-      const response = await axios.get(`/api/products/slug/${slug}/reviews`);
+      const response = await axios.get(`/api/reviews/${productId}`);
       setReviews(response.data || []);
     } catch (error) {
       console.error('Error fetching reviews:', error);
     } finally {
       setLoadingReviews(false);
     }
-  }, [slug]);
+  }, []);
 
   useEffect(() => {
-    fetchProductBySlug();
-    fetchReviews();
-  }, [fetchProductBySlug, fetchReviews]);
+    fetchProductByIdentifier();
+  }, [fetchProductByIdentifier]);
+
+  useEffect(() => {
+    if (product?.id) {
+      fetchReviewsByProductId(product.id);
+    }
+  }, [product?.id, fetchReviewsByProductId]);
 
   useEffect(() => {
     if (product) {
@@ -154,12 +163,12 @@ export default function ProductDetails() {
     if (!product) return;
 
     try {
-      await axios.post(`/api/products/${product.id}/reviews`, reviewForm);
+      await axios.post(`/api/reviews/${product.id}`, reviewForm);
       toast.success('Review submitted successfully!');
       setShowReviewForm(false);
       setReviewForm({ rating: 5, comment: '' });
-      fetchReviews();
-      fetchProductBySlug();
+      fetchReviewsByProductId(product.id);
+      fetchProductByIdentifier();
     } catch (error) {
       console.error('Error submitting review:', error);
       toast.error(error.response?.data?.message || 'Failed to submit review');
