@@ -3,6 +3,11 @@ const sequelize = require("../config/db");
 const User = require("./User");
 
 const Order = sequelize.define("Order", {
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    field: "UserId",
+  },
   totalAmount: {
     type: DataTypes.FLOAT,
     allowNull: false,
@@ -43,7 +48,16 @@ const Order = sequelize.define("Order", {
   timestamps: true 
 });
 
-Order.belongsTo(User);
-User.hasMany(Order);
+Order.belongsTo(User, { foreignKey: "userId" });
+User.hasMany(Order, { foreignKey: "userId" });
+
+Object.defineProperty(Order.prototype, "UserId", {
+  get() {
+    return this.getDataValue("userId");
+  },
+  set(value) {
+    this.setDataValue("userId", value);
+  },
+});
 
 module.exports = Order;

@@ -4,6 +4,8 @@ const Product = require("../models/Product");
 const User = require("../models/User");
 const { sendOrderConfirmationEmail } = require("../services/emailService");
 
+const getOrderUserId = (order) => order?.userId ?? order?.UserId ?? null;
+
 const placeOrder = async (req, res) => {
   const { items, shippingAddress, paymentMethod, paymentDetails, totalAmount } = req.body;
 
@@ -15,7 +17,7 @@ const placeOrder = async (req, res) => {
     for (let item of items) {
       const product = await Product.findByPk(item.productId);
       if (!product) {
-        return res.status(404).json({ message: "Product not found" });
+        return res.status(400).json({ message: "Product not found" });
       }
       if (product.stock < item.quantity) {
         return res.status(400).json({
@@ -27,7 +29,7 @@ const placeOrder = async (req, res) => {
     }
 
     const order = await Order.create({
-      UserId: req.user.id,
+      userId: req.user.id,
       shippingAddress,
       paymentMethod,
       paymentDetails: paymentDetails || null,
@@ -48,8 +50,8 @@ const placeOrder = async (req, res) => {
     await sendOrderConfirmationEmail(orderWithItems, user);
 
     res.status(201).json({
-      message: "Order placed successfully",
-      orderId: order.id,
+      ...order.toJSON(),
+      userId: getOrderUserId(order),
     });
   } catch (error) {
     console.error("Order placement error:", error);
@@ -60,7 +62,7 @@ const placeOrder = async (req, res) => {
 const getUserOrders = async (req, res) => {
   try {
     const orders = await Order.findAll({
-      where: { UserId: req.user.id },
+      where: { userId: req.user.id },
       include: [{ 
         model: OrderItem, 
         include: [Product] 
@@ -71,7 +73,28 @@ const getUserOrders = async (req, res) => {
     res.status(200).json(orders);
   } catch (error) {
     console.error("Get user orders error:", error);
-    res.status(500).json({ message: "Failed to fetch orders", error: error.message });
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id, {
+      include: [{ model: OrderItem, include: [Product] }],
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (getOrderUserId(order) !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized to view this order" });
+    }
+
+    res.status(200).json(order);
+  } catch (error) {
+    console.error("Get order error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -79,7 +102,11 @@ const cancelOrder = async (req, res) => {
   try {
     const order = await Order.findByPk(req.params.id);
 
-    if (!order || order.UserId !== req.user.id) {
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (getOrderUserId(order) !== req.user.id) {
       return res.status(404).json({ message: "Order not found" });
     }
 
@@ -97,7 +124,11 @@ const cancelOrder = async (req, res) => {
       await product.save();
     }
 
-    res.json({ message: "Order cancelled successfully", order });
+    res.json({
+      ...order.toJSON(),
+      userId: getOrderUserId(order),
+      message: "Order cancelled successfully",
+    });
   } catch (error) {
     console.error("Cancel order error:", error);
     res.status(500).json({ message: "Server error" });
@@ -108,7 +139,11 @@ const returnOrder = async (req, res) => {
   try {
     const order = await Order.findByPk(req.params.id);
 
-    if (!order || order.UserId !== req.user.id) {
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (getOrderUserId(order) !== req.user.id) {
       return res.status(404).json({ message: "Order not found" });
     }
 
@@ -135,11 +170,15 @@ const returnOrder = async (req, res) => {
       await product.save();
     }
 
-    res.json({ message: "Return processed successfully", order });
+    res.json({
+      ...order.toJSON(),
+      userId: getOrderUserId(order),
+      message: "Return processed successfully",
+    });
   } catch (error) {
     console.error("Return order error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-module.exports = { placeOrder, getUserOrders, cancelOrder, returnOrder };
+module.exports = { placeOrder, getUserOrders, getOrderById, cancelOrder, returnOrder };

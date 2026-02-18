@@ -1,52 +1,42 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { io } from 'socket.io-client';
 
 export default function useSocket() {
-  const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
+  const socket = useMemo(() => io('http://localhost:5000', { autoConnect: false }), []);
 
   useEffect(() => {
-    const socketInstance = io('http://localhost:5000', {
-      autoConnect: false,
-    });
-
-    socketInstance.on('connect', () => {
+    socket.on('connect', () => {
       setIsConnected(true);
     });
 
-    socketInstance.on('disconnect', () => {
+    socket.on('disconnect', () => {
       setIsConnected(false);
     });
 
-    setSocket(socketInstance);
-
     return () => {
-      socketInstance.disconnect();
+      socket.off('connect');
+      socket.off('disconnect');
+      socket.disconnect();
     };
-  }, []);
+  }, [socket]);
 
   const connect = () => {
-    if (socket) {
-      socket.connect();
-    }
+    socket.connect();
   };
 
   const disconnect = () => {
-    if (socket) {
-      socket.disconnect();
-    }
+    socket.disconnect();
   };
 
   const emit = (event, data) => {
-    if (socket && isConnected) {
+    if (isConnected) {
       socket.emit(event, data);
     }
   };
 
   const on = (event, callback) => {
-    if (socket) {
-      socket.on(event, callback);
-    }
+    socket.on(event, callback);
   };
 
   return {

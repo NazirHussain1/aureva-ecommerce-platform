@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { register } from '../../features/auth/authSlice';
@@ -21,7 +21,6 @@ export default function Register() {
   const [localError, setLocalError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState(0);
 
   useEffect(() => {
     document.title = 'Register - Aureva Beauty';
@@ -30,18 +29,16 @@ export default function Register() {
     };
   }, []);
 
-  useEffect(() => {
-    if (formData.password) {
-      let strength = 0;
-      if (formData.password.length >= 6) strength++;
-      if (formData.password.length >= 8) strength++;
-      if (/[A-Z]/.test(formData.password)) strength++;
-      if (/[0-9]/.test(formData.password)) strength++;
-      if (/[^A-Za-z0-9]/.test(formData.password)) strength++;
-      setPasswordStrength(strength);
-    } else {
-      setPasswordStrength(0);
-    }
+  const passwordStrength = useMemo(() => {
+    if (!formData.password) return 0;
+
+    let strength = 0;
+    if (formData.password.length >= 6) strength++;
+    if (formData.password.length >= 8) strength++;
+    if (/[A-Z]/.test(formData.password)) strength++;
+    if (/[0-9]/.test(formData.password)) strength++;
+    if (/[^A-Za-z0-9]/.test(formData.password)) strength++;
+    return strength;
   }, [formData.password]);
 
   const handleChange = (e) => {
@@ -80,7 +77,8 @@ export default function Register() {
     }
 
     try {
-      const { confirmPassword, ...registerData } = formData;
+      const registerData = { ...formData };
+      delete registerData.confirmPassword;
       await dispatch(register(registerData)).unwrap();
       navigate('/login');
     } catch (err) {
