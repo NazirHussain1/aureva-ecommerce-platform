@@ -21,6 +21,10 @@ describe('Product Controller Tests', () => {
   let adminToken;
   let adminUser;
 
+  beforeEach(async () => {
+    await Product.destroy({ where: {}, truncate: true });
+  });
+
   beforeAll(async () => {
     // Create admin user for protected routes
     adminUser = await User.create({
