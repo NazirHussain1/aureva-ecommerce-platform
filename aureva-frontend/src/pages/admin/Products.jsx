@@ -197,17 +197,40 @@ export default function AdminProducts() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await axios.delete(`/api/admin/products/${id}`);
-        toast.success('Product deleted successfully!');
-        fetchProducts();
-      } catch (error) {
-        console.error('Error deleting product:', error);
-        toast.error('Failed to delete product');
-      }
-    }
+  const handleDelete = (id) => {
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <p className="text-sm font-medium text-gray-800">
+          Are you sure you want to delete this product?
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                await axios.delete(`/api/admin/products/${id}`);
+                toast.success('Product deleted successfully!');
+                fetchProducts();
+              } catch (error) {
+                console.error('Error deleting product:', error);
+                toast.error('Failed to delete product');
+              }
+            }}
+            className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition-colors"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1.5 rounded-lg bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 8000,
+    });
   };
 
   const resetForm = () => {
