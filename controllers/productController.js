@@ -83,7 +83,7 @@ const getProducts = async (req, res) => {
       limit: parsedLimit,
       offset: parseInt(offset),
       attributes: [
-        'id', 'name', 'description', 'price', 'stock', 
+        'id', 'slug', 'name', 'description', 'price', 'stock', 
         'category', 'brand', 'images', 'createdAt'
       ]
     });
@@ -378,7 +378,7 @@ const getProductSuggestions = async (req, res) => {
     }
 
     const suggestions = await Product.findAll({
-      attributes: ['id', 'name', 'category', 'brand', 'price', 'images'],
+      attributes: ['id', 'slug', 'name', 'category', 'brand', 'price', 'images'],
       where: {
         stock: { [Op.gt]: 0 },
         [Op.or]: [
