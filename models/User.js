@@ -10,6 +10,10 @@ const User = sequelize.define("User", {
     type: DataTypes.ENUM("customer", "admin"),
     defaultValue: "customer",
   },
+  status: {
+    type: DataTypes.ENUM("active", "blocked"),
+    defaultValue: "active",
+  },
   resetPasswordToken: {
     type: DataTypes.STRING,
     allowNull: true,
