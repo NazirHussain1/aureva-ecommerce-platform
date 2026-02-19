@@ -41,12 +41,12 @@ export const getProductUrl = (product) => {
     return `/products/${encodeURIComponent(product.slug)}`;
   }
 
-  if (product?.name) {
-    return `/products/${encodeURIComponent(product.name)}`;
-  }
-
   if (product?.id !== undefined && product?.id !== null) {
     return `/products/${product.id}`;
+  }
+
+  if (product?.name) {
+    return `/products/${encodeURIComponent(product.name)}`;
   }
 
   return '/products';
