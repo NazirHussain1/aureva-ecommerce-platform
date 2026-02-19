@@ -42,6 +42,9 @@ export default function AdminOrders() {
           order.id === orderId ? { ...order, orderStatus: newStatus } : order
         )
       );
+      setSelectedOrder((prev) =>
+        prev && prev.id === orderId ? { ...prev, orderStatus: newStatus } : prev
+      );
       
       toast.success('Order status updated successfully!');
     } catch (error) {
