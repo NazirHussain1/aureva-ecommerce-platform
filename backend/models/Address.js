@@ -10,7 +10,7 @@ const Address = sequelize.define("Address", {
   city: { type: DataTypes.STRING, allowNull: false },
   state: { type: DataTypes.STRING, allowNull: false },
   zipCode: { type: DataTypes.STRING, allowNull: false },
-  country: { type: DataTypes.STRING, allowNull: false, defaultValue: 'Pakistan' },
+  country: { type: DataTypes.STRING, allowNull: false, defaultValue: 'United States' },
   isDefault: { type: DataTypes.BOOLEAN, defaultValue: false },
 }, { timestamps: true });
 
