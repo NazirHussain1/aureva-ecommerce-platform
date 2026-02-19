@@ -20,6 +20,24 @@ const updateUserRole = async (req, res) => {
   res.json({ message: "User role updated", user });
 };
 
+const updateUserStatus = async (req, res) => {
+  const user = await User.findByPk(req.params.id);
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const allowedStatuses = ["active", "blocked"];
+  if (!allowedStatuses.includes(req.body.status)) {
+    return res.status(400).json({ message: "Invalid status value" });
+  }
+
+  user.status = req.body.status;
+  await user.save();
+
+  res.json({ message: "User status updated", user });
+};
+
 const deleteUser = async (req, res) => {
   const user = await User.findByPk(req.params.id);
 
@@ -34,5 +52,6 @@ const deleteUser = async (req, res) => {
 module.exports = {
   getAllUsers,
   updateUserRole,
+  updateUserStatus,
   deleteUser,
 };

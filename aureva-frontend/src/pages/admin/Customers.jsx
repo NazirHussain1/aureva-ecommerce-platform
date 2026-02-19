@@ -30,29 +30,62 @@ export default function AdminCustomers() {
     }
   };
 
-  const handleBlockUser = async (userId, currentStatus) => {
-    const action = currentStatus === 'active' ? 'block' : 'unblock';
-    if (window.confirm(`Are you sure you want to ${action} this user?`)) {
-      try {
-        await axios.put(`/api/admin/users/${userId}/status`, {
-          status: currentStatus === 'active' ? 'blocked' : 'active'
-        });
-        toast.success(`User ${action}ed successfully!`);
-        fetchCustomers();
-      } catch (error) {
-        console.error('Error updating user status:', error);
-        toast.error(`Failed to ${action} user`);
-      }
-    }
+  const normalizeStatus = (status) => (status === 'blocked' ? 'blocked' : 'active');
+
+  const handleBlockUser = (userId, currentStatus) => {
+    const normalizedStatus = normalizeStatus(currentStatus);
+    const nextStatus = normalizedStatus === 'active' ? 'blocked' : 'active';
+    const action = nextStatus === 'blocked' ? 'block' : 'unblock';
+
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <p className="text-sm font-medium text-gray-800">
+          Are you sure you want to {action} this user?
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                await axios.put(`/api/admin/users/${userId}/status`, {
+                  status: nextStatus,
+                });
+                toast.success(`User ${action}ed successfully!`);
+                fetchCustomers();
+              } catch (error) {
+                console.error('Error updating user status:', error);
+                toast.error(`Failed to ${action} user`);
+              }
+            }}
+            className={`px-3 py-1.5 rounded-lg text-white text-xs font-semibold transition-colors ${
+              nextStatus === 'blocked'
+                ? 'bg-red-600 hover:bg-red-700'
+                : 'bg-green-600 hover:bg-green-700'
+            }`}
+          >
+            {action.charAt(0).toUpperCase() + action.slice(1)}
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1.5 rounded-lg bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 8000,
+    });
   };
 
   const filteredCustomers = customers.filter(customer => {
+    const normalizedStatus = normalizeStatus(customer.status);
     const matchesSearch = 
       customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || 
-      (filterStatus === 'active' && customer.status === 'active') ||
-      (filterStatus === 'blocked' && customer.status === 'blocked');
+      (filterStatus === 'active' && normalizedStatus === 'active') ||
+      (filterStatus === 'blocked' && normalizedStatus === 'blocked');
     return matchesSearch && matchesStatus;
   });
 
@@ -63,7 +96,7 @@ export default function AdminCustomers() {
       const now = new Date();
       return createdDate.getMonth() === now.getMonth() && createdDate.getFullYear() === now.getFullYear();
     }).length,
-    active: customers.filter(c => c.status === 'active').length
+    active: customers.filter(c => normalizeStatus(c.status) === 'active').length
   };
 
   const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
@@ -178,6 +211,7 @@ export default function AdminCustomers() {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {paginatedCustomers.map((customer) => {
+                    const normalizedStatus = normalizeStatus(customer.status);
                     const badge = getCustomerBadge(customer);
                     const orderCount = customer.Orders?.length || 0;
                     const totalSpent = customer.Orders?.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0) || 0;
@@ -214,24 +248,24 @@ export default function AdminCustomers() {
                         </td>
                         <td className="px-6 py-4">
                           <span className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                            customer.status === 'active' 
+                            normalizedStatus === 'active' 
                               ? 'bg-green-100 text-green-700' 
                               : 'bg-red-100 text-red-700'
                           }`}>
-                            {customer.status === 'active' ? 'Active' : 'Blocked'}
+                            {normalizedStatus === 'active' ? 'Active' : 'Blocked'}
                           </span>
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => handleBlockUser(customer.id, customer.status)}
+                              onClick={() => handleBlockUser(customer.id, normalizedStatus)}
                               className={`px-4 py-2 rounded-lg transition-colors duration-200 font-medium text-sm flex items-center gap-1 ${
-                                customer.status === 'active'
+                                normalizedStatus === 'active'
                                   ? 'bg-red-100 text-red-700 hover:bg-red-200'
                                   : 'bg-green-100 text-green-700 hover:bg-green-200'
                               }`}
                             >
-                              {customer.status === 'active' ? (
+                              {normalizedStatus === 'active' ? (
                                 <>
                                   <FiUserX className="w-4 h-4" />
                                   Block
