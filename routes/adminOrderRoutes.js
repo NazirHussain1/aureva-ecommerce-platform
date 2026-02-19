@@ -10,6 +10,7 @@ const {
 
 router.get("/", protect, isAdmin, getAllOrders);
 router.put("/:id", protect, isAdmin, updateOrderStatus);
+router.put("/:id/status", protect, isAdmin, updateOrderStatus);
 
 module.exports = router;
  
