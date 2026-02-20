@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const sequelize = require("./config/db");
 
+// Load models
 require("./models/User");
 require("./models/Product");
 require("./models/Order");
@@ -16,6 +17,9 @@ require("./models/Newsletter");
 require("./models/Payment");
 require("./models/Notification");
 require("./models/Settings");
+
+// Load Category model and relationships
+require("./models/index");
 
 const app = express();
 
@@ -35,6 +39,10 @@ app.use("/api/newsletter", require("./routes/newsletterRoutes"));
 app.use("/api/payments", require("./routes/paymentRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/uploads", require("./routes/uploadRoutes"));
+
+// Enterprise Category Routes
+app.use("/api/categories", require("./modules/category/category.routes"));
+
 app.use("/api/admin/users", require("./routes/adminUserRoutes"));
 app.use("/api/admin/products", require("./routes/adminProductRoutes"));
 app.use("/api/admin/orders", require("./routes/adminOrderRoutes"));
@@ -46,11 +54,9 @@ app.use("/api/admin/settings", require("./routes/adminSettingsRoutes"));
 app.use("/api/settings", require("./routes/settingsRoutes"));
 
 const PORT = process.env.PORT || 5000;
-const shouldAlterSchema = process.env.DB_SYNC_ALTER === "true";
-const syncOptions = shouldAlterSchema ? { alter: true } : {};
 
 sequelize
-  .sync(syncOptions)
+  .sync({ alter: true })
   .then(() => {
     console.log("Database synced");
     app.listen(PORT, () => {
