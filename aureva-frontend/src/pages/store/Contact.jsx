@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { FiMail, FiPhone, FiMapPin, FiSend } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
+import { submitContactForm } from '../../api/contactApi';
+import { getPublicSettings } from '../../api/settingsApi';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -13,12 +15,27 @@ export default function Contact() {
     message: '',
   });
   const [loading, setLoading] = useState(false);
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const data = await getPublicSettings();
+      setSettings(data);
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      await submitContactForm(formData);
       toast.success('Message sent successfully. We will get back to you shortly.');
       setFormData({
         name: '',
@@ -26,8 +43,12 @@ export default function Contact() {
         subject: '',
         message: '',
       });
+    } catch (error) {
+      console.error('Contact form error:', error);
+      toast.error(error.response?.data?.message || 'Failed to send message');
+    } finally {
       setLoading(false);
-    }, 900);
+    }
   };
 
   return (
@@ -49,7 +70,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">Email</p>
-                  <p className="text-sm text-gray-600">support@aureva.com</p>
+                  <p className="text-sm text-gray-600">{settings?.contactEmail || 'support@aureva.com'}</p>
                 </div>
               </div>
             </div>
@@ -61,7 +82,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">Phone</p>
-                  <p className="text-sm text-gray-600">+1 (800) 555-0100</p>
+                  <p className="text-sm text-gray-600">{settings?.phone || '+1 (800) 555-0100'}</p>
                 </div>
               </div>
             </div>
@@ -73,7 +94,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">Address</p>
-                  <p className="text-sm text-gray-600">New York, United States</p>
+                  <p className="text-sm text-gray-600">{settings?.address || 'New York, United States'}</p>
                 </div>
               </div>
             </div>

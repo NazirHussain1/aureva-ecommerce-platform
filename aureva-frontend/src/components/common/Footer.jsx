@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube, FaLinkedinIn, FaPinterestP } from 'react-icons/fa';
 import { FiMail, FiPhone, FiMapPin, FiSend } from 'react-icons/fi';
@@ -6,10 +6,25 @@ import { HiSparkles } from 'react-icons/hi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
+import { getPublicSettings } from '../../api/settingsApi';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
   const [subscribing, setSubscribing] = useState(false);
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const data = await getPublicSettings();
+      setSettings(data);
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
+    }
+  };
 
   const handleNewsletterSubscribe = async (e) => {
     e.preventDefault();
@@ -55,23 +70,23 @@ export default function Footer() {
               Your trusted destination for premium beauty and wellness products. Discover your natural radiance with our curated collection of luxury essentials.
             </p>
             <div className="space-y-3">
-              <a href="mailto:support@aureva.com" className="flex items-center gap-3 text-sm text-gray-400 hover:text-pink-400 transition-colors group">
+              <a href={`mailto:${settings?.contactEmail || 'support@aureva.com'}`} className="flex items-center gap-3 text-sm text-gray-400 hover:text-pink-400 transition-colors group">
                 <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center group-hover:bg-gradient-to-r group-hover:from-pink-600 group-hover:to-purple-600 transition-all duration-300">
                   <FiMail className="text-pink-500 group-hover:text-white transition-colors" />
                 </div>
-                <span>support@aureva.com</span>
+                <span>{settings?.contactEmail || 'support@aureva.com'}</span>
               </a>
-              <a href="tel:+15551234567" className="flex items-center gap-3 text-sm text-gray-400 hover:text-pink-400 transition-colors group">
+              <a href={`tel:${settings?.phone || '+15551234567'}`} className="flex items-center gap-3 text-sm text-gray-400 hover:text-pink-400 transition-colors group">
                 <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center group-hover:bg-gradient-to-r group-hover:from-pink-600 group-hover:to-purple-600 transition-all duration-300">
                   <FiPhone className="text-pink-500 group-hover:text-white transition-colors" />
                 </div>
-                <span>+1 (555) 123-4567</span>
+                <span>{settings?.phone || '+1 (555) 123-4567'}</span>
               </a>
               <div className="flex items-center gap-3 text-sm text-gray-400">
                 <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center">
                   <FiMapPin className="text-pink-500" />
                 </div>
-                <span>123 Beauty Ave, NY 10001</span>
+                <span>{settings?.address || '123 Beauty Ave, NY 10001'}</span>
               </div>
             </div>
           </div>
@@ -237,51 +252,99 @@ export default function Footer() {
             <div>
               <h5 className="text-white font-semibold mb-4 text-sm">Follow Us</h5>
               <div className="flex gap-3">
-                <a 
-                  href="https://facebook.com" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
-                  aria-label="Facebook"
-                >
-                  <FaFacebookF className="text-gray-400 group-hover:text-white transition-colors" />
-                </a>
-                <a 
-                  href="https://instagram.com" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
-                  aria-label="Instagram"
-                >
-                  <FaInstagram className="text-gray-400 group-hover:text-white transition-colors" />
-                </a>
-                <a 
-                  href="https://twitter.com" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
-                  aria-label="Twitter"
-                >
-                  <FaTwitter className="text-gray-400 group-hover:text-white transition-colors" />
-                </a>
-                <a 
-                  href="https://youtube.com" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
-                  aria-label="YouTube"
-                >
-                  <FaYoutube className="text-gray-400 group-hover:text-white transition-colors" />
-                </a>
-                <a 
-                  href="https://pinterest.com" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
-                  aria-label="Pinterest"
-                >
-                  <FaPinterestP className="text-gray-400 group-hover:text-white transition-colors" />
-                </a>
+                {settings?.facebookUrl && (
+                  <a 
+                    href={settings.facebookUrl} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
+                    aria-label="Facebook"
+                  >
+                    <FaFacebookF className="text-gray-400 group-hover:text-white transition-colors" />
+                  </a>
+                )}
+                {settings?.instagramUrl && (
+                  <a 
+                    href={settings.instagramUrl} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
+                    aria-label="Instagram"
+                  >
+                    <FaInstagram className="text-gray-400 group-hover:text-white transition-colors" />
+                  </a>
+                )}
+                {settings?.twitterUrl && (
+                  <a 
+                    href={settings.twitterUrl} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
+                    aria-label="Twitter"
+                  >
+                    <FaTwitter className="text-gray-400 group-hover:text-white transition-colors" />
+                  </a>
+                )}
+                {settings?.youtubeUrl && (
+                  <a 
+                    href={settings.youtubeUrl} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
+                    aria-label="YouTube"
+                  >
+                    <FaYoutube className="text-gray-400 group-hover:text-white transition-colors" />
+                  </a>
+                )}
+                {!settings?.facebookUrl && !settings?.instagramUrl && !settings?.twitterUrl && !settings?.youtubeUrl && (
+                  <>
+                    <a 
+                      href="https://facebook.com" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
+                      aria-label="Facebook"
+                    >
+                      <FaFacebookF className="text-gray-400 group-hover:text-white transition-colors" />
+                    </a>
+                    <a 
+                      href="https://instagram.com" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
+                      aria-label="Instagram"
+                    >
+                      <FaInstagram className="text-gray-400 group-hover:text-white transition-colors" />
+                    </a>
+                    <a 
+                      href="https://twitter.com" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
+                      aria-label="Twitter"
+                    >
+                      <FaTwitter className="text-gray-400 group-hover:text-white transition-colors" />
+                    </a>
+                    <a 
+                      href="https://youtube.com" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
+                      aria-label="YouTube"
+                    >
+                      <FaYoutube className="text-gray-400 group-hover:text-white transition-colors" />
+                    </a>
+                    <a 
+                      href="https://pinterest.com" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
+                      aria-label="Pinterest"
+                    >
+                      <FaPinterestP className="text-gray-400 group-hover:text-white transition-colors" />
+                    </a>
+                  </>
+                )}
               </div>
             </div>
           </div>

@@ -24,6 +24,8 @@ import Customers from './pages/admin/Customers';
 import Reports from './pages/admin/Reports';
 import Coupons from './pages/admin/Coupons';
 import Settings from './pages/admin/Settings';
+import SiteSettings from './pages/admin/SiteSettings';
+import ContactMessages from './pages/admin/ContactMessages';
 import AboutUs from './pages/info/AboutUs';
 import ContactUs from './pages/info/ContactUs';
 import FAQ from './pages/info/FAQ';
@@ -32,6 +34,7 @@ import ShippingInfo from './pages/info/ShippingInfo';
 import TermsOfService from './pages/info/TermsOfService';
 import PrivacyPolicy from './pages/info/PrivacyPolicy';
 import Careers from './pages/info/Careers';
+import FloatingWhatsApp from './components/common/FloatingWhatsApp';
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -63,6 +66,7 @@ function PublicRoute({ children }) {
 function AppRoutes() {
   return (
     <Router>
+      <FloatingWhatsApp />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
@@ -144,6 +148,8 @@ function AppRoutes() {
           <Route path="coupons" element={<Coupons />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="site-settings" element={<SiteSettings />} />
+          <Route path="contact-messages" element={<ContactMessages />} />
         </Route>
         
         <Route path="*" element={
