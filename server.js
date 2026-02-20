@@ -17,6 +17,7 @@ require("./models/Newsletter");
 require("./models/Payment");
 require("./models/Notification");
 require("./models/Settings");
+require("./models/ContactMessage");
 
 // Load Category model and relationships
 require("./models/index");
@@ -52,6 +53,7 @@ app.use("/api/admin/coupons", require("./routes/adminCouponRoutes"));
 app.use("/api/admin/newsletter", require("./routes/adminNewsletterRoutes"));
 app.use("/api/admin/settings", require("./routes/adminSettingsRoutes"));
 app.use("/api/settings", require("./routes/settingsRoutes"));
+app.use("/api/contact", require("./routes/contactRoutes"));
 
 const PORT = process.env.PORT || 5000;
 
