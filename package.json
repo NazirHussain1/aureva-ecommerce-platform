@@ -8,6 +8,8 @@
     "start": "node server.js",
     "create-admin": "node scripts/createAdmin.js",
     "migrate:product-categories": "node scripts/migrateProductCategoryEnum.js",
+    "setup:categories": "node scripts/setupCategories.js",
+    "seed:categories": "node scripts/setupCategories.js --force",
     "test": "cross-env NODE_ENV=test jest --detectOpenHandles --forceExit",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "test:coverage": "cross-env NODE_ENV=test jest --coverage"

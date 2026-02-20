@@ -6,18 +6,13 @@ const Product = sequelize.define(
   {
     name: { type: DataTypes.STRING, allowNull: false },
     slug: { type: DataTypes.STRING, allowNull: true, unique: true },
-    category: { 
-      type: DataTypes.ENUM(
-        "skincare",
-        "haircare",
-        "makeup",
-        "fragrance",
-        "men",
-        "women",
-        "kids",
-        "wellness"
-      ), 
-      allowNull: false 
+    categoryId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    gender: {
+      type: DataTypes.ENUM('MEN', 'WOMEN', 'UNISEX'),
+      defaultValue: 'UNISEX'
     },
     price: { type: DataTypes.FLOAT, allowNull: false },
     brand: { type: DataTypes.STRING, allowNull: false },
@@ -42,8 +37,18 @@ const Product = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
+    },
+    isDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    }
   },
-  { timestamps: true }
+  { 
+    timestamps: true
+  }
 );
 
 module.exports = Product;
