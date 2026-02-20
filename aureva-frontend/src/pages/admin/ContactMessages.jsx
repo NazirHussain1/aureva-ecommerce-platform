@@ -36,7 +36,10 @@ export default function ContactMessages() {
     if (!message.isRead) {
       try {
         await markMessageAsRead(message.id);
-        fetchMessages();
+        // Update local state
+        setMessages(prev => prev.map(m => 
+          m.id === message.id ? { ...m, isRead: true } : m
+        ));
       } catch (error) {
         console.error('Failed to mark as read:', error);
       }

@@ -1,5 +1,7 @@
 const ContactMessage = require('../models/ContactMessage');
 const { sendEmail } = require('../services/emailService');
+const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 exports.submitContactForm = async (req, res) => {
   try {
@@ -15,6 +17,30 @@ exports.submitContactForm = async (req, res) => {
       subject,
       message
     });
+
+    // Create notification for all admin users
+    try {
+      const adminUsers = await User.findAll({ where: { role: 'admin' } });
+      
+      const notificationPromises = adminUsers.map(admin => 
+        Notification.create({
+          userId: admin.id,
+          title: 'New Contact Message',
+          message: `${name} sent a message: ${subject}`,
+          type: 'system',
+          actionUrl: '/admin/contact-messages',
+          metadata: {
+            contactMessageId: contactMessage.id,
+            senderEmail: email,
+            senderName: name
+          }
+        })
+      );
+
+      await Promise.all(notificationPromises);
+    } catch (notifError) {
+      console.error('Failed to create admin notifications:', notifError);
+    }
 
     // Send notification email to admin (optional)
     try {
