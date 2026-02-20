@@ -123,6 +123,12 @@ npm run test:watch        # Watch mode
 npm run test:coverage     # Coverage report
 ```
 
+Test files are located in `backend/__tests__/`:
+- `auth.test.js` - Authentication tests
+- `product.test.js` - Product management tests
+- `cart.test.js` - Shopping cart tests
+- `order.test.js` - Order processing tests
+
 ## 📝 Environment Variables
 
 ### Backend (.env)
@@ -132,6 +138,7 @@ DB_NAME=aureva
 DB_USER=root
 DB_PASS=your_password
 DB_HOST=localhost
+DB_DIALECT=mysql
 JWT_SECRET=your_jwt_secret
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
@@ -147,12 +154,16 @@ EMAIL_PASS=your_app_password
 VITE_API_URL=http://localhost:5000
 ```
 
+## 🚀 Deployment
+
+The project is ready for deployment to Railway or other cloud platforms. The backend uses MySQL (Sequelize ORM) and can be easily configured with environment variables for production databases.
+
 ## 🎯 Next Steps
 
 1. ✅ Improve protected routing
-2. 🔄 Set up Playwright E2E testing
-3. 📱 Mobile app (React Native)
-4. 🌐 Deployment (Railway/Vercel)
+2. ✅ Backend API testing with Jest & Supertest
+3. 🔄 Set up Playwright E2E testing
+4. 🌐 Deployment to Railway
 5. 📊 Advanced analytics
 6. 🔔 Push notifications
 7. 💳 Payment gateway integration
@@ -187,7 +198,7 @@ VITE_API_URL=http://localhost:5000
 **Testing:**
 - Jest
 - Supertest
-- Playwright (upcoming)
+- SQLite (for test database)
 
 ## 🔒 Security Features
 
