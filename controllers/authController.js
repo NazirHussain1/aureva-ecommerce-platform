@@ -96,16 +96,59 @@ const forgotPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    const resetTokenExpiry = new Date(Date.now() + 3600000);
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = resetTokenExpiry;
+    user.resetPasswordOTP = otp;
+    user.resetPasswordOTPExpires = otpExpiry;
     await user.save();
 
-    await sendPasswordResetEmail(user, resetToken);
+    // Send OTP via email
+    try {
+      await sendPasswordResetEmail(user, null, otp);
+    } catch (emailError) {
+      console.error('Failed to send OTP email:', emailError);
+    }
 
-    res.status(200).json({ message: "Password reset email sent" });
+    res.status(200).json({ 
+      message: "OTP sent to your email",
+      email: email // Send back email for verification step
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const verifyOTP = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const user = await User.findOne({
+      where: {
+        email,
+        resetPasswordOTP: otp,
+        resetPasswordOTPExpires: {
+          [Op.gt]: new Date(),
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    // Generate a temporary token for password reset
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
+    await user.save();
+
+    res.status(200).json({ 
+      message: "OTP verified successfully",
+      resetToken 
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -120,7 +163,7 @@ const resetPassword = async (req, res) => {
       where: {
         resetPasswordToken: token,
         resetPasswordExpires: {
-          [require("sequelize").Op.gt]: new Date(),
+          [Op.gt]: new Date(),
         },
       },
     });
@@ -133,6 +176,8 @@ const resetPassword = async (req, res) => {
     user.password = hashedPassword;
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
+    user.resetPasswordOTP = null;
+    user.resetPasswordOTPExpires = null;
     await user.save();
 
     res.status(200).json({ message: "Password reset successful" });
@@ -237,4 +282,4 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, forgotPassword, resetPassword, getMe, logout, updateProfile };
+module.exports = { signup, login, forgotPassword, verifyOTP, resetPassword, getMe, logout, updateProfile };

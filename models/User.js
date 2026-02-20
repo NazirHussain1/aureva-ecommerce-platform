@@ -22,12 +22,28 @@ const User = sequelize.define("User", {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  resetPasswordOTP: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  resetPasswordOTPExpires: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   emailVerified: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
   emailVerificationToken: {
     type: DataTypes.STRING,
+    allowNull: true,
+  },
+  emailVerificationOTP: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  emailVerificationOTPExpires: {
+    type: DataTypes.DATE,
     allowNull: true,
   },
 }, { timestamps: true });
