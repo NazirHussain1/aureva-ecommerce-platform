@@ -1,22 +1,8 @@
 const { Op } = require("sequelize");
 const Product = require("../models/Product");
 const NotificationService = require("../services/notificationService");
-const { PrismaClient } = require("@prisma/client");
-const { PrismaPg } = require("@prisma/adapter-pg");
-const { Pool } = require("pg");
 
-const prismaConnectionString = process.env.DATABASE_URL;
-const prismaPool = prismaConnectionString
-  ? new Pool({
-      connectionString: prismaConnectionString,
-      ssl: prismaConnectionString.includes("supabase.co")
-        ? { rejectUnauthorized: false }
-        : undefined,
-      allowExitOnIdle: true,
-    })
-  : null;
-const prisma = prismaPool ? new PrismaClient({ adapter: new PrismaPg(prismaPool) }) : null;
-const dialect = Product.sequelize?.getDialect?.() || "postgres";
+const dialect = Product.sequelize?.getDialect?.() || "mysql";
 const textLikeOp = dialect === "postgres" ? Op.iLike : Op.like;
 const textLikeKeyword = dialect === "postgres" ? "ILIKE" : "LIKE";
 
