@@ -56,7 +56,7 @@ app.use("/api/settings", require("./routes/settingsRoutes"));
 const PORT = process.env.PORT || 5000;
 
 sequelize
-  .sync({ alter: true })
+  .sync()
   .then(() => {
     console.log("Database synced");
     app.listen(PORT, () => {
