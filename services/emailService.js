@@ -1,52 +1,97 @@
 const { sendEmail } = require("../config/email");
 const {
   welcomeEmailTemplate,
+  contactFormNotificationTemplate,
+  contactFormAutoReplyTemplate,
   orderConfirmationTemplate,
   orderStatusUpdateTemplate,
   passwordResetTemplate,
   newsletterTemplate,
 } = require("../utils/emailTemplates");
 
+// Send welcome email to new users
 const sendWelcomeEmail = async (user) => {
   try {
-    await sendEmail({
-      email: user.email,
-      subject: "Welcome to Aureva Beauty Shop! 💄",
+    const result = await sendEmail({
+      to: user.email,
+      subject: "Welcome to Aureva Beauty! 💄✨",
       html: welcomeEmailTemplate(user.name),
     });
+    return result;
   } catch (error) {
     console.error("Error sending welcome email:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Send contact form notification to admin
+const sendContactFormNotification = async (contactData) => {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+    const result = await sendEmail({
+      to: adminEmail,
+      subject: `New Contact Message: ${contactData.subject}`,
+      html: contactFormNotificationTemplate(
+        contactData.name,
+        contactData.email,
+        contactData.subject,
+        contactData.message
+      ),
+    });
+    return result;
+  } catch (error) {
+    console.error("Error sending contact form notification:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Send auto-reply to customer who submitted contact form
+const sendContactFormAutoReply = async (contactData) => {
+  try {
+    const result = await sendEmail({
+      to: contactData.email,
+      subject: "We've Received Your Message - Aureva Beauty",
+      html: contactFormAutoReplyTemplate(contactData.name),
+    });
+    return result;
+  } catch (error) {
+    console.error("Error sending contact form auto-reply:", error);
+    return { success: false, error: error.message };
   }
 };
 
 const sendOrderConfirmationEmail = async (order, user) => {
   try {
-    await sendEmail({
-      email: user.email,
-      subject: `Order Confirmation - #${order.id}`,
+    const result = await sendEmail({
+      to: user.email,
+      subject: `Order Confirmation - #${order.id} 🎉`,
       html: orderConfirmationTemplate(order, user),
     });
+    return result;
   } catch (error) {
     console.error("Error sending order confirmation email:", error);
+    return { success: false, error: error.message };
   }
 };
 
 const sendOrderStatusUpdateEmail = async (order, user, newStatus) => {
   try {
     const statusSubjects = {
-      processing: `Order #${order.id} is being processed`,
-      shipped: `Order #${order.id} has been shipped! 🚚`,
-      delivered: `Order #${order.id} has been delivered! 📦`,
-      cancelled: `Order #${order.id} has been cancelled`,
+      processing: `Order #${order.id} is Being Processed ⚙️`,
+      shipped: `Order #${order.id} Has Been Shipped! 🚚`,
+      delivered: `Order #${order.id} Has Been Delivered! 📦`,
+      cancelled: `Order #${order.id} Has Been Cancelled ❌`,
     };
 
-    await sendEmail({
-      email: user.email,
-      subject: statusSubjects[newStatus],
+    const result = await sendEmail({
+      to: user.email,
+      subject: statusSubjects[newStatus] || `Order #${order.id} Status Update`,
       html: orderStatusUpdateTemplate(order, user, newStatus),
     });
+    return result;
   } catch (error) {
     console.error("Error sending order status update email:", error);
+    return { success: false, error: error.message };
   }
 };
 
@@ -54,9 +99,9 @@ const sendPasswordResetEmail = async (user, resetToken = null, otp = null) => {
   try {
     if (otp) {
       // Send OTP email
-      await sendEmail({
-        email: user.email,
-        subject: "Password Reset OTP - Aureva Beauty Shop",
+      const result = await sendEmail({
+        to: user.email,
+        subject: "Password Reset OTP - Aureva Beauty 🔐",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
             <div style="background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
@@ -79,34 +124,39 @@ const sendPasswordResetEmail = async (user, resetToken = null, otp = null) => {
               </p>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
               <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">
-                © ${new Date().getFullYear()} Aureva Beauty Shop. All rights reserved.
+                © ${new Date().getFullYear()} Aureva Beauty. All rights reserved.
               </p>
             </div>
           </div>
         `,
       });
+      return result;
     } else if (resetToken) {
-      // Send reset link email (fallback)
-      await sendEmail({
-        email: user.email,
-        subject: "Password Reset Request - Aureva Beauty Shop",
+      // Send reset link email
+      const result = await sendEmail({
+        to: user.email,
+        subject: "Password Reset Request - Aureva Beauty 🔐",
         html: passwordResetTemplate(user.name, resetToken),
       });
+      return result;
     }
   } catch (error) {
     console.error("Error sending password reset email:", error);
+    return { success: false, error: error.message };
   }
 };
 
 const sendNewsletterEmail = async (user, subject, content) => {
   try {
-    await sendEmail({
-      email: user.email,
+    const result = await sendEmail({
+      to: user.email,
       subject: subject,
       html: newsletterTemplate(user.name, subject, content),
     });
+    return result;
   } catch (error) {
     console.error("Error sending newsletter email:", error);
+    return { success: false, error: error.message };
   }
 };
 
@@ -115,14 +165,18 @@ const sendBulkNewsletterEmail = async (users, subject, content) => {
     const emailPromises = users.map(user => 
       sendNewsletterEmail(user, subject, content)
     );
-    await Promise.all(emailPromises);
+    const results = await Promise.all(emailPromises);
+    return results;
   } catch (error) {
     console.error("Error sending bulk newsletter emails:", error);
+    return { success: false, error: error.message };
   }
 };
 
 module.exports = {
   sendWelcomeEmail,
+  sendContactFormNotification,
+  sendContactFormAutoReply,
   sendOrderConfirmationEmail,
   sendOrderStatusUpdateEmail,
   sendPasswordResetEmail,
