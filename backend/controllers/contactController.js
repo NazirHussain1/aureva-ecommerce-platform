@@ -1,5 +1,5 @@
 const ContactMessage = require('../models/ContactMessage');
-const { sendEmail } = require('../services/emailService');
+const { sendContactFormNotification, sendContactFormAutoReply } = require('../services/emailService');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 
@@ -42,21 +42,26 @@ exports.submitContactForm = async (req, res) => {
       console.error('Failed to create admin notifications:', notifError);
     }
 
-    // Send notification email to admin (optional)
+    // Send notification email to admin
     try {
-      await sendEmail({
-        to: process.env.ADMIN_EMAIL || 'admin@aureva.com',
-        subject: `New Contact Message: ${subject}`,
-        html: `
-          <h2>New Contact Message</h2>
-          <p><strong>From:</strong> ${name} (${email})</p>
-          <p><strong>Subject:</strong> ${subject}</p>
-          <p><strong>Message:</strong></p>
-          <p>${message}</p>
-        `
+      await sendContactFormNotification({
+        name,
+        email,
+        subject,
+        message
       });
     } catch (emailError) {
-      console.error('Failed to send notification email:', emailError);
+      console.error('Failed to send admin notification email:', emailError);
+    }
+
+    // Send auto-reply to customer
+    try {
+      await sendContactFormAutoReply({
+        name,
+        email
+      });
+    } catch (autoReplyError) {
+      console.error('Failed to send auto-reply email:', autoReplyError);
     }
 
     res.status(201).json({ 
