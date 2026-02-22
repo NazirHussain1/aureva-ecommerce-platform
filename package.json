@@ -44,7 +44,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "mysql2": "^3.11.5",
-    "nodemailer": "^6.9.8",
+    "nodemailer": "^6.9.7",
     "sequelize": "^6.37.7",
     "socket.io": "^4.8.3",
     "xss-clean": "^0.1.4"
