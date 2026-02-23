@@ -42,6 +42,14 @@ const Settings = sequelize.define('Settings', {
   youtubeUrl: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  whatsappUrl: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  whatsappNumber: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, {
   tableName: 'settings',

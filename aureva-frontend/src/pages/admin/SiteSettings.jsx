@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FiSave, FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
-import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube, FaWhatsapp } from 'react-icons/fa';
 import { BiLoaderAlt } from 'react-icons/bi';
 import toast from 'react-hot-toast';
 import { getSettings, updateSettings } from '../../api/settingsApi';
@@ -16,7 +16,9 @@ export default function SiteSettings() {
     facebookUrl: '',
     instagramUrl: '',
     twitterUrl: '',
-    youtubeUrl: ''
+    youtubeUrl: '',
+    whatsappUrl: '',
+    whatsappNumber: ''
   });
 
   useEffect(() => {
@@ -35,7 +37,9 @@ export default function SiteSettings() {
         facebookUrl: data.facebookUrl || '',
         instagramUrl: data.instagramUrl || '',
         twitterUrl: data.twitterUrl || '',
-        youtubeUrl: data.youtubeUrl || ''
+        youtubeUrl: data.youtubeUrl || '',
+        whatsappUrl: data.whatsappUrl || '',
+        whatsappNumber: data.whatsappNumber || ''
       });
     } catch (error) {
       console.error('Failed to fetch settings:', error);
@@ -215,6 +219,37 @@ export default function SiteSettings() {
                 className="input"
                 placeholder="https://youtube.com/yourchannel"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <FaWhatsapp className="text-green-600" />
+                WhatsApp Channel URL
+              </label>
+              <input
+                type="url"
+                name="whatsappUrl"
+                value={formData.whatsappUrl}
+                onChange={handleChange}
+                className="input"
+                placeholder="https://whatsapp.com/channel/..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <FaWhatsapp className="text-green-600" />
+                WhatsApp Number (for floating button)
+              </label>
+              <input
+                type="text"
+                name="whatsappNumber"
+                value={formData.whatsappNumber}
+                onChange={handleChange}
+                className="input"
+                placeholder="+923321716508"
+              />
+              <p className="text-xs text-gray-500 mt-1">Format: +country_code_number (e.g., +923321716508)</p>
             </div>
           </div>
         </div>

@@ -20,7 +20,11 @@ export default function FloatingWhatsApp() {
   const fetchSettings = async () => {
     try {
       const data = await getPublicSettings();
-      if (data.phone) {
+      // Use whatsappNumber if available, otherwise fallback to phone
+      if (data.whatsappNumber) {
+        const cleanPhone = data.whatsappNumber.replace(/\D/g, '');
+        setPhone(cleanPhone);
+      } else if (data.phone) {
         const cleanPhone = data.phone.replace(/\D/g, '');
         setPhone(cleanPhone);
       }

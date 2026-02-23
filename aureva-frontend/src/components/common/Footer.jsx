@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube, FaLinkedinIn, FaPinterestP } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube, FaLinkedinIn, FaPinterestP, FaWhatsapp } from 'react-icons/fa';
 import { FiMail, FiPhone, FiMapPin, FiSend } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi';
 import { BiLoaderAlt } from 'react-icons/bi';
@@ -296,7 +296,18 @@ export default function Footer() {
                     <FaYoutube className="text-gray-400 group-hover:text-white transition-colors" />
                   </a>
                 )}
-                {!settings?.facebookUrl && !settings?.instagramUrl && !settings?.twitterUrl && !settings?.youtubeUrl && (
+                {settings?.whatsappUrl && (
+                  <a 
+                    href={settings.whatsappUrl} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-11 h-11 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gradient-to-r hover:from-green-500 hover:to-green-600 transition-all duration-300 hover:scale-110 hover:shadow-lg group"
+                    aria-label="WhatsApp Channel"
+                  >
+                    <FaWhatsapp className="text-gray-400 group-hover:text-white transition-colors" />
+                  </a>
+                )}
+                {!settings?.facebookUrl && !settings?.instagramUrl && !settings?.twitterUrl && !settings?.youtubeUrl && !settings?.whatsappUrl && (
                   <>
                     <a 
                       href="https://facebook.com" 
