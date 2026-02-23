@@ -54,11 +54,7 @@ const User = sequelize.define("User", {
     allowNull: true,
   },
 }, { 
-  timestamps: true,
-  indexes: [
-    { fields: ['role'] },
-    { fields: ['status'] }
-  ]
+  timestamps: true
 });
 
 User.beforeCreate(async (user) => {

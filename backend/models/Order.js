@@ -45,12 +45,7 @@ const Order = sequelize.define("Order", {
     type: DataTypes.STRING,
   },
 }, { 
-  timestamps: true,
-  indexes: [
-    { fields: ['userId'] },
-    { fields: ['orderStatus'] },
-    { fields: ['paymentStatus'] }
-  ]
+  timestamps: true
 });
 
 Order.belongsTo(User, { foreignKey: "userId" });
