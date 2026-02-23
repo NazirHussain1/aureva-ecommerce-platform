@@ -25,7 +25,9 @@ exports.updateSettings = async (req, res) => {
       facebookUrl,
       instagramUrl,
       twitterUrl,
-      youtubeUrl
+      youtubeUrl,
+      whatsappUrl,
+      whatsappNumber
     } = req.body;
 
     let settings = await Settings.findOne();
@@ -41,7 +43,9 @@ exports.updateSettings = async (req, res) => {
         facebookUrl,
         instagramUrl,
         twitterUrl,
-        youtubeUrl
+        youtubeUrl,
+        whatsappUrl,
+        whatsappNumber
       });
     }
     
