@@ -42,7 +42,7 @@ export default function SiteSettings() {
         whatsappNumber: data.whatsappNumber || ''
       });
     } catch (error) {
-      console.error('Failed to fetch settings:', error);
+      
       toast.error('Failed to load settings');
     } finally {
       setLoading(false);
@@ -57,7 +57,7 @@ export default function SiteSettings() {
       await updateSettings(formData);
       toast.success('Settings updated successfully');
     } catch (error) {
-      console.error('Failed to update settings:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to update settings');
     } finally {
       setSaving(false);

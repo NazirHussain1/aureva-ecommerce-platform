@@ -66,7 +66,7 @@ export default function Checkout() {
         setSelectedAddress(defaultAddr);
       }
     } catch (error) {
-      console.error('Error fetching addresses:', error);
+      
     }
   };
 
@@ -157,7 +157,7 @@ export default function Checkout() {
       dispatch(clearCart());
       navigate(`/orders`);
     } catch (error) {
-      console.error('Error placing order:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to place order');
     } finally {
       setLoading(false);

@@ -40,7 +40,7 @@ export const logout = createAsyncThunk('auth/logout', async () => {
   try {
     await authApi.logout();
   } catch (error) {
-    console.error('Logout error:', error);
+    
   }
 });
 

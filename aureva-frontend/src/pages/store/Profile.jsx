@@ -120,7 +120,7 @@ export default function Profile() {
         confirmPassword: ''
       });
     } catch (error) {
-      console.error('Error updating profile:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to update profile');
     } finally {
       setLoading(false);

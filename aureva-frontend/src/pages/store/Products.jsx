@@ -72,7 +72,7 @@ export default function Products() {
       const response = await axios.get('/api/products');
       setProducts(response.data.products || []);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      
       toast.error('Failed to load products');
     } finally {
       setLoading(false);

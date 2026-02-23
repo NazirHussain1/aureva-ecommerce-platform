@@ -78,7 +78,7 @@ class PaymentService {
         } : null
       };
     } catch (error) {
-      console.error('Error creating payment:', error);
+      
       throw error;
     }
   }
@@ -140,7 +140,7 @@ class PaymentService {
 
       return payment;
     } catch (error) {
-      console.error('Error verifying payment:', error);
+      
       throw error;
     }
   }
@@ -167,7 +167,7 @@ class PaymentService {
         isPrimary: account.isPrimary
       }));
     } catch (error) {
-      console.error('Error fetching merchant accounts:', error);
+      
       throw error;
     }
   }
@@ -185,7 +185,7 @@ class PaymentService {
 
       return payment;
     } catch (error) {
-      console.error('Error fetching payment:', error);
+      
       throw error;
     }
   }
@@ -229,7 +229,7 @@ class PaymentService {
 
       return payment;
     } catch (error) {
-      console.error('Error refunding payment:', error);
+      
       throw error;
     }
   }
@@ -254,7 +254,7 @@ class PaymentService {
         );
       }
     } catch (error) {
-      console.error('Error notifying admin:', error);
+      
     }
   }
 
@@ -315,7 +315,7 @@ class PaymentService {
         html: emailTemplate
       });
     } catch (error) {
-      console.error('Error sending payment confirmation email:', error);
+      
     }
   }
 
@@ -371,7 +371,7 @@ class PaymentService {
         html: emailTemplate
       });
     } catch (error) {
-      console.error('Error sending payment verified email:', error);
+      
     }
   }
 }

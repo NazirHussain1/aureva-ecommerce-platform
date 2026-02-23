@@ -122,8 +122,7 @@ export default function AdminProducts() {
       const apiProducts = response.data.products || response.data.data || [];
       setProducts(Array.isArray(apiProducts) ? apiProducts : []);
     } catch (error) {
-      console.error('Error fetching products:', error);
-      toast.error('Failed to fetch products');
+            toast.error('Failed to fetch products');
     } finally {
       setLoading(false);
     }
@@ -175,7 +174,7 @@ export default function AdminProducts() {
       resetForm();
       fetchProducts();
     } catch (error) {
-      console.error('Error saving product:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to save product');
     } finally {
       setSubmitting(false);
@@ -212,8 +211,7 @@ export default function AdminProducts() {
                 toast.success('Product deleted successfully!');
                 fetchProducts();
               } catch (error) {
-                console.error('Error deleting product:', error);
-                toast.error('Failed to delete product');
+                                toast.error('Failed to delete product');
               }
             }}
             className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition-colors"

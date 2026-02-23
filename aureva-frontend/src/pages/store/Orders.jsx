@@ -38,7 +38,7 @@ export default function Orders() {
       const response = await axios.get('/api/orders');
       setOrders(response.data || []);
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      
       toast.error('Failed to load orders');
     } finally {
       setLoading(false);

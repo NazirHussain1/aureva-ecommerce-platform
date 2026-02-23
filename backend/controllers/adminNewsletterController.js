@@ -21,7 +21,7 @@ const sendNewsletter = async (req, res) => {
       sentTo: subscribers.length,
     });
   } catch (error) {
-    console.error("Send newsletter error:", error);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -45,7 +45,7 @@ const getNewsletterStats = async (req, res) => {
       recentSubscribers,
     });
   } catch (error) {
-    console.error("Get newsletter stats error:", error);
+    
     res.status(500).json({ message: "Server error" });
   }
 };

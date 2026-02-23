@@ -82,7 +82,7 @@ export default function Register() {
       await dispatch(register(registerData)).unwrap();
       navigate('/login');
     } catch (err) {
-      console.error('Registration error:', err);
+      
       setLocalError(err || 'Registration failed. Please try again.');
     }
   };

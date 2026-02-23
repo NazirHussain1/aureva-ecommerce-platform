@@ -30,7 +30,7 @@ export default function Settings() {
         setSettings(response.data);
       }
     } catch (error) {
-      console.error('Error fetching settings:', error);
+      
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,7 @@ export default function Settings() {
       await axios.put('/api/admin/settings', settings);
       toast.success('Settings updated successfully!');
     } catch (error) {
-      console.error('Error saving settings:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to save settings');
     } finally {
       setSaving(false);

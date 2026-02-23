@@ -21,7 +21,7 @@ const subscribeToNewsletter = async (req, res) => {
     await Newsletter.create({ email, name });
     res.status(201).json({ message: "Successfully subscribed to newsletter" });
   } catch (error) {
-    console.error("Newsletter subscription error:", error);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -41,7 +41,7 @@ const unsubscribeFromNewsletter = async (req, res) => {
 
     res.status(200).json({ message: "Successfully unsubscribed from newsletter" });
   } catch (error) {
-    console.error("Newsletter unsubscribe error:", error);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -59,7 +59,7 @@ const getNewsletterSubscribers = async (req, res) => {
       subscribers,
     });
   } catch (error) {
-    console.error("Get newsletter subscribers error:", error);
+    
     res.status(500).json({ message: "Server error" });
   }
 };

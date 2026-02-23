@@ -49,7 +49,7 @@ export default function Addresses() {
       const response = await axios.get('/api/addresses');
       setAddresses(response.data || []);
     } catch (error) {
-      console.error('Error fetching addresses:', error);
+      
       toast.error('Failed to load addresses');
     } finally {
       setLoading(false);
@@ -72,7 +72,7 @@ export default function Addresses() {
       resetForm();
       fetchAddresses();
     } catch (error) {
-      console.error('Error saving address:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to save address');
     }
   };
@@ -100,7 +100,7 @@ export default function Addresses() {
         toast.success('Address deleted successfully!');
         fetchAddresses();
       } catch (error) {
-        console.error('Error deleting address:', error);
+        
         toast.error('Failed to delete address');
       }
     }
@@ -112,7 +112,7 @@ export default function Addresses() {
       toast.success('Default address updated!');
       fetchAddresses();
     } catch (error) {
-      console.error('Error setting default address:', error);
+      
       toast.error('Failed to set default address');
     }
   };

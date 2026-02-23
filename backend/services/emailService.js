@@ -19,7 +19,7 @@ const sendWelcomeEmail = async (user) => {
     });
     return result;
   } catch (error) {
-    console.error("Error sending welcome email:", error);
+    
     return { success: false, error: error.message };
   }
 };
@@ -40,7 +40,7 @@ const sendContactFormNotification = async (contactData) => {
     });
     return result;
   } catch (error) {
-    console.error("Error sending contact form notification:", error);
+    
     return { success: false, error: error.message };
   }
 };
@@ -55,7 +55,7 @@ const sendContactFormAutoReply = async (contactData) => {
     });
     return result;
   } catch (error) {
-    console.error("Error sending contact form auto-reply:", error);
+    
     return { success: false, error: error.message };
   }
 };
@@ -69,7 +69,7 @@ const sendOrderConfirmationEmail = async (order, user) => {
     });
     return result;
   } catch (error) {
-    console.error("Error sending order confirmation email:", error);
+    
     return { success: false, error: error.message };
   }
 };
@@ -90,7 +90,7 @@ const sendOrderStatusUpdateEmail = async (order, user, newStatus) => {
     });
     return result;
   } catch (error) {
-    console.error("Error sending order status update email:", error);
+    
     return { success: false, error: error.message };
   }
 };
@@ -141,7 +141,7 @@ const sendPasswordResetEmail = async (user, resetToken = null, otp = null) => {
       return result;
     }
   } catch (error) {
-    console.error("Error sending password reset email:", error);
+    
     return { success: false, error: error.message };
   }
 };
@@ -155,7 +155,7 @@ const sendNewsletterEmail = async (user, subject, content) => {
     });
     return result;
   } catch (error) {
-    console.error("Error sending newsletter email:", error);
+    
     return { success: false, error: error.message };
   }
 };
@@ -168,7 +168,7 @@ const sendBulkNewsletterEmail = async (users, subject, content) => {
     const results = await Promise.all(emailPromises);
     return results;
   } catch (error) {
-    console.error("Error sending bulk newsletter emails:", error);
+    
     return { success: false, error: error.message };
   }
 };

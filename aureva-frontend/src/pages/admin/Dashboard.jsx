@@ -29,8 +29,7 @@ export default function Dashboard() {
       const salesRes = await axios.get(`/api/admin/analytics/sales-chart?range=${timeRange}`);
       setSalesData(salesRes.data || []);
     } catch (error) {
-      console.error('Error fetching chart data:', error);
-    }
+          }
   }, [timeRange]);
 
   const fetchDashboardData = useCallback(async () => {
@@ -59,7 +58,7 @@ export default function Dashboard() {
         recentOrders
       });
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      
     } finally {
       setLoading(false);
     }

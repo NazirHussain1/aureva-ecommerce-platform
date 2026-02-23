@@ -30,7 +30,7 @@ class CategoryController {
         data: category
       });
     } catch (error) {
-      console.error('Create category error:', error);
+      
       res.status(400).json({
         success: false,
         message: error.message || 'Failed to create category'
@@ -64,7 +64,7 @@ class CategoryController {
         data: category
       });
     } catch (error) {
-      console.error('Update category error:', error);
+      
       res.status(400).json({
         success: false,
         message: error.message || 'Failed to update category'
@@ -91,7 +91,7 @@ class CategoryController {
         ...result
       });
     } catch (error) {
-      console.error('Delete category error:', error);
+      
       res.status(400).json({
         success: false,
         message: error.message || 'Failed to delete category'
@@ -117,7 +117,7 @@ class CategoryController {
         data: tree
       });
     } catch (error) {
-      console.error('Get category tree error:', error);
+      
       res.status(500).json({
         success: false,
         message: 'Failed to fetch category tree'
@@ -147,7 +147,7 @@ class CategoryController {
         data: category
       });
     } catch (error) {
-      console.error('Get category error:', error);
+      
       res.status(404).json({
         success: false,
         message: error.message || 'Category not found'
@@ -180,7 +180,7 @@ class CategoryController {
         data: result
       });
     } catch (error) {
-      console.error('Get products by category error:', error);
+      
       res.status(404).json({
         success: false,
         message: error.message || 'Failed to fetch products'
@@ -215,7 +215,7 @@ class CategoryController {
         data: result
       });
     } catch (error) {
-      console.error('Reassign products error:', error);
+      
       res.status(400).json({
         success: false,
         message: error.message || 'Failed to reassign products'

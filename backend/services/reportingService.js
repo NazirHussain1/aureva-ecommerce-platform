@@ -35,7 +35,7 @@ class ReportingService {
         comparison
       };
     } catch (error) {
-      console.error('Error generating advanced sales report:', error);
+      
       throw error;
     }
   }
@@ -165,7 +165,7 @@ class ReportingService {
 
       return detailedSegments;
     } catch (error) {
-      console.error('Error generating customer segmentation report:', error);
+      
       throw error;
     }
   }
@@ -227,7 +227,7 @@ class ReportingService {
 
       return profitabilityData;
     } catch (error) {
-      console.error('Error generating product profitability report:', error);
+      
       throw error;
     }
   }
@@ -311,7 +311,7 @@ class ReportingService {
         }))
       };
     } catch (error) {
-      console.error('Error generating inventory analysis report:', error);
+      
       throw error;
     }
   }
@@ -373,7 +373,7 @@ class ReportingService {
 
       return ltvData;
     } catch (error) {
-      console.error('Error generating customer LTV report:', error);
+      
       throw error;
     }
   }

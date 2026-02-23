@@ -28,7 +28,7 @@ const securityHeaders = helmet({
 const noSQLInjectionPrevention = mongoSanitize({
   replaceWith: '_',
   onSanitize: ({ req, key }) => {
-    console.warn(`Potential NoSQL injection attempt detected: ${key} from IP: ${req.ip}`);
+    
   },
 });
 
@@ -102,7 +102,7 @@ const corsOptions = {
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      console.warn(`CORS blocked request from origin: ${origin}`);
+      
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -135,7 +135,7 @@ const securityLogger = (req, res, next) => {
     if (typeof obj === 'string') {
       suspiciousPatterns.forEach(pattern => {
         if (pattern.test(obj)) {
-          console.warn(`Suspicious pattern detected in ${path}: ${obj.substring(0, 100)} from IP: ${req.ip}`);
+          } from IP: ${req.ip}`);
         }
       });
     } else if (typeof obj === 'object' && obj !== null) {

@@ -67,7 +67,7 @@ export default function Reports() {
       setCategoryData(mockCategoryData);
 
     } catch (error) {
-      console.error('Error fetching reports data:', error);
+      
     } finally {
       setLoading(false);
     }

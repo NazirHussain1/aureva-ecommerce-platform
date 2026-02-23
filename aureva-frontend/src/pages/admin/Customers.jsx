@@ -23,7 +23,7 @@ export default function AdminCustomers() {
       const response = await axios.get('/api/admin/users');
       setCustomers(response.data || []);
     } catch (error) {
-      console.error('Error fetching customers:', error);
+      
       toast.error('Failed to load customers');
     } finally {
       setLoading(false);
@@ -53,8 +53,7 @@ export default function AdminCustomers() {
                 toast.success(`User ${action}ed successfully!`);
                 fetchCustomers();
               } catch (error) {
-                console.error('Error updating user status:', error);
-                toast.error(`Failed to ${action} user`);
+                                toast.error(`Failed to ${action} user`);
               }
             }}
             className={`px-3 py-1.5 rounded-lg text-white text-xs font-semibold transition-colors ${

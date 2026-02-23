@@ -33,7 +33,7 @@ const addAddress = async (req, res) => {
 
     res.status(201).json(address);
   } catch (error) {
-    console.error('Error adding address:', error);
+    
     res.status(500).json({ message: 'Failed to add address', error: error.message });
   }
 };
@@ -69,7 +69,7 @@ const updateAddress = async (req, res) => {
 
     res.json(address);
   } catch (error) {
-    console.error('Error updating address:', error);
+    
     res.status(500).json({ message: 'Failed to update address', error: error.message });
   }
 };
@@ -85,7 +85,7 @@ const deleteAddress = async (req, res) => {
     await address.destroy();
     res.json({ message: "Address deleted" });
   } catch (error) {
-    console.error('Error deleting address:', error);
+    
     res.status(500).json({ message: 'Failed to delete address', error: error.message });
   }
 };

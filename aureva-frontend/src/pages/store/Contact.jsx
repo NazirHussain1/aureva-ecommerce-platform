@@ -26,7 +26,7 @@ export default function Contact() {
       const data = await getPublicSettings();
       setSettings(data);
     } catch (error) {
-      console.error('Failed to fetch settings:', error);
+      
     }
   };
 
@@ -44,7 +44,7 @@ export default function Contact() {
         message: '',
       });
     } catch (error) {
-      console.error('Contact form error:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to send message');
     } finally {
       setLoading(false);

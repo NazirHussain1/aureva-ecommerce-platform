@@ -31,7 +31,7 @@ export default function Home() {
       const allProducts = response.data.products || [];
       setProducts(allProducts.filter(p => p.stock > 0).slice(0, 8));
     } catch (error) {
-      console.error('Error fetching products:', error);
+      
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,7 @@ export default function Home() {
       toast.success('Successfully subscribed to newsletter!');
       setNewsletterEmail('');
     } catch (error) {
-      console.error('Newsletter subscription error:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to subscribe');
     } finally {
       setSubscribing(false);

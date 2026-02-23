@@ -52,7 +52,7 @@ export default function ForgotPassword() {
       setTimer(600);
       toast.success('OTP sent to your email!');
     } catch (error) {
-      console.error('Forgot password error:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to send OTP');
     } finally {
       setLoading(false);
@@ -69,7 +69,7 @@ export default function ForgotPassword() {
       setStep(3);
       toast.success('OTP verified successfully!');
     } catch (error) {
-      console.error('OTP verification error:', error);
+      
       toast.error(error.response?.data?.message || 'Invalid or expired OTP');
     } finally {
       setLoading(false);
@@ -102,7 +102,7 @@ export default function ForgotPassword() {
         navigate('/login');
       }, 2000);
     } catch (error) {
-      console.error('Reset password error:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to reset password');
     } finally {
       setLoading(false);

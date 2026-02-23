@@ -45,7 +45,7 @@ class PasswordResetService {
         message: 'Password reset email sent successfully.' 
       };
     } catch (error) {
-      console.error('Error requesting password reset:', error);
+      
       throw new Error('Failed to process password reset request');
     }
   }
@@ -101,7 +101,7 @@ class PasswordResetService {
         message: 'Password reset successfully.' 
       };
     } catch (error) {
-      console.error('Error resetting password:', error);
+      
       if (error.message === 'Invalid or expired reset token') {
         throw error;
       }
@@ -125,7 +125,7 @@ class PasswordResetService {
 
       return !!user;
     } catch (error) {
-      console.error('Error verifying reset token:', error);
+      
       return false;
     }
   }

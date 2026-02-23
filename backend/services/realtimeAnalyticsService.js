@@ -13,14 +13,14 @@ class RealtimeAnalyticsService {
 
   setupSocketHandlers() {
     this.io.on('connection', (socket) => {
-      console.log('Analytics client connected:', socket.id);
+      
       this.activeConnections.add(socket.id);
 
       // Send initial data on connection
       this.sendInitialData(socket);
 
       socket.on('disconnect', () => {
-        console.log('Analytics client disconnected:', socket.id);
+        
         this.activeConnections.delete(socket.id);
       });
 
@@ -35,7 +35,7 @@ class RealtimeAnalyticsService {
       const data = await this.getRealtimeData();
       socket.emit('analytics-update', data);
     } catch (error) {
-      console.error('Error sending initial analytics data:', error);
+      
     }
   }
 
@@ -44,7 +44,7 @@ class RealtimeAnalyticsService {
       const data = await this.getRealtimeData();
       socket.emit('analytics-update', data);
     } catch (error) {
-      console.error('Error sending realtime analytics update:', error);
+      
     }
   }
 
@@ -56,7 +56,7 @@ class RealtimeAnalyticsService {
           const data = await this.getRealtimeData();
           this.io.emit('analytics-update', data);
         } catch (error) {
-          console.error('Error in realtime analytics update:', error);
+          
         }
       }
     }, 30000); // 30 seconds
@@ -175,7 +175,7 @@ class RealtimeAnalyticsService {
         this.io.emit('analytics-update', data);
       }
     } catch (error) {
-      console.error('Error emitting new order event:', error);
+      
     }
   }
 
@@ -192,7 +192,7 @@ class RealtimeAnalyticsService {
       const data = await this.getRealtimeData();
       this.io.emit('analytics-update', data);
     } catch (error) {
-      console.error('Error emitting order status change event:', error);
+      
     }
   }
 
@@ -206,7 +206,7 @@ class RealtimeAnalyticsService {
         timestamp: new Date()
       });
     } catch (error) {
-      console.error('Error emitting low stock alert:', error);
+      
     }
   }
 }

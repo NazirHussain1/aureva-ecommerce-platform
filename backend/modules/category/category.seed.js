@@ -9,7 +9,7 @@ const { generateCategorySlug, generateCanonicalUrl } = require('../../utils/slug
 
 const seedCategories = async () => {
   try {
-    console.log('🌱 Seeding categories...');
+    
     
     // Clear existing categories (development only)
     // await Category.destroy({ where: {}, force: true });
@@ -299,7 +299,7 @@ const seedCategories = async () => {
       }
       
       const category = await Category.create(data);
-      console.log(`✅ Created: ${data.name} (Level ${data.level})`);
+      `);
       
       // Create children recursively
       if (children && children.length > 0) {
@@ -316,9 +316,9 @@ const seedCategories = async () => {
       await createCategoryTree(categoryData);
     }
     
-    console.log('✅ Categories seeded successfully!');
+    
   } catch (error) {
-    console.error('❌ Error seeding categories:', error);
+    
     throw error;
   }
 };

@@ -45,7 +45,7 @@ class ShipmentService {
 
       return shipment;
     } catch (error) {
-      console.error('Error creating shipment:', error);
+      
       throw error;
     }
   }
@@ -94,7 +94,7 @@ class ShipmentService {
 
       return shipment;
     } catch (error) {
-      console.error('Error updating shipment status:', error);
+      
       throw error;
     }
   }
@@ -118,7 +118,7 @@ class ShipmentService {
 
       return shipment;
     } catch (error) {
-      console.error('Error getting shipment tracking:', error);
+      
       throw error;
     }
   }
@@ -193,7 +193,7 @@ class ShipmentService {
         html: emailTemplate
       });
     } catch (error) {
-      console.error('Error notifying customer:', error);
+      
     }
   }
 }

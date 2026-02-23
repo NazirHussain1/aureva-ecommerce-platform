@@ -29,7 +29,7 @@ export default function FloatingWhatsApp() {
         setPhone(cleanPhone);
       }
     } catch (error) {
-      console.error('Failed to fetch settings:', error);
+      
     }
   };
 

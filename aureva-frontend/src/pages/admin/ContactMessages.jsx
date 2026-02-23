@@ -22,7 +22,7 @@ export default function ContactMessages() {
       const data = await getAllMessages(params);
       setMessages(data.messages || []);
     } catch (error) {
-      console.error('Failed to fetch messages:', error);
+      
       toast.error('Failed to load messages');
     } finally {
       setLoading(false);
@@ -41,7 +41,7 @@ export default function ContactMessages() {
           m.id === message.id ? { ...m, isRead: true } : m
         ));
       } catch (error) {
-        console.error('Failed to mark as read:', error);
+        
       }
     }
   };
@@ -57,7 +57,7 @@ export default function ContactMessages() {
         setShowModal(false);
       }
     } catch (error) {
-      console.error('Failed to delete message:', error);
+      
       toast.error('Failed to delete message');
     }
   };

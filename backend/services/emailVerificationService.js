@@ -92,7 +92,7 @@ class EmailVerificationService {
         message: 'Verification email sent successfully' 
       };
     } catch (error) {
-      console.error('Error sending verification email:', error);
+      
       throw new Error('Failed to send verification email');
     }
   }
@@ -132,7 +132,7 @@ class EmailVerificationService {
         message: 'Email verified successfully' 
       };
     } catch (error) {
-      console.error('Error verifying email:', error);
+      
       if (error.message === 'Invalid verification token') {
         throw error;
       }
@@ -176,7 +176,7 @@ class EmailVerificationService {
         message: 'Verification email sent successfully' 
       };
     } catch (error) {
-      console.error('Error resending verification email:', error);
+      
       throw new Error('Failed to resend verification email');
     }
   }

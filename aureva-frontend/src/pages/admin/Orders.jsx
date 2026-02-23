@@ -25,7 +25,7 @@ export default function AdminOrders() {
       const response = await axios.get('/api/admin/orders');
       setOrders(response.data || []);
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      
       toast.error('Failed to load orders');
     } finally {
       setLoading(false);
@@ -48,7 +48,7 @@ export default function AdminOrders() {
       
       toast.success('Order status updated successfully!');
     } catch (error) {
-      console.error('Error updating order:', error);
+      
       toast.error('Failed to update order status');
     } finally {
       setUpdating(null);

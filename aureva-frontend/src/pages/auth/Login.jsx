@@ -38,8 +38,7 @@ export default function Login() {
         navigate('/');
       }
     } catch (err) {
-      console.error('Login error:', err);
-    }
+          }
   };
 
   return (

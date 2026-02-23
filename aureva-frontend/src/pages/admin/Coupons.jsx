@@ -33,7 +33,7 @@ export default function AdminCoupons() {
       const response = await axios.get('/api/admin/coupons');
       setCoupons(response.data || []);
     } catch (error) {
-      console.error('Error fetching coupons:', error);
+      
       toast.error('Failed to load coupons');
     } finally {
       setLoading(false);
@@ -65,7 +65,7 @@ export default function AdminCoupons() {
       resetForm();
       fetchCoupons();
     } catch (error) {
-      console.error('Error saving coupon:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to save coupon');
     } finally {
       setSubmitting(false);
@@ -94,7 +94,7 @@ export default function AdminCoupons() {
         toast.success('Coupon deleted successfully!');
         fetchCoupons();
       } catch (error) {
-        console.error('Error deleting coupon:', error);
+        
         toast.error('Failed to delete coupon');
       }
     }

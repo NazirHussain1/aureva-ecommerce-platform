@@ -50,7 +50,7 @@ export default function ProductDetails() {
       setProduct(response.data);
       return response.data;
     } catch (error) {
-      console.error('Error fetching product:', error);
+      
       toast.error('Product not found');
       navigate('/products');
       return null;
@@ -67,7 +67,7 @@ export default function ProductDetails() {
       const response = await axios.get(`/api/reviews/${productId}`);
       setReviews(response.data || []);
     } catch (error) {
-      console.error('Error fetching reviews:', error);
+      
     } finally {
       setLoadingReviews(false);
     }
@@ -170,7 +170,7 @@ export default function ProductDetails() {
       fetchReviewsByProductId(product.id);
       fetchProductByIdentifier();
     } catch (error) {
-      console.error('Error submitting review:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to submit review');
     }
   };

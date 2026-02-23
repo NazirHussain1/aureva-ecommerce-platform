@@ -116,7 +116,7 @@ const getSalesChartData = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching sales chart data:', error);
+    
     res.status(500).json({ message: 'Error fetching sales data' });
   }
 };
@@ -149,7 +149,7 @@ const getCategoryRevenue = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching category revenue:', error);
+    
     res.status(500).json({ message: 'Error fetching category data' });
   }
 };
@@ -178,7 +178,7 @@ const getTopProducts = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching top products:', error);
+    
     res.status(500).json({ message: 'Error fetching top products' });
   }
 };
@@ -246,7 +246,7 @@ const getCustomerGrowth = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching customer growth:', error);
+    
     res.status(500).json({ message: 'Error fetching customer growth' });
   }
 };
@@ -268,7 +268,7 @@ const getOrderStatusDistribution = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching order status distribution:', error);
+    
     res.status(500).json({ message: 'Error fetching order status' });
   }
 };
@@ -319,7 +319,7 @@ const getDailySales = async (req, res) => {
       comparisonDate: yesterday.toISOString().split('T')[0]
     });
   } catch (error) {
-    console.error('Error fetching daily sales:', error);
+    
     res.status(500).json({ message: 'Error fetching daily sales' });
   }
 };
@@ -385,7 +385,7 @@ const getMonthlyRevenue = async (req, res) => {
       dailyBreakdown: dailyData
     });
   } catch (error) {
-    console.error('Error fetching monthly revenue:', error);
+    
     res.status(500).json({ message: 'Error fetching monthly revenue' });
   }
 };
@@ -455,7 +455,7 @@ const getRepeatCustomers = async (req, res) => {
       topCustomers: topCustomersData
     });
   } catch (error) {
-    console.error('Error fetching repeat customers:', error);
+    
     res.status(500).json({ message: 'Error fetching repeat customers data' });
   }
 };

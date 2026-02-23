@@ -18,7 +18,7 @@ export default function Sidebar() {
       const data = await getAllMessages({ isRead: false });
       setUnreadCount(data.totalMessages || 0);
     } catch (error) {
-      console.error('Failed to fetch unread count:', error);
+      
     }
   };
 

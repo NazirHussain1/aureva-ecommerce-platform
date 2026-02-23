@@ -26,7 +26,7 @@ export default function NotificationBell() {
       setNotifications(notifs);
       setUnreadCount(notifs.filter(n => !n.isRead).length);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      
     } finally {
       setLoading(false);
     }
@@ -40,7 +40,7 @@ export default function NotificationBell() {
       ));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      
     }
   };
 
@@ -51,7 +51,7 @@ export default function NotificationBell() {
       setUnreadCount(0);
       toast.success('All notifications marked as read');
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      
       toast.error('Failed to mark all as read');
     }
   };
@@ -62,7 +62,7 @@ export default function NotificationBell() {
       setNotifications(notifications.filter(n => n.id !== id));
       toast.success('Notification deleted');
     } catch (error) {
-      console.error('Error deleting notification:', error);
+      
       toast.error('Failed to delete notification');
     }
   };

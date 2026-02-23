@@ -22,7 +22,7 @@ export default function Footer() {
       const data = await getPublicSettings();
       setSettings(data);
     } catch (error) {
-      console.error('Failed to fetch settings:', error);
+      
     }
   };
 
@@ -40,7 +40,7 @@ export default function Footer() {
       toast.success('Successfully subscribed to newsletter!');
       setEmail('');
     } catch (error) {
-      console.error('Newsletter subscription error:', error);
+      
       toast.error(error.response?.data?.message || 'Failed to subscribe');
     } finally {
       setSubscribing(false);
