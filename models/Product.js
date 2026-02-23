@@ -47,13 +47,7 @@ const Product = sequelize.define(
     }
   },
   { 
-    timestamps: true,
-    indexes: [
-      { fields: ['categoryId'] },
-      { fields: ['brand'] },
-      { fields: ['isActive'] },
-      { fields: ['isDeleted'] }
-    ]
+    timestamps: true
   }
 );
 
