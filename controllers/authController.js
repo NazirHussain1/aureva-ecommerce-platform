@@ -9,7 +9,7 @@ const generateToken = (user) => {
   return jwt.sign(
     { id: user.id, email: user.email, role: user.role },
     process.env.JWT_SECRET,
-    { expiresIn: "7d" }
+    { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
   );
 };
 
@@ -50,7 +50,6 @@ const signup = async (req, res) => {
       token,
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -82,7 +81,6 @@ const login = async (req, res) => {
       token,
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -108,7 +106,7 @@ const forgotPassword = async (req, res) => {
     try {
       await sendPasswordResetEmail(user, null, otp);
     } catch (emailError) {
-      console.error('Failed to send OTP email:', emailError);
+      // Email error logged by email service
     }
 
     res.status(200).json({ 
@@ -116,7 +114,6 @@ const forgotPassword = async (req, res) => {
       email: email // Send back email for verification step
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -150,7 +147,6 @@ const verifyOTP = async (req, res) => {
       resetToken 
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -172,7 +168,7 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired reset token" });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12);
     user.password = hashedPassword;
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
@@ -182,7 +178,6 @@ const resetPassword = async (req, res) => {
 
     res.status(200).json({ message: "Password reset successful" });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -261,7 +256,7 @@ const updateProfile = async (req, res) => {
         return res.status(400).json({ message: "New password must be at least 6 characters" });
       }
 
-      user.password = await bcrypt.hash(newPassword, 10);
+      user.password = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12);
     }
 
     await user.save();
@@ -277,7 +272,6 @@ const updateProfile = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };

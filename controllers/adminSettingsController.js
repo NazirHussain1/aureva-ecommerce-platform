@@ -10,7 +10,7 @@ exports.getSettings = async (req, res) => {
     
     res.json(settings);
   } catch (error) {
-    console.error('Error fetching settings:', error);
+    
     res.status(500).json({ message: 'Failed to fetch settings' });
   }
 };
@@ -51,7 +51,7 @@ exports.updateSettings = async (req, res) => {
     
     res.json({ message: 'Settings updated successfully', settings });
   } catch (error) {
-    console.error('Error updating settings:', error);
+    
     res.status(500).json({ message: 'Failed to update settings' });
   }
 };
@@ -66,7 +66,7 @@ exports.getPublicSettings = async (req, res) => {
     
     res.json(settings);
   } catch (error) {
-    console.error('Error fetching public settings:', error);
+    
     res.status(500).json({ message: 'Failed to fetch settings' });
   }
 };

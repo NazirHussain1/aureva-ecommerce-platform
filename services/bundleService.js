@@ -48,7 +48,7 @@ class BundleService {
 
       return await this.getBundleById(bundle.id);
     } catch (error) {
-      console.error('Error creating bundle:', error);
+      
       throw error;
     }
   }
@@ -72,7 +72,7 @@ class BundleService {
 
       return bundle;
     } catch (error) {
-      console.error('Error getting bundle:', error);
+      
       throw error;
     }
   }
@@ -126,7 +126,7 @@ class BundleService {
         }
       };
     } catch (error) {
-      console.error('Error getting active bundles:', error);
+      
       throw error;
     }
   }
@@ -174,7 +174,7 @@ class BundleService {
 
       return await this.getBundleById(bundleId);
     } catch (error) {
-      console.error('Error updating bundle:', error);
+      
       throw error;
     }
   }
@@ -196,7 +196,7 @@ class BundleService {
 
       return true;
     } catch (error) {
-      console.error('Error deleting bundle:', error);
+      
       throw error;
     }
   }
@@ -227,7 +227,7 @@ class BundleService {
 
       return { available: true };
     } catch (error) {
-      console.error('Error checking bundle stock:', error);
+      
       throw error;
     }
   }

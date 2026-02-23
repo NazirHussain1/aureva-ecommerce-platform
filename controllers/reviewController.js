@@ -28,7 +28,7 @@ const getProductReviewsBySlug = async (req, res) => {
 
     res.json(reviews);
   } catch (error) {
-    console.error("Get reviews by slug error:", error);
+    
     res.status(500).json({ message: "Server error" });
   }
 };

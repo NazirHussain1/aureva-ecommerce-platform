@@ -31,7 +31,7 @@ const processPayment = async (req, res) => {
       payment,
     });
   } catch (error) {
-    console.error("Payment processing error:", error);
+    
     res.status(500).json({ message: "Payment processing failed" });
   }
 };
@@ -46,7 +46,7 @@ const getPaymentHistory = async (req, res) => {
 
     res.status(200).json(payments);
   } catch (error) {
-    console.error("Get payment history error:", error);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -63,7 +63,7 @@ const getPaymentDetails = async (req, res) => {
 
     res.status(200).json(payment);
   } catch (error) {
-    console.error("Get payment details error:", error);
+    
     res.status(500).json({ message: "Server error" });
   }
 };

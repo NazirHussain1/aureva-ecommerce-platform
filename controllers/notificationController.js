@@ -21,7 +21,7 @@ const getUserNotifications = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get notifications error:", error);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -39,7 +39,7 @@ const markAsRead = async (req, res) => {
 
     res.status(200).json({ message: "Notification marked as read" });
   } catch (error) {
-    console.error("Mark notification as read error:", error);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -53,7 +53,7 @@ const markAllAsRead = async (req, res) => {
 
     res.status(200).json({ message: "All notifications marked as read" });
   } catch (error) {
-    console.error("Mark all notifications as read error:", error);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -69,7 +69,7 @@ const deleteNotification = async (req, res) => {
     await notification.destroy();
     res.status(200).json({ message: "Notification deleted" });
   } catch (error) {
-    console.error("Delete notification error:", error);
+    
     res.status(500).json({ message: "Server error" });
   }
 };

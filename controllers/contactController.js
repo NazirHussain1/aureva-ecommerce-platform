@@ -39,7 +39,7 @@ exports.submitContactForm = async (req, res) => {
 
       await Promise.all(notificationPromises);
     } catch (notifError) {
-      console.error('Failed to create admin notifications:', notifError);
+      
     }
 
     // Send notification email to admin
@@ -51,7 +51,7 @@ exports.submitContactForm = async (req, res) => {
         message
       });
     } catch (emailError) {
-      console.error('Failed to send admin notification email:', emailError);
+      
     }
 
     // Send auto-reply to customer
@@ -61,7 +61,7 @@ exports.submitContactForm = async (req, res) => {
         email
       });
     } catch (autoReplyError) {
-      console.error('Failed to send auto-reply email:', autoReplyError);
+      
     }
 
     res.status(201).json({ 
@@ -69,7 +69,7 @@ exports.submitContactForm = async (req, res) => {
       contactMessage 
     });
   } catch (error) {
-    console.error('Error submitting contact form:', error);
+    
     res.status(500).json({ message: 'Failed to submit message' });
   }
 };
@@ -98,7 +98,7 @@ exports.getAllMessages = async (req, res) => {
       currentPage: parseInt(page)
     });
   } catch (error) {
-    console.error('Error fetching messages:', error);
+    
     res.status(500).json({ message: 'Failed to fetch messages' });
   }
 };
@@ -114,7 +114,7 @@ exports.getMessageById = async (req, res) => {
 
     res.json(message);
   } catch (error) {
-    console.error('Error fetching message:', error);
+    
     res.status(500).json({ message: 'Failed to fetch message' });
   }
 };
@@ -131,7 +131,7 @@ exports.markAsRead = async (req, res) => {
     await message.update({ isRead: true });
     res.json({ message: 'Message marked as read', contactMessage: message });
   } catch (error) {
-    console.error('Error marking message as read:', error);
+    
     res.status(500).json({ message: 'Failed to update message' });
   }
 };
@@ -148,7 +148,7 @@ exports.deleteMessage = async (req, res) => {
     await message.destroy();
     res.json({ message: 'Message deleted successfully' });
   } catch (error) {
-    console.error('Error deleting message:', error);
+    
     res.status(500).json({ message: 'Failed to delete message' });
   }
 };

@@ -83,7 +83,7 @@ class AnalyticsService {
         }
       };
     } catch (error) {
-      console.error('Error generating sales report:', error);
+      
       throw error;
     }
   }
@@ -165,7 +165,7 @@ class AnalyticsService {
         }))
       };
     } catch (error) {
-      console.error('Error generating product performance report:', error);
+      
       throw error;
     }
   }
@@ -273,7 +273,7 @@ class AnalyticsService {
         repeatCustomers: parseInt(repeatCustomers[0].repeat_customers || 0)
       };
     } catch (error) {
-      console.error('Error generating customer analytics:', error);
+      
       throw error;
     }
   }
@@ -319,7 +319,7 @@ class AnalyticsService {
         averagePrice: parseFloat(item.dataValues.averagePrice)
       }));
     } catch (error) {
-      console.error('Error generating category performance report:', error);
+      
       throw error;
     }
   }
@@ -377,7 +377,7 @@ class AnalyticsService {
         orders: parseInt(item.orders)
       })).reverse();
     } catch (error) {
-      console.error('Error generating revenue tracking report:', error);
+      
       throw error;
     }
   }
@@ -515,7 +515,7 @@ class AnalyticsService {
         }))
       };
     } catch (error) {
-      console.error('Error generating dashboard summary:', error);
+      
       throw error;
     }
   }

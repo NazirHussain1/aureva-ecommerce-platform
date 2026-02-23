@@ -13,7 +13,7 @@ class NotificationService {
       });
       return notification;
     } catch (error) {
-      console.error("Create notification error:", error);
+      
     }
   }
 
@@ -93,7 +93,7 @@ class NotificationService {
       });
       return count;
     } catch (error) {
-      console.error("Get unread count error:", error);
+      
       return 0;
     }
   }
@@ -105,7 +105,7 @@ class NotificationService {
         { where: { userId, isRead: false } }
       );
     } catch (error) {
-      console.error("Mark all as read error:", error);
+      
     }
   }
 
@@ -123,7 +123,7 @@ class NotificationService {
         },
       });
     } catch (error) {
-      console.error("Delete old notifications error:", error);
+      
     }
   }
 }

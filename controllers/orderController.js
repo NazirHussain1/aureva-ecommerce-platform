@@ -54,8 +54,7 @@ const placeOrder = async (req, res) => {
       userId: getOrderUserId(order),
     });
   } catch (error) {
-    console.error("Order placement error:", error);
-    res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -72,8 +71,7 @@ const getUserOrders = async (req, res) => {
 
     res.status(200).json(orders);
   } catch (error) {
-    console.error("Get user orders error:", error);
-    res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -93,8 +91,7 @@ const getOrderById = async (req, res) => {
 
     res.status(200).json(order);
   } catch (error) {
-    console.error("Get order error:", error);
-    res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -130,8 +127,7 @@ const cancelOrder = async (req, res) => {
       message: "Order cancelled successfully",
     });
   } catch (error) {
-    console.error("Cancel order error:", error);
-    res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -176,8 +172,7 @@ const returnOrder = async (req, res) => {
       message: "Return processed successfully",
     });
   } catch (error) {
-    console.error("Return order error:", error);
-    res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: "Server error" });
   }
 };
 

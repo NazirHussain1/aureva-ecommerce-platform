@@ -5,8 +5,7 @@ const getAllProducts = async (req, res) => {
     const products = await Product.findAll();
     res.json(products);
   } catch (error) {
-    console.error("Error fetching admin products:", error);
-    res.status(500).json({ message: "Failed to fetch products" });
+        res.status(500).json({ message: "Failed to fetch products" });
   }
 };
 
@@ -21,8 +20,7 @@ const createProduct = async (req, res) => {
     const product = await Product.create(payload);
     res.status(201).json(product);
   } catch (error) {
-    console.error("Error creating product:", error);
-    const message =
+        const message =
       error?.parent?.sqlMessage ||
       error?.errors?.[0]?.message ||
       "Failed to create product";
@@ -49,8 +47,7 @@ const updateProduct = async (req, res) => {
     await product.update(payload);
     res.json(product);
   } catch (error) {
-    console.error("Error updating product:", error);
-    const message =
+        const message =
       error?.parent?.sqlMessage ||
       error?.errors?.[0]?.message ||
       "Failed to update product";
@@ -69,8 +66,7 @@ const deleteProduct = async (req, res) => {
     await product.destroy();
     res.json({ message: "Product removed" });
   } catch (error) {
-    console.error("Error deleting product:", error);
-    res.status(500).json({ message: "Failed to delete product" });
+        res.status(500).json({ message: "Failed to delete product" });
   }
 };
 

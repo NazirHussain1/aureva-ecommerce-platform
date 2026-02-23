@@ -100,7 +100,7 @@ const getProducts = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -141,7 +141,7 @@ const getProductById = async (req, res) => {
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.status(200).json(product);
   } catch (err) {
-    console.error(err);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -175,7 +175,7 @@ const createProduct = async (req, res) => {
 
     res.status(201).json({ success: true, product });
   } catch (err) {
-    console.error(err);
+    
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
@@ -201,7 +201,7 @@ const updateProduct = async (req, res) => {
 
     res.status(200).json(product);
   } catch (err) {
-    console.error(err);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -214,7 +214,7 @@ const deleteProduct = async (req, res) => {
     await product.destroy();
     res.status(200).json({ message: "Product deleted" });
   } catch (err) {
-    console.error(err);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -236,7 +236,7 @@ const getCategories = async (req, res) => {
 
     res.json(categories);
   } catch (err) {
-    console.error(err);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -259,7 +259,7 @@ const getBrands = async (req, res) => {
 
     res.json(brands);
   } catch (err) {
-    console.error(err);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -349,7 +349,7 @@ const searchProducts = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -387,7 +387,7 @@ const getProductSuggestions = async (req, res) => {
 
     res.json({ suggestions });
   } catch (err) {
-    console.error(err);
+    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -403,7 +403,7 @@ const getProductBySlug = async (req, res) => {
 
     res.json(product);
   } catch (err) {
-    console.error(err);
+    
     res.status(500).json({ message: "Server error" });
   }
 };

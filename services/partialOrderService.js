@@ -51,7 +51,7 @@ class PartialOrderService {
 
       return cancellation;
     } catch (error) {
-      console.error('Error requesting partial cancellation:', error);
+      
       throw error;
     }
   }
@@ -110,7 +110,7 @@ class PartialOrderService {
 
       return returnRequest;
     } catch (error) {
-      console.error('Error requesting partial return:', error);
+      
       throw error;
     }
   }
@@ -170,7 +170,7 @@ class PartialOrderService {
 
       return cancellation;
     } catch (error) {
-      console.error('Error approving cancellation:', error);
+      
       throw error;
     }
   }
@@ -208,7 +208,7 @@ class PartialOrderService {
 
       return returnRequest;
     } catch (error) {
-      console.error('Error approving return:', error);
+      
       throw error;
     }
   }
@@ -254,7 +254,7 @@ class PartialOrderService {
 
       return returnRequest;
     } catch (error) {
-      console.error('Error processing return refund:', error);
+      
       throw error;
     }
   }
@@ -301,7 +301,7 @@ class PartialOrderService {
 
       return { cancellations, returns };
     } catch (error) {
-      console.error('Error getting user requests:', error);
+      
       throw error;
     }
   }
@@ -321,7 +321,7 @@ class PartialOrderService {
         );
       }
     } catch (error) {
-      console.error('Error notifying admin:', error);
+      
     }
   }
 
@@ -340,7 +340,7 @@ class PartialOrderService {
         );
       }
     } catch (error) {
-      console.error('Error notifying admin:', error);
+      
     }
   }
 }

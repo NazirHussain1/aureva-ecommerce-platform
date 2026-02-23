@@ -18,7 +18,7 @@ const checkLowStock = async (productId, newStock) => {
       }
     }
   } catch (error) {
-    console.error("Error checking low stock:", error);
+    
   }
 };
 
