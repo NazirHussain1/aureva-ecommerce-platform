@@ -49,9 +49,7 @@ const Order = sequelize.define("Order", {
   indexes: [
     { fields: ['userId'] },
     { fields: ['orderStatus'] },
-    { fields: ['paymentStatus'] },
-    { fields: ['createdAt'] },
-    { fields: ['deliveredAt'] }
+    { fields: ['paymentStatus'] }
   ]
 });
 

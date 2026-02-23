@@ -56,11 +56,8 @@ const User = sequelize.define("User", {
 }, { 
   timestamps: true,
   indexes: [
-    { fields: ['email'] },
     { fields: ['role'] },
-    { fields: ['status'] },
-    { fields: ['resetPasswordToken'] },
-    { fields: ['emailVerificationToken'] }
+    { fields: ['status'] }
   ]
 });
 

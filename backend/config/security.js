@@ -42,8 +42,16 @@ const securityConfig = (app) => {
 
   app.use(cors(corsOptions));
 
-  // Data sanitization against NoSQL injection
-  app.use(mongoSanitize());
+  // Data sanitization against NoSQL injection (only sanitize body, not query params)
+  app.use(mongoSanitize({
+    replaceWith: '_',
+    onSanitize: ({ req, key }) => {
+      // Log sanitization attempts in development
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Sanitized key: ${key}`);
+      }
+    },
+  }));
 
   // Data sanitization against XSS
   app.use(xss());
