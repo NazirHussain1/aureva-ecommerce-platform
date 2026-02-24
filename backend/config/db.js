@@ -10,17 +10,26 @@ if (process.env.NODE_ENV === 'test') {
     logging: false,
   });
 } else {
-  // Use MySQL for local development
-  sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASS,
-    {
-      host: process.env.DB_HOST,
-      dialect: "mysql",
-      logging: false,
+  // Railway provides MYSQLHOST, MYSQLUSER, etc. as well as DB_HOST, DB_USER, etc.
+  // Try Railway variables first, then fall back to custom variables
+  const dbHost = process.env.MYSQLHOST || process.env.DB_HOST || 'localhost';
+  const dbUser = process.env.MYSQLUSER || process.env.DB_USER || 'root';
+  const dbPass = process.env.MYSQLPASSWORD || process.env.DB_PASS || '';
+  const dbName = process.env.MYSQLDATABASE || process.env.DB_NAME || 'aureva';
+  const dbPort = process.env.MYSQLPORT || process.env.DB_PORT || 3306;
+
+  sequelize = new Sequelize(dbName, dbUser, dbPass, {
+    host: dbHost,
+    port: dbPort,
+    dialect: "mysql",
+    logging: false,
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
     }
-  );
+  });
 }
 
 module.exports = sequelize;
