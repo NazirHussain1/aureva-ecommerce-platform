@@ -5,6 +5,15 @@ const xss = require('xss-clean');
 
 // Security configuration
 const securityConfig = (app) => {
+  const mongoSanitizeOptions = {
+    replaceWith: '_',
+    onSanitize: ({ key }) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Sanitized key: ${key}`);
+      }
+    },
+  };
+
   // Set security HTTP headers
   app.use(helmet({
     contentSecurityPolicy: {
@@ -25,6 +34,12 @@ const securityConfig = (app) => {
         process.env.FRONTEND_URL,
         'http://localhost:3000',
         'http://localhost:3001',
+        'http://localhost:4173',
+        'http://localhost:5173',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:3001',
+        'http://127.0.0.1:4173',
+        'http://127.0.0.1:5173',
       ].filter(Boolean);
 
       // Allow requests with no origin (mobile apps, Postman, etc.)
@@ -42,16 +57,23 @@ const securityConfig = (app) => {
 
   app.use(cors(corsOptions));
 
-  // Data sanitization against NoSQL injection (only sanitize body, not query params)
-  app.use(mongoSanitize({
-    replaceWith: '_',
-    onSanitize: ({ req, key }) => {
-      // Log sanitization attempts in development
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`Sanitized key: ${key}`);
+  // Express 5 exposes req.query as a getter-only property, so sanitize mutable inputs manually.
+  app.use((req, res, next) => {
+    ['body', 'params'].forEach((key) => {
+      if (!req[key] || typeof req[key] !== 'object') {
+        return;
       }
-    },
-  }));
+
+      const wasSanitized = mongoSanitize.has(req[key], mongoSanitizeOptions.allowDots);
+      mongoSanitize.sanitize(req[key], mongoSanitizeOptions);
+
+      if (wasSanitized) {
+        mongoSanitizeOptions.onSanitize({ req, key });
+      }
+    });
+
+    next();
+  });
 
   // Data sanitization against XSS
   app.use(xss());
