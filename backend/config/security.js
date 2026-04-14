@@ -1,7 +1,7 @@
 const helmet = require('helmet');
 const cors = require('cors');
 const mongoSanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean');
+const { clean: cleanXss } = require('xss-clean/lib/xss');
 
 // Security configuration
 const securityConfig = (app) => {
@@ -75,8 +75,18 @@ const securityConfig = (app) => {
     next();
   });
 
-  // Data sanitization against XSS
-  app.use(xss());
+  // xss-clean also mutates req.query, which breaks under Express 5.
+  app.use((req, res, next) => {
+    ['body', 'params'].forEach((key) => {
+      if (!req[key]) {
+        return;
+      }
+
+      req[key] = cleanXss(req[key]);
+    });
+
+    next();
+  });
 
   // Prevent parameter pollution
   // app.use(hpp({
