@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('../config/loadEnv');
 const { sendEmail } = require('../config/email');
 const { 
   welcomeEmailTemplate,

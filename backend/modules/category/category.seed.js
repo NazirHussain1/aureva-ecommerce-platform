@@ -299,7 +299,6 @@ const seedCategories = async () => {
       }
       
       const category = await Category.create(data);
-      `);
       
       // Create children recursively
       if (children && children.length > 0) {

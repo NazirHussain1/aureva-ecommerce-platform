@@ -10,7 +10,7 @@ Category.hasMany(Product, {
 
 Product.belongsTo(Category, {
   foreignKey: 'categoryId',
-  as: 'category'
+  as: 'categoryDetails'
 });
 
 module.exports = {

@@ -6,6 +6,7 @@ const Product = sequelize.define(
   {
     name: { type: DataTypes.STRING, allowNull: false },
     slug: { type: DataTypes.STRING, allowNull: true, unique: true },
+    category: { type: DataTypes.STRING, allowNull: true },
     categoryId: {
       type: DataTypes.INTEGER,
       allowNull: true

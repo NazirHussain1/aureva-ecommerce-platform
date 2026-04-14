@@ -193,12 +193,13 @@ describe('Auth Controller Tests', () => {
         .send({ email: email })
         .expect(200);
 
-      expect(response.body.message).toBe('Password reset email sent');
+      expect(response.body.message).toBe('OTP sent to your email');
+      expect(response.body.email).toBe(email);
       
-      // Verify user has reset token
+      // Verify user has OTP details for the next verification step
       const updatedUser = await User.findByPk(user.id);
-      expect(updatedUser.resetPasswordToken).toBeTruthy();
-      expect(updatedUser.resetPasswordExpires).toBeTruthy();
+      expect(updatedUser.resetPasswordOTP).toBeTruthy();
+      expect(updatedUser.resetPasswordOTPExpires).toBeTruthy();
     });
 
     it('should return 404 for non-existent user', async () => {

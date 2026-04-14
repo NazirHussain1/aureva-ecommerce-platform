@@ -1,3 +1,5 @@
+require('./loadEnv');
+
 const { Sequelize } = require("sequelize");
 
 let sequelize;

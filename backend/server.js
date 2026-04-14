@@ -1,7 +1,4 @@
-// Load environment variables only in development
-if (process.env.NODE_ENV !== 'production') {
-  require("dotenv").config();
-}
+require("./config/loadEnv");
 
 const express = require("express");
 const compression = require("compression");
@@ -97,6 +94,10 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
+const shouldAlterSchema =
+  process.env.NODE_ENV === 'development' &&
+  process.env.DB_SYNC_ALTER !== 'false';
+const syncOptions = shouldAlterSchema ? { alter: true } : {};
 
 // Graceful shutdown
 const gracefulShutdown = async (signal) => {
@@ -123,7 +124,7 @@ process.on('unhandledRejection', (err) => {
 
 // Start server
 sequelize
-  .sync()
+  .sync(syncOptions)
   .then(() => {
     logger.info("✅ Database synced successfully");
     

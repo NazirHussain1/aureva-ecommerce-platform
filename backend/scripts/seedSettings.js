@@ -1,10 +1,10 @@
-require('dotenv').config();
+require('../config/loadEnv');
 const sequelize = require('../config/db');
 const Settings = require('../models/Settings');
 
 async function seedSettings() {
   try {
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
     
     const existingSettings = await Settings.findOne();
     
