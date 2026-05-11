@@ -2,7 +2,6 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const { Op } = require("sequelize");
 const { sendWelcomeEmail, sendPasswordResetEmail } = require("../services/emailService");
 
 const generateToken = (user) => {
@@ -23,7 +22,7 @@ const signup = async (req, res) => {
       });
     }
 
-    const userExists = await User.findOne({ where: { email } });
+    const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "Email already registered" });
     }
@@ -41,7 +40,7 @@ const signup = async (req, res) => {
 
     res.status(201).json({
       user: {
-        id: user.id,
+        id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -58,12 +57,12 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -72,7 +71,7 @@ const login = async (req, res) => {
 
     res.status(200).json({
       user: {
-        id: user.id,
+        id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -89,7 +88,7 @@ const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -123,13 +122,9 @@ const verifyOTP = async (req, res) => {
 
   try {
     const user = await User.findOne({
-      where: {
-        email,
-        resetPasswordOTP: otp,
-        resetPasswordOTPExpires: {
-          [Op.gt]: new Date(),
-        },
-      },
+      email,
+      resetPasswordOTP: otp,
+      resetPasswordOTPExpires: { $gt: new Date() }
     });
 
     if (!user) {
@@ -156,20 +151,15 @@ const resetPassword = async (req, res) => {
 
   try {
     const user = await User.findOne({
-      where: {
-        resetPasswordToken: token,
-        resetPasswordExpires: {
-          [Op.gt]: new Date(),
-        },
-      },
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: new Date() }
     });
 
     if (!user) {
       return res.status(400).json({ message: "Invalid or expired reset token" });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12);
-    user.password = hashedPassword;
+    user.password = newPassword;
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
     user.resetPasswordOTP = null;
@@ -188,7 +178,7 @@ const getMe = async (req, res) => {
   }
 
   res.status(200).json({
-    id: req.user.id,
+    id: req.user._id,
     name: req.user.name,
     email: req.user.email,
     role: req.user.role,
@@ -207,7 +197,7 @@ const updateProfile = async (req, res) => {
       return res.status(401).json({ message: "Not authorized" });
     }
 
-    const user = await User.findByPk(req.user.id);
+    const user = await User.findById(req.user._id).select('+password');
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -229,10 +219,8 @@ const updateProfile = async (req, res) => {
       }
 
       const existingUser = await User.findOne({
-        where: {
-          email: normalizedEmail,
-          id: { [Op.ne]: user.id },
-        },
+        email: normalizedEmail,
+        _id: { $ne: user._id }
       });
 
       if (existingUser) {
@@ -247,7 +235,7 @@ const updateProfile = async (req, res) => {
         return res.status(400).json({ message: "Current password is required" });
       }
 
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      const isMatch = await user.comparePassword(currentPassword);
       if (!isMatch) {
         return res.status(400).json({ message: "Current password is incorrect" });
       }
@@ -256,7 +244,7 @@ const updateProfile = async (req, res) => {
         return res.status(400).json({ message: "New password must be at least 6 characters" });
       }
 
-      user.password = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12);
+      user.password = newPassword;
     }
 
     await user.save();
@@ -264,7 +252,7 @@ const updateProfile = async (req, res) => {
     res.status(200).json({
       message: "Profile updated successfully",
       user: {
-        id: user.id,
+        id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,

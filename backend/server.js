@@ -3,6 +3,7 @@ require("./config/loadEnv");
 const express = require("express");
 const compression = require("compression");
 const morgan = require("morgan");
+const { connectDB } = require("./config/mongodb");
 const logger = require("./utils/logger");
 const securityConfig = require("./config/security");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
@@ -80,6 +81,9 @@ const gracefulShutdown = async (signal) => {
   logger.info(`${signal} received. Starting graceful shutdown...`);
   
   try {
+    const mongoose = require('mongoose');
+    await mongoose.connection.close();
+    logger.info('MongoDB connection closed');
     logger.info('Shutdown complete');
     process.exit(0);
   } catch (error) {
@@ -98,10 +102,23 @@ process.on('unhandledRejection', (err) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  logger.info(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-  logger.info(`📊 Health check available at http://localhost:${PORT}/health`);
-});
+const startServer = async () => {
+  try {
+    // Connect to MongoDB
+    await connectDB();
+    
+    // Start Express server
+    app.listen(PORT, () => {
+      logger.info(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+      logger.info(`📊 Health check available at http://localhost:${PORT}/health`);
+    });
+  } catch (error) {
+    logger.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 module.exports = app;
 

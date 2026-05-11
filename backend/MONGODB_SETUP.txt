@@ -1,0 +1,53 @@
+MongoDB Atlas Setup Instructions
+================================
+
+1. Create MongoDB Atlas Account
+   - Go to: https://www.mongodb.com/cloud/atlas
+   - Sign up for free account
+
+2. Create a Cluster
+   - Click "Build a Database"
+   - Choose FREE tier (M0)
+   - Select your preferred region
+   - Click "Create Cluster"
+
+3. Create Database User
+   - Go to "Database Access"
+   - Click "Add New Database User"
+   - Choose "Password" authentication
+   - Set username and password (save these!)
+   - Set role to "Atlas Admin" or "Read and write to any database"
+   - Click "Add User"
+
+4. Whitelist IP Address
+   - Go to "Network Access"
+   - Click "Add IP Address"
+   - Click "Allow Access from Anywhere" (0.0.0.0/0) for development
+   - Or add your specific IP address
+   - Click "Confirm"
+
+5. Get Connection String
+   - Go to "Database" > "Connect"
+   - Choose "Connect your application"
+   - Copy the connection string
+   - It looks like: mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+
+6. Update .env File
+   - Open backend/.env
+   - Replace MONGODB_URI with your connection string
+   - Replace <username> with your database username
+   - Replace <password> with your database password
+   - Add database name after .net/: mongodb+srv://user:pass@cluster.net/aureva?retryWrites=true&w=majority
+
+7. Start Server
+   - Run: npm run dev
+   - You should see: "✅ MongoDB Connected: cluster0.xxxxx.mongodb.net"
+
+Example Connection String:
+MONGODB_URI=mongodb+srv://myuser:mypassword123@cluster0.abc123.mongodb.net/aureva?retryWrites=true&w=majority
+
+Troubleshooting:
+- If connection fails, check IP whitelist
+- Verify username and password are correct
+- Ensure database user has proper permissions
+- Check if cluster is active (not paused)
