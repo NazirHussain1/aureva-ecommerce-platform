@@ -1,10 +1,7 @@
 /**
- * Enterprise-level Slug Generator Utility
- * Handles slug generation, uniqueness, and validation
+ * Enterprise-level Slug Generator Utility - Database Agnostic
+ * TODO: Implement uniqueness checks with MongoDB
  */
-
-const Category = require('../modules/category/category.model');
-const Product = require('../models/Product');
 
 /**
  * Generate a URL-friendly slug from text
@@ -34,34 +31,11 @@ const generateSlug = (text) => {
 
 /**
  * Ensure slug uniqueness by appending number if needed
- * @param {string} baseSlug - Base slug to check
- * @param {string} modelName - Model name ('category' or 'product')
- * @param {number} excludeId - ID to exclude from uniqueness check (for updates)
- * @returns {Promise<string>} - Unique slug
+ * TODO: Implement with MongoDB
  */
 const ensureUniqueSlug = async (baseSlug, modelName = 'category', excludeId = null) => {
-  const Model = modelName === 'category' ? Category : Product;
-  let slug = baseSlug;
-  let counter = 1;
-  
-  while (true) {
-    const whereClause = { slug };
-    if (excludeId) {
-      whereClause.id = { [require('sequelize').Op.ne]: excludeId };
-    }
-    
-    const existing = await Model.unscoped().findOne({ 
-      where: whereClause,
-      attributes: ['id']
-    });
-    
-    if (!existing) {
-      return slug;
-    }
-    
-    slug = `${baseSlug}-${counter}`;
-    counter++;
-  }
+  // TODO: Implement uniqueness check with MongoDB
+  return baseSlug;
 };
 
 /**

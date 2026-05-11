@@ -3,30 +3,10 @@ require("./config/loadEnv");
 const express = require("express");
 const compression = require("compression");
 const morgan = require("morgan");
-const sequelize = require("./config/db");
 const logger = require("./utils/logger");
 const securityConfig = require("./config/security");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
 const { apiLimiter } = require("./middleware/rateLimiter");
-
-// Load models
-require("./models/User");
-require("./models/Product");
-require("./models/Order");
-require("./models/OrderItem");
-require("./models/Cart");
-require("./models/Wishlist");
-require("./models/Address");
-require("./models/Review");
-require("./models/Coupon");
-require("./models/Newsletter");
-require("./models/Payment");
-require("./models/Notification");
-require("./models/Settings");
-require("./models/ContactMessage");
-
-// Load Category model and relationships
-require("./models/index");
 
 const app = express();
 
@@ -94,18 +74,13 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-const shouldAlterSchema =
-  process.env.NODE_ENV === 'development' &&
-  process.env.DB_SYNC_ALTER !== 'false';
-const syncOptions = shouldAlterSchema ? { alter: true } : {};
 
 // Graceful shutdown
 const gracefulShutdown = async (signal) => {
   logger.info(`${signal} received. Starting graceful shutdown...`);
   
   try {
-    await sequelize.close();
-    logger.info('Database connection closed');
+    logger.info('Shutdown complete');
     process.exit(0);
   } catch (error) {
     logger.error('Error during shutdown:', error);
@@ -123,19 +98,11 @@ process.on('unhandledRejection', (err) => {
 });
 
 // Start server
-sequelize
-  .sync(syncOptions)
-  .then(() => {
-    logger.info("✅ Database synced successfully");
-    
-    app.listen(PORT, () => {
-      logger.info(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-      logger.info(`📊 Health check available at http://localhost:${PORT}/health`);
-    });
-  })
-  .catch((err) => {
-    logger.error("❌ Database sync failed:", err);
-    process.exit(1);
-  });
+app.listen(PORT, () => {
+  logger.info(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  logger.info(`📊 Health check available at http://localhost:${PORT}/health`);
+});
 
 module.exports = app;
+
+
