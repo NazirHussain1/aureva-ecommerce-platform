@@ -1,6 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authApi from '../../api/authApi';
 
+// SECURITY NOTE: localStorage is used for token storage for simplicity.
+// For production, consider these security improvements:
+// 1. Use httpOnly cookies for token storage (requires backend support)
+// 2. Implement token refresh mechanism with short-lived access tokens
+// 3. Add CSRF protection for state-changing operations
+// 4. Consider using secure session management libraries
+// Current implementation is vulnerable to XSS attacks if malicious scripts are injected.
+
 const user = JSON.parse(localStorage.getItem('user'));
 const token = localStorage.getItem('token');
 

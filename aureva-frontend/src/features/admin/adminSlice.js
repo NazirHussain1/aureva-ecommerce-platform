@@ -19,39 +19,39 @@ const adminSlice = createSlice({
     products: [],
     orders: [],
     customers: [],
-    loading: false,
+    isLoading: false,
     error: null,
   },
   reducers: {
-    addProduct: (state, action) => {
-      state.products.push(action.payload);
-    },
-    removeProduct: (state, action) => {
-      state.products = state.products.filter(p => p.id !== action.payload);
-    },
     clearError: (state) => {
       state.error = null;
-    }
+    },
+    clearAdminData: (state) => {
+      state.products = [];
+      state.orders = [];
+      state.customers = [];
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAdminData.pending, (state) => {
-        state.loading = true;
+        state.isLoading = true;
         state.error = null;
       })
       .addCase(fetchAdminData.fulfilled, (state, action) => {
-        state.loading = false;
-        state.products = action.payload.products;
-        state.orders = action.payload.orders;
-        state.customers = action.payload.customers;
+        state.isLoading = false;
+        state.products = action.payload.products || [];
+        state.orders = action.payload.orders || [];
+        state.customers = action.payload.customers || [];
       })
       .addCase(fetchAdminData.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || 'Something went wrong';
+        state.isLoading = false;
+        state.error = action.payload || 'Failed to fetch admin data';
       });
   }
 });
 
-export const { addProduct, removeProduct, clearError } = adminSlice.actions;
+export const { clearError, clearAdminData } = adminSlice.actions;
 
 export default adminSlice.reducer;
