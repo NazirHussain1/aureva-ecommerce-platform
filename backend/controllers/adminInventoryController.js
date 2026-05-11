@@ -1,17 +1,16 @@
-const { Op } = require("sequelize");
-const sequelize = require("../config/db");
 const Product = require("../models/Product");
 
 const getLowStockProducts = async (req, res) => {
-  const products = await Product.findAll({
-    where: {
-      stock: {
-        [Op.lte]: sequelize.col("lowStockThreshold"),
-      },
-    },
-  });
+  try {
+    const lowStockThreshold = Number(req.query.threshold) || 5;
+    const products = await Product.find({
+      stock: { $gt: 0, $lte: lowStockThreshold },
+    });
 
-  res.json(products);
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch low stock products" });
+  }
 };
 
 module.exports = { getLowStockProducts };

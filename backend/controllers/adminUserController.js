@@ -1,52 +1,67 @@
 const User = require("../models/User");
 
 const getAllUsers = async (req, res) => {
-  const users = await User.findAll({
-    attributes: { exclude: ["password"] },
-  });
-  res.json(users);
+  try {
+    const users = await User.find().select("-password");
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch users" });
+  }
 };
 
 const updateUserRole = async (req, res) => {
-  const user = await User.findByPk(req.params.id);
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { role: req.body.role },
+      { new: true, runValidators: true }
+    ).select("-password");
 
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "User role updated", user });
+  } catch (error) {
+    res.status(400).json({ message: "Failed to update user role" });
   }
-
-  user.role = req.body.role || user.role;
-  await user.save();
-
-  res.json({ message: "User role updated", user });
 };
 
 const updateUserStatus = async (req, res) => {
-  const user = await User.findByPk(req.params.id);
+  try {
+    const allowedStatuses = ["active", "blocked"];
+    if (!allowedStatuses.includes(req.body.status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
 
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "User status updated", user });
+  } catch (error) {
+    res.status(400).json({ message: "Failed to update user status" });
   }
-
-  const allowedStatuses = ["active", "blocked"];
-  if (!allowedStatuses.includes(req.body.status)) {
-    return res.status(400).json({ message: "Invalid status value" });
-  }
-
-  user.status = req.body.status;
-  await user.save();
-
-  res.json({ message: "User status updated", user });
 };
 
 const deleteUser = async (req, res) => {
-  const user = await User.findByPk(req.params.id);
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
 
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "User deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete user" });
   }
-
-  await user.destroy();
-  res.json({ message: "User deleted" });
 };
 
 module.exports = {

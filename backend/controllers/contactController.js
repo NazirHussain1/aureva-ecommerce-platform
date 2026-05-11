@@ -1,154 +1,135 @@
-const ContactMessage = require('../models/ContactMessage');
-const { sendContactFormNotification, sendContactFormAutoReply } = require('../services/emailService');
-const User = require('../models/User');
-const Notification = require('../models/Notification');
+const ContactMessage = require("../models/ContactMessage");
+const { sendContactFormNotification, sendContactFormAutoReply } = require("../services/emailService");
+const User = require("../models/User");
+const Notification = require("../models/Notification");
 
 exports.submitContactForm = async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
 
     if (!name || !email || !subject || !message) {
-      return res.status(400).json({ message: 'All fields are required' });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     const contactMessage = await ContactMessage.create({
       name,
       email,
       subject,
-      message
+      message,
     });
 
-    // Create notification for all admin users
     try {
-      const adminUsers = await User.findAll({ where: { role: 'admin' } });
-      
-      const notificationPromises = adminUsers.map(admin => 
+      const adminUsers = await User.find({ role: "admin" });
+
+      await Promise.all(adminUsers.map((admin) =>
         Notification.create({
-          userId: admin.id,
-          title: 'New Contact Message',
+          user: admin.id,
+          title: "New Contact Message",
           message: `${name} sent a message: ${subject}`,
-          type: 'system',
-          actionUrl: '/admin/contact-messages',
+          type: "system",
+          actionUrl: "/admin/contact-messages",
           metadata: {
             contactMessageId: contactMessage.id,
             senderEmail: email,
-            senderName: name
-          }
+            senderName: name,
+          },
         })
-      );
-
-      await Promise.all(notificationPromises);
+      ));
     } catch (notifError) {
-      
+      // Contact submission should succeed even if admin notification creation fails.
     }
 
-    // Send notification email to admin
     try {
-      await sendContactFormNotification({
-        name,
-        email,
-        subject,
-        message
-      });
+      await sendContactFormNotification({ name, email, subject, message });
     } catch (emailError) {
-      
+      // Email delivery is best-effort for contact form submissions.
     }
 
-    // Send auto-reply to customer
     try {
-      await sendContactFormAutoReply({
-        name,
-        email
-      });
+      await sendContactFormAutoReply({ name, email });
     } catch (autoReplyError) {
-      
+      // Auto-reply delivery is best-effort.
     }
 
-    res.status(201).json({ 
-      message: 'Message sent successfully. We will get back to you shortly.',
-      contactMessage 
+    res.status(201).json({
+      message: "Message sent successfully. We will get back to you shortly.",
+      contactMessage,
     });
   } catch (error) {
-    
-    res.status(500).json({ message: 'Failed to submit message' });
+    res.status(500).json({ message: "Failed to submit message" });
   }
 };
 
 exports.getAllMessages = async (req, res) => {
   try {
     const { page = 1, limit = 20, isRead } = req.query;
-    const offset = (page - 1) * limit;
+    const currentPage = Math.max(parseInt(page, 10) || 1, 1);
+    const parsedLimit = Math.max(parseInt(limit, 10) || 20, 1);
+    const skip = (currentPage - 1) * parsedLimit;
+    const filter = {};
 
-    const where = {};
     if (isRead !== undefined) {
-      where.isRead = isRead === 'true';
+      filter.status = isRead === "true" ? "read" : "new";
     }
 
-    const { count, rows } = await ContactMessage.findAndCountAll({
-      where,
-      order: [['createdAt', 'DESC']],
-      limit: parseInt(limit),
-      offset: parseInt(offset)
-    });
+    const [rows, count] = await Promise.all([
+      ContactMessage.find(filter).sort({ createdAt: -1 }).skip(skip).limit(parsedLimit),
+      ContactMessage.countDocuments(filter),
+    ]);
 
     res.json({
       messages: rows,
       totalMessages: count,
-      totalPages: Math.ceil(count / limit),
-      currentPage: parseInt(page)
+      totalPages: Math.ceil(count / parsedLimit),
+      currentPage,
     });
   } catch (error) {
-    
-    res.status(500).json({ message: 'Failed to fetch messages' });
+    res.status(500).json({ message: "Failed to fetch messages" });
   }
 };
 
 exports.getMessageById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const message = await ContactMessage.findByPk(id);
+    const message = await ContactMessage.findById(req.params.id);
 
     if (!message) {
-      return res.status(404).json({ message: 'Message not found' });
+      return res.status(404).json({ message: "Message not found" });
     }
 
     res.json(message);
   } catch (error) {
-    
-    res.status(500).json({ message: 'Failed to fetch message' });
+    res.status(500).json({ message: "Failed to fetch message" });
   }
 };
 
 exports.markAsRead = async (req, res) => {
   try {
-    const { id } = req.params;
-    const message = await ContactMessage.findByPk(id);
+    const message = await ContactMessage.findByIdAndUpdate(
+      req.params.id,
+      { status: "read" },
+      { new: true }
+    );
 
     if (!message) {
-      return res.status(404).json({ message: 'Message not found' });
+      return res.status(404).json({ message: "Message not found" });
     }
 
-    await message.update({ isRead: true });
-    res.json({ message: 'Message marked as read', contactMessage: message });
+    res.json({ message: "Message marked as read", contactMessage: message });
   } catch (error) {
-    
-    res.status(500).json({ message: 'Failed to update message' });
+    res.status(500).json({ message: "Failed to update message" });
   }
 };
 
 exports.deleteMessage = async (req, res) => {
   try {
-    const { id } = req.params;
-    const message = await ContactMessage.findByPk(id);
+    const message = await ContactMessage.findByIdAndDelete(req.params.id);
 
     if (!message) {
-      return res.status(404).json({ message: 'Message not found' });
+      return res.status(404).json({ message: "Message not found" });
     }
 
-    await message.destroy();
-    res.json({ message: 'Message deleted successfully' });
+    res.json({ message: "Message deleted successfully" });
   } catch (error) {
-    
-    res.status(500).json({ message: 'Failed to delete message' });
+    res.status(500).json({ message: "Failed to delete message" });
   }
 };

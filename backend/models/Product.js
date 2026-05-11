@@ -41,6 +41,17 @@ const productSchema = new mongoose.Schema({
     min: [0, 'Stock cannot be negative'],
     default: 0
   },
+  averageRating: {
+    type: Number,
+    default: 0,
+    min: [0, 'Average rating cannot be negative'],
+    max: [5, 'Average rating cannot exceed 5']
+  },
+  numReviews: {
+    type: Number,
+    default: 0,
+    min: [0, 'Number of reviews cannot be negative']
+  },
   images: [{
     type: String
   }],

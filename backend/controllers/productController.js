@@ -1,93 +1,89 @@
-const { Op } = require("sequelize");
+const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const NotificationService = require("../services/notificationService");
 
-const dialect = Product.sequelize?.getDialect?.() || "mysql";
-const textLikeOp = dialect === "postgres" ? Op.iLike : Op.like;
-const textLikeKeyword = dialect === "postgres" ? "ILIKE" : "LIKE";
+const escapeRegex = (value = "") => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const escapeSqlString = (value = "") => String(value).replace(/'/g, "''");
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
+
+const buildProductFilter = ({ category, brand, minPrice, maxPrice, search, inStock = true }) => {
+  const filter = {};
+
+  if (inStock) {
+    filter.stock = { $gt: 0 };
+  }
+
+  if (category) {
+    filter.category = { $regex: escapeRegex(category), $options: "i" };
+  }
+
+  if (brand) {
+    filter.brand = { $regex: escapeRegex(brand), $options: "i" };
+  }
+
+  if (minPrice || maxPrice) {
+    filter.price = {};
+    if (minPrice) filter.price.$gte = Number(minPrice);
+    if (maxPrice) filter.price.$lte = Number(maxPrice);
+  }
+
+  if (search) {
+    const regex = { $regex: escapeRegex(search), $options: "i" };
+    filter.$or = [
+      { name: regex },
+      { description: regex },
+      { category: regex },
+      { brand: regex },
+    ];
+  }
+
+  return filter;
+};
+
+const getSortDirection = (sortOrder) => (String(sortOrder).toUpperCase() === "ASC" ? 1 : -1);
 
 const getProducts = async (req, res) => {
   try {
-    const { 
-      category, 
-      brand, 
-      minPrice, 
-      maxPrice, 
-      search, 
-      sortBy = 'createdAt', 
-      sortOrder = 'DESC',
+    const {
+      category,
+      brand,
+      minPrice,
+      maxPrice,
+      search,
+      sortBy = "createdAt",
+      sortOrder = "DESC",
       page = 1,
-      limit = 12
+      limit = 12,
     } = req.query;
 
-    // Build filter object
-    let filter = {
-      stock: { [Op.gt]: 0 },
-    };
+    const currentPage = Math.max(parseInt(page, 10) || 1, 1);
+    const parsedLimit = Math.max(parseInt(limit, 10) || 12, 1);
+    const skip = (currentPage - 1) * parsedLimit;
+    const validSortFields = ["name", "price", "createdAt", "stock", "category", "brand"];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
+    const order = String(sortOrder).toUpperCase() === "ASC" ? "ASC" : "DESC";
+    const filter = buildProductFilter({ category, brand, minPrice, maxPrice, search });
 
-    // Category filter
-    if (category) {
-      filter.category = { [textLikeOp]: `%${category}%` };
-    }
+    const [products, count] = await Promise.all([
+      Product.find(filter)
+        .select("id slug name description price stock category brand images createdAt")
+        .sort({ [sortField]: getSortDirection(order) })
+        .skip(skip)
+        .limit(parsedLimit),
+      Product.countDocuments(filter),
+    ]);
 
-    // Brand filter
-    if (brand) {
-      filter.brand = { [textLikeOp]: `%${brand}%` };
-    }
-
-    // Price range filter
-    if (minPrice || maxPrice) {
-      filter.price = {};
-      if (minPrice) filter.price[Op.gte] = Number(minPrice);
-      if (maxPrice) filter.price[Op.lte] = Number(maxPrice);
-    }
-
-    // Search functionality
-    if (search) {
-      filter[Op.or] = [
-        { name: { [textLikeOp]: `%${search}%` } },
-        { description: { [textLikeOp]: `%${search}%` } },
-        { category: { [textLikeOp]: `%${search}%` } },
-        { brand: { [textLikeOp]: `%${search}%` } }
-      ];
-    }
-
-    // Pagination
-    const offset = (page - 1) * limit;
-    const parsedLimit = parseInt(limit);
-
-    // Valid sort fields
-    const validSortFields = ['name', 'price', 'createdAt', 'stock', 'category', 'brand'];
-    const sortField = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
-    const order = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-
-    const { count, rows: products } = await Product.findAndCountAll({
-      where: filter,
-      order: [[sortField, order]],
-      limit: parsedLimit,
-      offset: parseInt(offset),
-      attributes: [
-        'id', 'slug', 'name', 'description', 'price', 'stock', 
-        'category', 'brand', 'images', 'createdAt'
-      ]
-    });
-
-    // Calculate pagination info
     const totalPages = Math.ceil(count / parsedLimit);
-    const hasNextPage = page < totalPages;
-    const hasPrevPage = page > 1;
 
     res.status(200).json({
       products,
       pagination: {
-        currentPage: parseInt(page),
+        currentPage,
         totalPages,
         totalProducts: count,
-        hasNextPage,
-        hasPrevPage,
-        limit: parsedLimit
+        hasNextPage: currentPage < totalPages,
+        hasPrevPage: currentPage > 1,
+        limit: parsedLimit,
       },
       filters: {
         category,
@@ -96,99 +92,87 @@ const getProducts = async (req, res) => {
         maxPrice,
         search,
         sortBy: sortField,
-        sortOrder: order
-      }
+        sortOrder: order,
+      },
     });
   } catch (err) {
-    
     res.status(500).json({ message: "Server error" });
   }
 };
 
 const getProductById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const normalizedParam = decodeURIComponent(String(id || "")).trim();
-    let product;
+    const normalizedParam = decodeURIComponent(String(req.params.id || "")).trim();
+    let product = null;
 
     if (!normalizedParam) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    if (!Number.isNaN(Number(normalizedParam))) {
-      product = await Product.findByPk(Number(normalizedParam));
-    } else {
-      // Legacy URLs like "my-product-12"
-      const legacyIdMatch = normalizedParam.match(/-(\d+)$/);
-      if (legacyIdMatch) {
-        product = await Product.findByPk(Number(legacyIdMatch[1]));
-      }
+    if (isValidObjectId(normalizedParam)) {
+      product = await Product.findById(normalizedParam);
+    }
 
-      if (!product) {
-        product = await Product.findOne({ where: { slug: normalizedParam } });
-      }
-
-      if (!product) {
-        product = await Product.findOne({
-          where: require("sequelize").where(
-            require("sequelize").fn("lower", require("sequelize").col("name")),
-            normalizedParam.toLowerCase()
-          ),
-        });
+    if (!product) {
+      const legacyIdMatch = normalizedParam.match(/-([a-f\d]{24}|\d+)$/i);
+      if (legacyIdMatch && isValidObjectId(legacyIdMatch[1])) {
+        product = await Product.findById(legacyIdMatch[1]);
       }
     }
-    
+
+    if (!product) {
+      product = await Product.findOne({ slug: normalizedParam.toLowerCase() });
+    }
+
+    if (!product) {
+      product = await Product.findOne({
+        name: { $regex: `^${escapeRegex(normalizedParam)}$`, $options: "i" },
+      });
+    }
+
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.status(200).json(product);
   } catch (err) {
-    
     res.status(500).json({ message: "Server error" });
   }
 };
 
 const createProduct = async (req, res) => {
   try {
-    if (!prisma) {
-      return res
-        .status(500)
-        .json({ success: false, message: "Prisma database is not configured" });
-    }
-
     const { name, description, price, stock, category, brand } = req.body;
-
-    let imageUrl = null;
-    if (req.file) {
-      imageUrl = req.file.path;
-    }
-
-    const product = await prisma.product.create({
-      data: {
-        name,
-        description,
-        price: parseFloat(price),
-        stock: parseInt(stock, 10),
-        category,
-        brand,
-        image: imageUrl,
-      },
+    const imageUrl = req.file?.path;
+    const product = await Product.create({
+      ...req.body,
+      name,
+      description,
+      price: Number(price),
+      stock: parseInt(stock, 10),
+      category,
+      brand,
+      images: imageUrl ? [imageUrl] : req.body.images,
     });
 
     res.status(201).json({ success: true, product });
   } catch (err) {
-    
-    res.status(500).json({ success: false, message: "Server Error" });
+    const message = err?.errors ? Object.values(err.errors)[0]?.message : "Server Error";
+    res.status(500).json({ success: false, message });
   }
 };
 
 const updateProduct = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id);
+    const payload = { ...req.body };
+    if (payload.price !== undefined) payload.price = Number(payload.price);
+    if (payload.stock !== undefined) payload.stock = parseInt(payload.stock, 10);
+    if (req.file?.path) payload.images = [req.file.path];
+
+    const product = await Product.findByIdAndUpdate(req.params.id, payload, {
+      new: true,
+      runValidators: true,
+    });
+
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    const oldStock = product.stock;
-    await product.update(req.body);
-
-    // Check for low stock after update
     const lowStockThreshold = 5;
     if (product.stock <= lowStockThreshold && product.stock > 0) {
       await NotificationService.createLowStockAlert(
@@ -201,138 +185,87 @@ const updateProduct = async (req, res) => {
 
     res.status(200).json(product);
   } catch (err) {
-    
     res.status(500).json({ message: "Server error" });
   }
 };
 
 const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id);
+    const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    await product.destroy();
     res.status(200).json({ message: "Product deleted" });
   } catch (err) {
-    
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Get all categories
 const getCategories = async (req, res) => {
   try {
-    const categories = await Product.findAll({
-      attributes: [
-        'category',
-        [require('sequelize').fn('COUNT', require('sequelize').col('category')), 'count']
-      ],
-      where: {
-        stock: { [Op.gt]: 0 }
-      },
-      group: ['category'],
-      order: [['category', 'ASC']]
-    });
+    const categories = await Product.aggregate([
+      { $match: { stock: { $gt: 0 }, category: { $ne: null } } },
+      { $group: { _id: "$category", count: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+      { $project: { _id: 0, category: "$_id", count: 1 } },
+    ]);
 
     res.json(categories);
   } catch (err) {
-    
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Get all brands
 const getBrands = async (req, res) => {
   try {
-    const brands = await Product.findAll({
-      attributes: [
-        'brand',
-        [require('sequelize').fn('COUNT', require('sequelize').col('brand')), 'count']
-      ],
-      where: {
-        stock: { [Op.gt]: 0 },
-        brand: { [Op.ne]: null }
-      },
-      group: ['brand'],
-      order: [['brand', 'ASC']]
-    });
+    const brands = await Product.aggregate([
+      { $match: { stock: { $gt: 0 }, brand: { $nin: [null, ""] } } },
+      { $group: { _id: "$brand", count: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+      { $project: { _id: 0, brand: "$_id", count: 1 } },
+    ]);
 
     res.json(brands);
   } catch (err) {
-    
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Search products with advanced filters
 const searchProducts = async (req, res) => {
   try {
-    const { 
-      q: searchQuery, 
-      category, 
-      brand, 
-      minPrice, 
+    const {
+      q: searchQuery,
+      category,
+      brand,
+      minPrice,
       maxPrice,
       inStock = true,
       page = 1,
-      limit = 12
+      limit = 12,
     } = req.query;
 
     if (!searchQuery) {
       return res.status(400).json({ message: "Search query is required" });
     }
 
-    let filter = {};
-
-    // Stock filter
-    if (inStock === 'true') {
-      filter.stock = { [Op.gt]: 0 };
-    }
-
-    // Category filter
-    if (category) {
-      filter.category = { [textLikeOp]: `%${category}%` };
-    }
-
-    // Brand filter
-    if (brand) {
-      filter.brand = { [textLikeOp]: `%${brand}%` };
-    }
-
-    // Price range filter
-    if (minPrice || maxPrice) {
-      filter.price = {};
-      if (minPrice) filter.price[Op.gte] = Number(minPrice);
-      if (maxPrice) filter.price[Op.lte] = Number(maxPrice);
-    }
-
-    // Search across multiple fields
-    filter[Op.or] = [
-      { name: { [textLikeOp]: `%${searchQuery}%` } },
-      { description: { [textLikeOp]: `%${searchQuery}%` } },
-      { category: { [textLikeOp]: `%${searchQuery}%` } },
-      { brand: { [textLikeOp]: `%${searchQuery}%` } }
-    ];
-
-    // Pagination
-    const offset = (page - 1) * limit;
-    const parsedLimit = parseInt(limit);
-
-    const { count, rows: products } = await Product.findAndCountAll({
-      where: filter,
-      order: [
-        // Prioritize exact matches in name
-        [
-          require("sequelize").literal(
-            `CASE WHEN name ${textLikeKeyword} '%${escapeSqlString(searchQuery)}%' THEN 1 ELSE 2 END`
-          ),
-          "ASC",
-        ],
-        ['createdAt', 'DESC']
-      ],
-      limit: parsedLimit,
-      offset: parseInt(offset)
+    const currentPage = Math.max(parseInt(page, 10) || 1, 1);
+    const parsedLimit = Math.max(parseInt(limit, 10) || 12, 1);
+    const skip = (currentPage - 1) * parsedLimit;
+    const filter = buildProductFilter({
+      category,
+      brand,
+      minPrice,
+      maxPrice,
+      search: searchQuery,
+      inStock: inStock === true || inStock === "true",
     });
+
+    const [products, count] = await Promise.all([
+      Product.find(filter)
+        .sort({ name: 1, createdAt: -1 })
+        .skip(skip)
+        .limit(parsedLimit),
+      Product.countDocuments(filter),
+    ]);
 
     const totalPages = Math.ceil(count / parsedLimit);
 
@@ -340,21 +273,19 @@ const searchProducts = async (req, res) => {
       products,
       searchQuery,
       pagination: {
-        currentPage: parseInt(page),
+        currentPage,
         totalPages,
         totalResults: count,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
-        limit: parsedLimit
-      }
+        hasNextPage: currentPage < totalPages,
+        hasPrevPage: currentPage > 1,
+        limit: parsedLimit,
+      },
     });
   } catch (err) {
-    
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Get product suggestions for autocomplete
 const getProductSuggestions = async (req, res) => {
   try {
     const { q: searchQuery, limit = 5 } = req.query;
@@ -363,39 +294,24 @@ const getProductSuggestions = async (req, res) => {
       return res.json({ suggestions: [] });
     }
 
-    const suggestions = await Product.findAll({
-      attributes: ['id', 'slug', 'name', 'category', 'brand', 'price', 'images'],
-      where: {
-        stock: { [Op.gt]: 0 },
-        [Op.or]: [
-          { name: { [textLikeOp]: `%${searchQuery}%` } },
-          { category: { [textLikeOp]: `%${searchQuery}%` } },
-          { brand: { [textLikeOp]: `%${searchQuery}%` } }
-        ]
-      },
-      order: [
-        [
-          require("sequelize").literal(
-            `CASE WHEN name ${textLikeKeyword} '${escapeSqlString(searchQuery)}%' THEN 1 ELSE 2 END`
-          ),
-          "ASC",
-        ],
-        ['name', 'ASC']
-      ],
-      limit: parseInt(limit)
-    });
+    const regex = { $regex: escapeRegex(searchQuery), $options: "i" };
+    const suggestions = await Product.find({
+      stock: { $gt: 0 },
+      $or: [{ name: regex }, { category: regex }, { brand: regex }],
+    })
+      .select("id slug name category brand price images")
+      .sort({ name: 1 })
+      .limit(parseInt(limit, 10) || 5);
 
     res.json({ suggestions });
   } catch (err) {
-    
     res.status(500).json({ message: "Server error" });
   }
 };
 
 const getProductBySlug = async (req, res) => {
   try {
-    const { slug } = req.params;
-    const product = await Product.findOne({ where: { slug } });
+    const product = await Product.findOne({ slug: req.params.slug });
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -403,7 +319,6 @@ const getProductBySlug = async (req, res) => {
 
     res.json(product);
   } catch (err) {
-    
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -418,5 +333,5 @@ module.exports = {
   getBrands,
   searchProducts,
   getProductSuggestions,
-  getProductBySlug
+  getProductBySlug,
 };

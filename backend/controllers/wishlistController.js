@@ -1,42 +1,54 @@
 const Wishlist = require("../models/Wishlist");
-const Product = require("../models/Product");
 
 const getWishlist = async (req, res) => {
-  const items = await Wishlist.findAll({
-    where: { userId: req.user.id },
-    include: [Product],
-  });
-  res.json(items);
+  try {
+    const wishlist = await Wishlist.findOne({ user: req.user.id }).populate("products");
+    res.json(wishlist ? wishlist.products : []);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 const addToWishlist = async (req, res) => {
-  const { productId } = req.body;
+  try {
+    const { productId } = req.body;
+    const exists = await Wishlist.findOne({
+      user: req.user.id,
+      products: productId,
+    });
 
-  const exists = await Wishlist.findOne({
-    where: { userId: req.user.id, productId },
-  });
+    if (exists) {
+      return res.status(400).json({ message: "Already in wishlist" });
+    }
 
-  if (exists) {
-    return res.status(400).json({ message: "Already in wishlist" });
+    const item = await Wishlist.findOneAndUpdate(
+      { user: req.user.id },
+      { $addToSet: { products: productId } },
+      { new: true, upsert: true, runValidators: true }
+    ).populate("products");
+
+    res.status(201).json(item);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
   }
-
-  const item = await Wishlist.create({
-    userId: req.user.id,
-    productId,
-  });
-
-  res.status(201).json(item);
 };
 
 const removeFromWishlist = async (req, res) => {
-  const item = await Wishlist.findByPk(req.params.id);
+  try {
+    const item = await Wishlist.findOneAndUpdate(
+      { user: req.user.id, products: req.params.id },
+      { $pull: { products: req.params.id } },
+      { new: true }
+    );
 
-  if (!item || item.userId !== req.user.id) {
-    return res.status(404).json({ message: "Item not found" });
+    if (!item) {
+      return res.status(404).json({ message: "Item not found" });
+    }
+
+    res.json({ message: "Removed from wishlist" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
   }
-
-  await item.destroy();
-  res.json({ message: "Removed from wishlist" });
 };
 
 module.exports = { getWishlist, addToWishlist, removeFromWishlist };

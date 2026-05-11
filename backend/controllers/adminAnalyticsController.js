@@ -1,275 +1,200 @@
-const { Op } = require("sequelize");
 const Order = require("../models/Order");
-const OrderItem = require("../models/OrderItem");
 const User = require("../models/User");
 const Product = require("../models/Product");
 
+const getDateKey = (date, groupBy) => {
+  if (groupBy === "hour") return `${date.getHours()}:00`;
+  if (groupBy === "day") return date.toISOString().split("T")[0];
+  return date.toISOString().slice(0, 7);
+};
+
+const getRangeStart = (range) => {
+  const startDate = new Date();
+  let groupBy = "day";
+
+  switch (range) {
+    case "today":
+      startDate.setHours(0, 0, 0, 0);
+      groupBy = "hour";
+      break;
+    case "week":
+      startDate.setDate(startDate.getDate() - 7);
+      break;
+    case "month":
+      startDate.setMonth(startDate.getMonth() - 1);
+      break;
+    case "year":
+      startDate.setFullYear(startDate.getFullYear() - 1);
+      groupBy = "month";
+      break;
+    default:
+      return { startDate: new Date(0), groupBy: "month" };
+  }
+
+  return { startDate, groupBy };
+};
+
 const getDashboardStats = async (req, res) => {
-  const totalUsers = await User.count();
-  const totalOrders = await Order.count();
-  const totalRevenue = await Order.sum("totalAmount", {
-    where: { paymentStatus: "paid" },
-  });
+  try {
+    const [totalUsers, totalOrders, revenueResult, statusCounts] = await Promise.all([
+      User.countDocuments(),
+      Order.countDocuments(),
+      Order.aggregate([
+        { $match: { paymentStatus: "completed" } },
+        { $group: { _id: null, total: { $sum: "$totalAmount" } } },
+      ]),
+      Order.aggregate([{ $group: { _id: "$orderStatus", count: { $sum: 1 } } }]),
+    ]);
 
-  const orderStatus = {
-    placed: await Order.count({ where: { orderStatus: "placed" } }),
-    processing: await Order.count({ where: { orderStatus: "processing" } }),
-    shipped: await Order.count({ where: { orderStatus: "shipped" } }),
-    delivered: await Order.count({ where: { orderStatus: "delivered" } }),
-    cancelled: await Order.count({ where: { orderStatus: "cancelled" } }),
-  };
+    const orderStatus = { placed: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0 };
+    statusCounts.forEach((item) => {
+      orderStatus[item._id === "pending" ? "placed" : item._id] = item.count;
+    });
 
-  res.json({
-    totalUsers,
-    totalOrders,
-    totalRevenue: totalRevenue || 0,
-    orderStatus,
-  });
+    res.json({
+      totalUsers,
+      totalOrders,
+      totalRevenue: revenueResult[0]?.total || 0,
+      orderStatus,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching dashboard stats" });
+  }
 };
 
 const getMonthlySales = async (req, res) => {
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  try {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-  const orders = await Order.findAll({
-    where: {
-      paymentStatus: "paid",
-      createdAt: { [Op.gte]: sixMonthsAgo },
-    },
-    attributes: ["totalAmount", "createdAt"],
-  });
+    const orders = await Order.find({
+      paymentStatus: "completed",
+      createdAt: { $gte: sixMonthsAgo },
+    }).select("totalAmount createdAt");
 
-  const monthlySales = {};
+    const monthlySales = {};
+    orders.forEach((order) => {
+      const month = order.createdAt.toISOString().slice(0, 7);
+      monthlySales[month] = (monthlySales[month] || 0) + order.totalAmount;
+    });
 
-  orders.forEach((order) => {
-    const month = order.createdAt.toISOString().slice(0, 7);
-    monthlySales[month] =
-      (monthlySales[month] || 0) + order.totalAmount;
-  });
-
-  res.json(monthlySales);
+    res.json(monthlySales);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching monthly sales" });
+  }
 };
 
 const getSalesChartData = async (req, res) => {
   try {
-    const { range = 'week' } = req.query;
-    
-    let startDate = new Date();
-    let groupBy = 'day';
-    
-    switch(range) {
-      case 'today':
-        startDate.setHours(0, 0, 0, 0);
-        groupBy = 'hour';
-        break;
-      case 'week':
-        startDate.setDate(startDate.getDate() - 7);
-        groupBy = 'day';
-        break;
-      case 'month':
-        startDate.setMonth(startDate.getMonth() - 1);
-        groupBy = 'day';
-        break;
-      case 'year':
-        startDate.setFullYear(startDate.getFullYear() - 1);
-        groupBy = 'month';
-        break;
-      default:
-        startDate = new Date(0);
-        groupBy = 'month';
-    }
-
-    const orders = await Order.findAll({
-      where: {
-        createdAt: { [Op.gte]: startDate }
-      },
-      attributes: ['totalAmount', 'createdAt', 'orderStatus'],
-      order: [['createdAt', 'ASC']]
-    });
+    const { startDate, groupBy } = getRangeStart(req.query.range || "week");
+    const orders = await Order.find({ createdAt: { $gte: startDate } })
+      .select("totalAmount createdAt orderStatus")
+      .sort({ createdAt: 1 });
 
     const chartData = {};
-    
-    orders.forEach(order => {
-      let key;
-      const date = new Date(order.createdAt);
-      
-      if (groupBy === 'hour') {
-        key = `${date.getHours()}:00`;
-      } else if (groupBy === 'day') {
-        key = date.toISOString().split('T')[0];
-      } else {
-        key = date.toISOString().slice(0, 7);
-      }
-      
-      if (!chartData[key]) {
-        chartData[key] = { date: key, revenue: 0, orders: 0 };
-      }
-      
+    orders.forEach((order) => {
+      const key = getDateKey(new Date(order.createdAt), groupBy);
+      if (!chartData[key]) chartData[key] = { date: key, revenue: 0, orders: 0 };
       chartData[key].revenue += Number(order.totalAmount);
       chartData[key].orders += 1;
     });
 
-    const result = Object.values(chartData).map(item => ({
+    res.json(Object.values(chartData).map((item) => ({
       ...item,
-      revenue: Number(item.revenue.toFixed(2))
-    }));
-
-    res.json(result);
+      revenue: Number(item.revenue.toFixed(2)),
+    })));
   } catch (error) {
-    
-    res.status(500).json({ message: 'Error fetching sales data' });
+    res.status(500).json({ message: "Error fetching sales data" });
   }
 };
 
 const getCategoryRevenue = async (req, res) => {
   try {
-    const orders = await Order.findAll({
-      include: [{
-        model: OrderItem,
-        include: [{ model: Product }]
-      }]
-    });
-
+    const orders = await Order.find().populate("items.product");
     const categoryData = {};
-    
-    orders.forEach(order => {
-      order.OrderItems?.forEach(item => {
-        const category = item.Product?.category || 'Other';
-        if (!categoryData[category]) {
-          categoryData[category] = { name: category, value: 0 };
-        }
+
+    orders.forEach((order) => {
+      order.items?.forEach((item) => {
+        const category = item.product?.category || "Other";
+        if (!categoryData[category]) categoryData[category] = { name: category, value: 0 };
         categoryData[category].value += Number(item.price) * item.quantity;
       });
     });
 
-    const result = Object.values(categoryData).map(item => ({
+    res.json(Object.values(categoryData).map((item) => ({
       ...item,
-      value: Number(item.value.toFixed(2))
-    }));
-
-    res.json(result);
+      value: Number(item.value.toFixed(2)),
+    })));
   } catch (error) {
-    
-    res.status(500).json({ message: 'Error fetching category data' });
+    res.status(500).json({ message: "Error fetching category data" });
   }
 };
 
 const getTopProducts = async (req, res) => {
   try {
     const { limit = 10 } = req.query;
-    
-    const orderItems = await OrderItem.findAll({
-      include: [{ model: Product }],
-      attributes: [
-        'ProductId',
-        [Order.sequelize.fn('SUM', Order.sequelize.col('quantity')), 'totalQuantity'],
-        [Order.sequelize.fn('SUM', Order.sequelize.literal('price * quantity')), 'totalRevenue']
-      ],
-      group: ['ProductId', 'Product.id'],
-      order: [[Order.sequelize.literal('totalQuantity'), 'DESC']],
-      limit: parseInt(limit)
-    });
+    const rows = await Order.aggregate([
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.product",
+          quantity: { $sum: "$items.quantity" },
+          revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } },
+        },
+      },
+      { $sort: { quantity: -1 } },
+      { $limit: parseInt(limit, 10) || 10 },
+    ]);
 
-    const result = orderItems.map(item => ({
-      name: item.Product?.name || 'Unknown',
-      quantity: parseInt(item.dataValues.totalQuantity),
-      revenue: Number(parseFloat(item.dataValues.totalRevenue).toFixed(2))
-    }));
+    const products = await Product.find({ _id: { $in: rows.map((row) => row._id) } }).select("name");
+    const productNames = new Map(products.map((product) => [product.id, product.name]));
 
-    res.json(result);
+    res.json(rows.map((row) => ({
+      name: productNames.get(String(row._id)) || "Unknown",
+      quantity: row.quantity,
+      revenue: Number(row.revenue.toFixed(2)),
+    })));
   } catch (error) {
-    
-    res.status(500).json({ message: 'Error fetching top products' });
+    res.status(500).json({ message: "Error fetching top products" });
   }
 };
 
 const getCustomerGrowth = async (req, res) => {
   try {
-    const { range = 'year' } = req.query;
-    
-    let startDate = new Date();
-    let groupBy = 'month';
-    
-    switch(range) {
-      case 'week':
-        startDate.setDate(startDate.getDate() - 7);
-        groupBy = 'day';
-        break;
-      case 'month':
-        startDate.setMonth(startDate.getMonth() - 1);
-        groupBy = 'day';
-        break;
-      case 'year':
-        startDate.setFullYear(startDate.getFullYear() - 1);
-        groupBy = 'month';
-        break;
-      default:
-        startDate = new Date(0);
-        groupBy = 'month';
-    }
-
-    const users = await User.findAll({
-      where: {
-        createdAt: { [Op.gte]: startDate }
-      },
-      attributes: ['createdAt'],
-      order: [['createdAt', 'ASC']]
-    });
-
+    const { startDate, groupBy } = getRangeStart(req.query.range || "year");
+    const users = await User.find({ createdAt: { $gte: startDate } })
+      .select("createdAt")
+      .sort({ createdAt: 1 });
     const growthData = {};
     let cumulative = 0;
-    
-    users.forEach(user => {
-      const date = new Date(user.createdAt);
-      let key;
-      
-      if (groupBy === 'day') {
-        key = date.toISOString().split('T')[0];
-      } else {
-        key = date.toISOString().slice(0, 7);
-      }
-      
-      if (!growthData[key]) {
-        growthData[key] = { date: key, newCustomers: 0, totalCustomers: 0 };
-      }
-      
+
+    users.forEach((user) => {
+      const key = getDateKey(new Date(user.createdAt), groupBy === "hour" ? "day" : groupBy);
+      if (!growthData[key]) growthData[key] = { date: key, newCustomers: 0, totalCustomers: 0 };
       growthData[key].newCustomers += 1;
     });
 
-    const result = Object.values(growthData).map(item => {
+    res.json(Object.values(growthData).map((item) => {
       cumulative += item.newCustomers;
-      return {
-        ...item,
-        totalCustomers: cumulative
-      };
-    });
-
-    res.json(result);
+      return { ...item, totalCustomers: cumulative };
+    }));
   } catch (error) {
-    
-    res.status(500).json({ message: 'Error fetching customer growth' });
+    res.status(500).json({ message: "Error fetching customer growth" });
   }
 };
 
 const getOrderStatusDistribution = async (req, res) => {
   try {
-    const statusCounts = await Order.findAll({
-      attributes: [
-        'orderStatus',
-        [Order.sequelize.fn('COUNT', Order.sequelize.col('id')), 'count']
-      ],
-      group: ['orderStatus']
-    });
+    const statusCounts = await Order.aggregate([
+      { $group: { _id: "$orderStatus", count: { $sum: 1 } } },
+    ]);
 
-    const result = statusCounts.map(item => ({
-      name: item.orderStatus.charAt(0).toUpperCase() + item.orderStatus.slice(1),
-      value: parseInt(item.dataValues.count)
-    }));
-
-    res.json(result);
+    res.json(statusCounts.map((item) => ({
+      name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
+      value: item.count,
+    })));
   } catch (error) {
-    
-    res.status(500).json({ message: 'Error fetching order status' });
+    res.status(500).json({ message: "Error fetching order status" });
   }
 };
 
@@ -277,50 +202,29 @@ const getDailySales = async (req, res) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const todayOrders = await Order.findAll({
-      where: {
-        createdAt: {
-          [Op.gte]: today,
-          [Op.lt]: tomorrow
-        }
-      }
-    });
-
-    const totalSales = todayOrders.reduce((sum, order) => sum + Number(order.totalAmount), 0);
-    const totalOrders = todayOrders.length;
-    const averageOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
-
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    const yesterdayOrders = await Order.findAll({
-      where: {
-        createdAt: {
-          [Op.gte]: yesterday,
-          [Op.lt]: today
-        }
-      }
-    });
+    const [todayOrders, yesterdayOrders] = await Promise.all([
+      Order.find({ createdAt: { $gte: today, $lt: tomorrow } }),
+      Order.find({ createdAt: { $gte: yesterday, $lt: today } }),
+    ]);
 
+    const totalSales = todayOrders.reduce((sum, order) => sum + Number(order.totalAmount), 0);
     const yesterdaySales = yesterdayOrders.reduce((sum, order) => sum + Number(order.totalAmount), 0);
-    const growthPercentage = yesterdaySales > 0 
-      ? ((totalSales - yesterdaySales) / yesterdaySales * 100).toFixed(1)
-      : 0;
+    const totalOrders = todayOrders.length;
 
     res.json({
       totalSales: Number(totalSales.toFixed(2)),
       totalOrders,
-      averageOrderValue: Number(averageOrderValue.toFixed(2)),
-      growthPercentage: Number(growthPercentage),
-      comparisonDate: yesterday.toISOString().split('T')[0]
+      averageOrderValue: totalOrders > 0 ? Number((totalSales / totalOrders).toFixed(2)) : 0,
+      growthPercentage: yesterdaySales > 0 ? Number((((totalSales - yesterdaySales) / yesterdaySales) * 100).toFixed(1)) : 0,
+      comparisonDate: yesterday.toISOString().split("T")[0],
     });
   } catch (error) {
-    
-    res.status(500).json({ message: 'Error fetching daily sales' });
+    res.status(500).json({ message: "Error fetching daily sales" });
   }
 };
 
@@ -329,134 +233,79 @@ const getMonthlyRevenue = async (req, res) => {
     const currentDate = new Date();
     const currentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    const lastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
 
-    const monthlyOrders = await Order.findAll({
-      where: {
-        createdAt: {
-          [Op.gte]: currentMonth,
-          [Op.lt]: nextMonth
-        }
-      }
-    });
+    const [monthlyOrders, lastMonthOrders] = await Promise.all([
+      Order.find({ createdAt: { $gte: currentMonth, $lt: nextMonth } }),
+      Order.find({ createdAt: { $gte: lastMonth, $lt: currentMonth } }),
+    ]);
 
     const totalRevenue = monthlyOrders.reduce((sum, order) => sum + Number(order.totalAmount), 0);
-    const totalOrders = monthlyOrders.length;
-
-    const lastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-    const lastMonthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-
-    const lastMonthOrders = await Order.findAll({
-      where: {
-        createdAt: {
-          [Op.gte]: lastMonth,
-          [Op.lt]: lastMonthEnd
-        }
-      }
-    });
-
     const lastMonthRevenue = lastMonthOrders.reduce((sum, order) => sum + Number(order.totalAmount), 0);
-    const growthPercentage = lastMonthRevenue > 0 
-      ? ((totalRevenue - lastMonthRevenue) / lastMonthRevenue * 100).toFixed(1)
-      : 0;
-
     const dailyBreakdown = {};
-    monthlyOrders.forEach(order => {
+
+    monthlyOrders.forEach((order) => {
       const day = new Date(order.createdAt).getDate();
-      if (!dailyBreakdown[day]) {
-        dailyBreakdown[day] = { day, revenue: 0, orders: 0 };
-      }
+      if (!dailyBreakdown[day]) dailyBreakdown[day] = { day, revenue: 0, orders: 0 };
       dailyBreakdown[day].revenue += Number(order.totalAmount);
       dailyBreakdown[day].orders += 1;
     });
 
-    const dailyData = Object.values(dailyBreakdown)
-      .sort((a, b) => a.day - b.day)
-      .map(item => ({
-        ...item,
-        revenue: Number(item.revenue.toFixed(2))
-      }));
-
     res.json({
       totalRevenue: Number(totalRevenue.toFixed(2)),
-      totalOrders,
-      averageOrderValue: totalOrders > 0 ? Number((totalRevenue / totalOrders).toFixed(2)) : 0,
-      growthPercentage: Number(growthPercentage),
-      monthName: currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' }),
-      dailyBreakdown: dailyData
+      totalOrders: monthlyOrders.length,
+      averageOrderValue: monthlyOrders.length > 0 ? Number((totalRevenue / monthlyOrders.length).toFixed(2)) : 0,
+      growthPercentage: lastMonthRevenue > 0 ? Number((((totalRevenue - lastMonthRevenue) / lastMonthRevenue) * 100).toFixed(1)) : 0,
+      monthName: currentMonth.toLocaleString("default", { month: "long", year: "numeric" }),
+      dailyBreakdown: Object.values(dailyBreakdown)
+        .sort((a, b) => a.day - b.day)
+        .map((item) => ({ ...item, revenue: Number(item.revenue.toFixed(2)) })),
     });
   } catch (error) {
-    
-    res.status(500).json({ message: 'Error fetching monthly revenue' });
+    res.status(500).json({ message: "Error fetching monthly revenue" });
   }
 };
 
 const getRepeatCustomers = async (req, res) => {
   try {
-    const allCustomers = await User.count({
-      where: { role: 'customer' }
-    });
-
-    const customersWithOrders = await Order.findAll({
-      attributes: [
-        'UserId',
-        [Order.sequelize.fn('COUNT', Order.sequelize.col('id')), 'orderCount']
-      ],
-      group: ['UserId'],
-      having: Order.sequelize.literal('COUNT(id) > 1')
-    });
-
-    const repeatCustomersCount = customersWithOrders.length;
-    const repeatCustomerPercentage = allCustomers > 0 
-      ? ((repeatCustomersCount / allCustomers) * 100).toFixed(1)
-      : 0;
+    const [allCustomers, groupedOrders] = await Promise.all([
+      User.countDocuments({ role: "customer" }),
+      Order.aggregate([
+        { $group: { _id: "$user", orderCount: { $sum: 1 }, totalSpent: { $sum: "$totalAmount" } } },
+        { $match: { orderCount: { $gt: 1 } } },
+        { $sort: { orderCount: -1 } },
+      ]),
+    ]);
 
     const orderFrequency = {};
-    customersWithOrders.forEach(customer => {
-      const count = parseInt(customer.dataValues.orderCount);
-      const range = count >= 10 ? '10+' : 
-                    count >= 5 ? '5-9' : 
-                    count >= 3 ? '3-4' : '2';
+    groupedOrders.forEach((customer) => {
+      const count = customer.orderCount;
+      const range = count >= 10 ? "10+" : count >= 5 ? "5-9" : count >= 3 ? "3-4" : "2";
       orderFrequency[range] = (orderFrequency[range] || 0) + 1;
     });
 
-    const frequencyData = Object.entries(orderFrequency).map(([range, count]) => ({
-      range: `${range} orders`,
-      count
-    }));
-
-    const topCustomers = await Order.findAll({
-      attributes: [
-        'UserId',
-        [Order.sequelize.fn('COUNT', Order.sequelize.col('Order.id')), 'orderCount'],
-        [Order.sequelize.fn('SUM', Order.sequelize.col('totalAmount')), 'totalSpent']
-      ],
-      include: [{
-        model: User,
-        attributes: ['name', 'email']
-      }],
-      group: ['UserId', 'User.id'],
-      order: [[Order.sequelize.literal('orderCount'), 'DESC']],
-      limit: 10
-    });
-
-    const topCustomersData = topCustomers.map(customer => ({
-      name: customer.User?.name || 'Unknown',
-      email: customer.User?.email || '',
-      orderCount: parseInt(customer.dataValues.orderCount),
-      totalSpent: Number(parseFloat(customer.dataValues.totalSpent).toFixed(2))
-    }));
+    const topRows = groupedOrders.slice(0, 10);
+    const users = await User.find({ _id: { $in: topRows.map((row) => row._id) } }).select("name email");
+    const userMap = new Map(users.map((user) => [user.id, user]));
 
     res.json({
       totalCustomers: allCustomers,
-      repeatCustomers: repeatCustomersCount,
-      repeatCustomerPercentage: Number(repeatCustomerPercentage),
-      oneTimeCustomers: allCustomers - repeatCustomersCount,
-      orderFrequency: frequencyData,
-      topCustomers: topCustomersData
+      repeatCustomers: groupedOrders.length,
+      repeatCustomerPercentage: allCustomers > 0 ? Number(((groupedOrders.length / allCustomers) * 100).toFixed(1)) : 0,
+      oneTimeCustomers: allCustomers - groupedOrders.length,
+      orderFrequency: Object.entries(orderFrequency).map(([range, count]) => ({ range: `${range} orders`, count })),
+      topCustomers: topRows.map((row) => {
+        const user = userMap.get(String(row._id));
+        return {
+          name: user?.name || "Unknown",
+          email: user?.email || "",
+          orderCount: row.orderCount,
+          totalSpent: Number(row.totalSpent.toFixed(2)),
+        };
+      }),
     });
   } catch (error) {
-    
-    res.status(500).json({ message: 'Error fetching repeat customers data' });
+    res.status(500).json({ message: "Error fetching repeat customers data" });
   }
 };
 
@@ -470,5 +319,5 @@ module.exports = {
   getOrderStatusDistribution,
   getDailySales,
   getMonthlyRevenue,
-  getRepeatCustomers
+  getRepeatCustomers,
 };

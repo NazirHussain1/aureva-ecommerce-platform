@@ -1,10 +1,17 @@
 const Order = require("../models/Order");
-const OrderItem = require("../models/OrderItem");
 const Product = require("../models/Product");
 const User = require("../models/User");
 const { sendOrderConfirmationEmail } = require("../services/emailService");
 
-const getOrderUserId = (order) => order?.userId ?? order?.UserId ?? null;
+const getOrderUserId = (order) => String(order?.user?._id || order?.user || "");
+
+const normalizeShippingAddress = (shippingAddress = {}) => ({
+  street: shippingAddress.street || [shippingAddress.addressLine1, shippingAddress.addressLine2].filter(Boolean).join(", "),
+  city: shippingAddress.city,
+  state: shippingAddress.state,
+  zipCode: shippingAddress.zipCode,
+  country: shippingAddress.country || "USA",
+});
 
 const placeOrder = async (req, res) => {
   const { items, shippingAddress, paymentMethod, paymentDetails, totalAmount } = req.body;
@@ -14,8 +21,10 @@ const placeOrder = async (req, res) => {
   }
 
   try {
-    for (let item of items) {
-      const product = await Product.findByPk(item.productId);
+    const orderItems = [];
+
+    for (const item of items) {
+      const product = await Product.findById(item.productId || item.product);
       if (!product) {
         return res.status(400).json({ message: "Product not found" });
       }
@@ -24,62 +33,57 @@ const placeOrder = async (req, res) => {
           message: `${product.name} is out of stock`,
         });
       }
-      product.stock -= item.quantity;
+
+      product.stock -= Number(item.quantity);
       await product.save();
+
+      orderItems.push({
+        product: product.id,
+        name: product.name,
+        price: Number(item.price ?? product.price),
+        quantity: Number(item.quantity),
+        image: product.images?.[0],
+      });
     }
 
+    const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const order = await Order.create({
-      userId: req.user.id,
-      shippingAddress,
+      user: req.user.id,
+      items: orderItems,
+      shippingAddress: normalizeShippingAddress(shippingAddress),
       paymentMethod,
       paymentDetails: paymentDetails || null,
-      totalAmount,
+      subtotal,
+      totalAmount: Number(totalAmount ?? subtotal),
     });
 
-    const orderItems = items.map((item) => ({
-      OrderId: order.id,
-      ProductId: item.productId,
-      quantity: item.quantity,
-      price: item.price,
-    }));
-
-    await OrderItem.bulkCreate(orderItems);
-
-    const user = await User.findByPk(req.user.id);
-    const orderWithItems = { ...order.toJSON(), items };
-    await sendOrderConfirmationEmail(orderWithItems, user);
+    const user = await User.findById(req.user.id);
+    await sendOrderConfirmationEmail(order.toJSON(), user);
 
     res.status(201).json({
       ...order.toJSON(),
       userId: getOrderUserId(order),
     });
   } catch (error) {
-        res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 const getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.findAll({
-      where: { userId: req.user.id },
-      include: [{ 
-        model: OrderItem, 
-        include: [Product] 
-      }],
-      order: [['createdAt', 'DESC']],
-    });
+    const orders = await Order.find({ user: req.user.id })
+      .populate("items.product")
+      .sort({ createdAt: -1 });
 
     res.status(200).json(orders);
   } catch (error) {
-        res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 const getOrderById = async (req, res) => {
   try {
-    const order = await Order.findByPk(req.params.id, {
-      include: [{ model: OrderItem, include: [Product] }],
-    });
+    const order = await Order.findById(req.params.id).populate("items.product");
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -91,13 +95,19 @@ const getOrderById = async (req, res) => {
 
     res.status(200).json(order);
   } catch (error) {
-        res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const restoreOrderStock = async (order) => {
+  for (const item of order.items) {
+    await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
   }
 };
 
 const cancelOrder = async (req, res) => {
   try {
-    const order = await Order.findByPk(req.params.id);
+    const order = await Order.findById(req.params.id);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -113,13 +123,7 @@ const cancelOrder = async (req, res) => {
 
     order.orderStatus = "cancelled";
     await order.save();
-
-    const orderItems = await OrderItem.findAll({ where: { OrderId: order.id } });
-    for (let item of orderItems) {
-      const product = await Product.findByPk(item.ProductId);
-      product.stock += item.quantity;
-      await product.save();
-    }
+    await restoreOrderStock(order);
 
     res.json({
       ...order.toJSON(),
@@ -127,13 +131,13 @@ const cancelOrder = async (req, res) => {
       message: "Order cancelled successfully",
     });
   } catch (error) {
-        res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 const returnOrder = async (req, res) => {
   try {
-    const order = await Order.findByPk(req.params.id);
+    const order = await Order.findById(req.params.id);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -158,13 +162,7 @@ const returnOrder = async (req, res) => {
 
     order.orderStatus = "returned";
     await order.save();
-
-    const orderItems = await OrderItem.findAll({ where: { OrderId: order.id } });
-    for (let item of orderItems) {
-      const product = await Product.findByPk(item.ProductId);
-      product.stock += item.quantity;
-      await product.save();
-    }
+    await restoreOrderStock(order);
 
     res.json({
       ...order.toJSON(),
@@ -172,7 +170,7 @@ const returnOrder = async (req, res) => {
       message: "Return processed successfully",
     });
   } catch (error) {
-        res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error" });
   }
 };
 

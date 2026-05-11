@@ -5,10 +5,7 @@ const sendNewsletter = async (req, res) => {
   const { subject, content } = req.body;
 
   try {
-    const subscribers = await Newsletter.findAll({
-      where: { isSubscribed: true },
-      attributes: ["email", "name"],
-    });
+    const subscribers = await Newsletter.find({ isActive: true }).select("email");
 
     if (subscribers.length === 0) {
       return res.status(400).json({ message: "No active subscribers found" });
@@ -21,23 +18,18 @@ const sendNewsletter = async (req, res) => {
       sentTo: subscribers.length,
     });
   } catch (error) {
-    
     res.status(500).json({ message: "Server error" });
   }
 };
 
 const getNewsletterStats = async (req, res) => {
   try {
-    const totalSubscribers = await Newsletter.count({ where: { isSubscribed: true } });
-    const totalUnsubscribed = await Newsletter.count({ where: { isSubscribed: false } });
-    const recentSubscribers = await Newsletter.count({
-      where: {
-        isSubscribed: true,
-        subscribedAt: {
-          [require("sequelize").Op.gte]: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-        },
-      },
-    });
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const [totalSubscribers, totalUnsubscribed, recentSubscribers] = await Promise.all([
+      Newsletter.countDocuments({ isActive: true }),
+      Newsletter.countDocuments({ isActive: false }),
+      Newsletter.countDocuments({ isActive: true, createdAt: { $gte: thirtyDaysAgo } }),
+    ]);
 
     res.status(200).json({
       totalSubscribers,
@@ -45,7 +37,6 @@ const getNewsletterStats = async (req, res) => {
       recentSubscribers,
     });
   } catch (error) {
-    
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -1,53 +1,49 @@
 const Order = require("../models/Order");
-const User = require("../models/User");
-const OrderItem = require("../models/OrderItem");
-const Product = require("../models/Product");
 const { sendOrderStatusUpdateEmail } = require("../services/emailService");
 
 const getAllOrders = async (req, res) => {
-  const orders = await Order.findAll({
-    include: [
-      { model: User },
-      { model: OrderItem, include: [Product] },
-    ],
-    order: [["createdAt", "DESC"]],
-  });
-  res.json(orders);
+  try {
+    const orders = await Order.find()
+      .populate("user", "name email")
+      .populate("items.product")
+      .sort({ createdAt: -1 });
+
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 const updateOrderStatus = async (req, res) => {
   try {
-    const order = await Order.findByPk(req.params.id, {
-      include: [{ model: User }],
-    });
-    
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-
     const nextStatus = req.body.orderStatus || req.body.status;
-    const allowedStatuses = ["placed", "processing", "shipped", "delivered", "cancelled", "returned"];
+    const allowedStatuses = ["placed", "pending", "processing", "shipped", "delivered", "cancelled", "returned"];
 
     if (!allowedStatuses.includes(nextStatus)) {
       return res.status(400).json({ message: "Invalid order status" });
     }
 
+    const order = await Order.findById(req.params.id).populate("user", "name email");
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
     const oldStatus = order.orderStatus;
-    order.orderStatus = nextStatus;
-    
+    order.orderStatus = nextStatus === "placed" ? "pending" : nextStatus;
+
     if (nextStatus === "delivered") {
       order.deliveredAt = new Date();
     }
 
     await order.save();
 
-    if (oldStatus !== nextStatus) {
-      await sendOrderStatusUpdateEmail(order, order.User, nextStatus);
+    if (oldStatus !== order.orderStatus) {
+      await sendOrderStatusUpdateEmail(order, order.user, order.orderStatus);
     }
 
     res.json({ message: "Order status updated", order });
   } catch (error) {
-    
     res.status(500).json({ message: "Server error" });
   }
 };
