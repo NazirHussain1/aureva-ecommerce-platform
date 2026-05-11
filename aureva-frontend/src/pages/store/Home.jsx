@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from '../../api/axios';
@@ -13,18 +13,130 @@ import Footer from '../../components/common/Footer';
 import { ProductCardSkeleton } from '../../components/common/SkeletonLoader';
 import { getProductUrl } from '../../utils/helpers';
 
-export default function Home() {
+// Memoized category data to prevent recreation on every render
+const CATEGORIES = [
+  { name: 'Skincare', icon: HiSparkles, category: 'skincare', gradient: 'from-purple-400 to-purple-600', bg: 'bg-purple-50' },
+  { name: 'Haircare', icon: GiComb, category: 'haircare', gradient: 'from-pink-400 to-pink-600', bg: 'bg-pink-50' },
+  { name: 'Makeup', icon: GiLipstick, category: 'makeup', gradient: 'from-red-400 to-red-600', bg: 'bg-red-50' },
+  { name: 'Fragrance', icon: GiPerfumeBottle, category: 'fragrance', gradient: 'from-indigo-400 to-indigo-600', bg: 'bg-indigo-50' },
+  { name: "Men's Care", icon: IoManSharp, category: 'men', gradient: 'from-blue-400 to-blue-600', bg: 'bg-blue-50' },
+  { name: "Women's Care", icon: IoWomanSharp, category: 'women', gradient: 'from-pink-500 to-pink-700', bg: 'bg-pink-50' },
+  { name: "Kids' Care", icon: MdChildCare, category: 'kids', gradient: 'from-orange-400 to-orange-600', bg: 'bg-orange-50' },
+  { name: 'Wellness', icon: MdFace, category: 'wellness', gradient: 'from-green-400 to-green-600', bg: 'bg-green-50' }
+];
+
+// Memoized CategoryCard component
+const CategoryCard = memo(({ cat }) => {
+  const IconComponent = cat.icon;
+  return (
+    <Link
+      key={cat.category}
+      to={`/products?category=${cat.category}`}
+      className="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-transparent hover:-translate-y-1"
+    >
+      <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
+      
+      <div className="relative p-6 sm:p-8 flex flex-col items-center">
+        <div className={`w-16 h-16 sm:w-20 sm:h-20 ${cat.bg} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
+          <IconComponent className={`text-3xl sm:text-4xl bg-gradient-to-br ${cat.gradient} bg-clip-text text-transparent`} />
+        </div>
+        
+        <h3 className="font-bold text-base sm:text-lg text-gray-800 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-purple-600 group-hover:to-pink-600 transition-all duration-300 text-center">
+          {cat.name}
+        </h3>
+        
+        <div className="mt-3 flex items-center gap-1 text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="text-sm font-medium">Explore</span>
+          <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+    </Link>
+  );
+});
+
+CategoryCard.displayName = 'CategoryCard';
+
+// Memoized ProductCard component
+const ProductCard = memo(({ product }) => {
+  return (
+    <div
+      key={product.id}
+      className="group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100"
+    >
+      <Link to={getProductUrl(product)} className="block">
+        <div className="relative h-56 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+          {product.images && product.images[0] ? (
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              loading="lazy"
+              className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <HiSparkles className="text-6xl text-gray-300" />
+            </div>
+          )}
+          
+          {product.stock < 10 && product.stock > 0 && (
+            <div className="absolute top-3 right-3 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg">
+              Only {product.stock} left!
+            </div>
+          )}
+          
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </div>
+        
+        <div className="p-5">
+          {product.brand && (
+            <p className="text-xs text-purple-600 font-bold uppercase mb-2 tracking-wider">
+              {product.brand}
+            </p>
+          )}
+          
+          <h3 className="font-bold text-base text-gray-800 mb-3 line-clamp-2 group-hover:text-purple-600 transition min-h-[3rem] leading-snug">
+            {product.name}
+          </h3>
+          
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col">
+              <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                ${Number(product.price).toFixed(2)}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+              <span className="font-medium">{product.stock} in stock</span>
+            </div>
+          </div>
+          
+          <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2 group-hover:scale-105 active:scale-95 touch-target">
+            <span>View Details</span>
+            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </Link>
+    </div>
+  );
+});
+
+ProductCard.displayName = 'ProductCard';
+
+function Home() {
   const { user } = useSelector((state) => state.auth);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribing, setSubscribing] = useState(false);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get('/api/products');
@@ -35,9 +147,13 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleNewsletterSubscribe = async (e) => {
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const handleNewsletterSubscribe = useCallback(async (e) => {
     e.preventDefault();
     
     if (!newsletterEmail) {
@@ -56,7 +172,7 @@ export default function Home() {
     } finally {
       setSubscribing(false);
     }
-  };
+  }, [newsletterEmail]);
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
@@ -206,44 +322,9 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {[
-              { name: 'Skincare', icon: HiSparkles, category: 'skincare', gradient: 'from-purple-400 to-purple-600', bg: 'bg-purple-50' },
-              { name: 'Haircare', icon: GiComb, category: 'haircare', gradient: 'from-pink-400 to-pink-600', bg: 'bg-pink-50' },
-              { name: 'Makeup', icon: GiLipstick, category: 'makeup', gradient: 'from-red-400 to-red-600', bg: 'bg-red-50' },
-              { name: 'Fragrance', icon: GiPerfumeBottle, category: 'fragrance', gradient: 'from-indigo-400 to-indigo-600', bg: 'bg-indigo-50' },
-              { name: "Men's Care", icon: IoManSharp, category: 'men', gradient: 'from-blue-400 to-blue-600', bg: 'bg-blue-50' },
-              { name: "Women's Care", icon: IoWomanSharp, category: 'women', gradient: 'from-pink-500 to-pink-700', bg: 'bg-pink-50' },
-              { name: "Kids' Care", icon: MdChildCare, category: 'kids', gradient: 'from-orange-400 to-orange-600', bg: 'bg-orange-50' },
-              { name: 'Wellness', icon: MdFace, category: 'wellness', gradient: 'from-green-400 to-green-600', bg: 'bg-green-50' }
-            ].map(cat => {
-              const IconComponent = cat.icon;
-              return (
-                <Link
-                  key={cat.category}
-                  to={`/products?category=${cat.category}`}
-                  className="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-transparent hover:-translate-y-1"
-                >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                  
-                  <div className="relative p-6 sm:p-8 flex flex-col items-center">
-                    <div className={`w-16 h-16 sm:w-20 sm:h-20 ${cat.bg} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
-                      <IconComponent className={`text-3xl sm:text-4xl bg-gradient-to-br ${cat.gradient} bg-clip-text text-transparent`} />
-                    </div>
-                    
-                    <h3 className="font-bold text-base sm:text-lg text-gray-800 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-purple-600 group-hover:to-pink-600 transition-all duration-300 text-center">
-                      {cat.name}
-                    </h3>
-                    
-                    <div className="mt-3 flex items-center gap-1 text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="text-sm font-medium">Explore</span>
-                      <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+            {CATEGORIES.map(cat => (
+              <CategoryCard key={cat.category} cat={cat} />
+            ))}
           </div>
         </div>
       </div>
@@ -424,3 +505,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default memo(Home);

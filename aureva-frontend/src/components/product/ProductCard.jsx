@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../features/cart/cartSlice';
@@ -7,12 +8,12 @@ import { formatPrice } from '../../utils/formatters';
 import { getImageUrl, getProductUrl } from '../../utils/helpers';
 import { isLowStock, isOutOfStock } from '../../utils/productHelpers';
 
-export default function ProductCard({ product }) {
+function ProductCard({ product }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
 
-  const handleAddToCart = (e) => {
+  const handleAddToCart = useCallback((e) => {
     e.preventDefault();
     
     if (!user) {
@@ -28,9 +29,9 @@ export default function ProductCard({ product }) {
     
     dispatch(addToCart({ product, quantity: 1 }));
     toast.success(`${product.name} added to cart!`);
-  };
+  }, [dispatch, navigate, product, user]);
 
-  const handleAddToWishlist = (e) => {
+  const handleAddToWishlist = useCallback((e) => {
     e.preventDefault();
     
     if (!user) {
@@ -41,7 +42,7 @@ export default function ProductCard({ product }) {
     
     dispatch(addToWishlist(product));
     toast.success(`${product.name} added to wishlist!`);
-  };
+  }, [dispatch, navigate, product, user]);
 
   return (
     <div className="card group overflow-hidden bg-white rounded-lg shadow-md hover:shadow-xl transition relative flex flex-col">
@@ -103,3 +104,5 @@ export default function ProductCard({ product }) {
     </div>
   );
 }
+
+export default memo(ProductCard);
