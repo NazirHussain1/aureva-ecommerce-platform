@@ -1,47 +1,52 @@
-import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { useMemo, useCallback } from 'react';
-import { logout } from '../features/auth/authSlice';
+import { useEffect, useMemo, useState } from 'react';
+import { io } from 'socket.io-client';
 
-export default function useAuth() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+export default function useSocket() {
+  const [isConnected, setIsConnected] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  
+  const socket = useMemo(() => io(API_URL, { autoConnect: false }), [API_URL]);
 
-  const { user, token, loading } = useSelector((state) => state.auth);
+  useEffect(() => {
+    socket.on('connect', () => {
+      setIsConnected(true);
+    });
 
-  const isAuthenticated = !!token;
-  const isAdmin = user?.role === 'admin';
+    socket.on('disconnect', () => {
+      setIsConnected(false);
+    });
 
-  const handleLogout = useCallback(() => {
-    dispatch(logout());
-    navigate('/login', { replace: true });
-  }, [dispatch, navigate]);
+    return () => {
+      socket.off('connect');
+      socket.off('disconnect');
+      socket.disconnect();
+    };
+  }, [socket]);
 
-  const requireAuth = useCallback(
-    (redirectPath = '/login') => {
-      if (!isAuthenticated) navigate(redirectPath, { replace: true });
-    },
-    [isAuthenticated, navigate]
-  );
+  const connect = () => {
+    socket.connect();
+  };
 
-  const requireAdmin = useCallback(
-    (redirectPath = '/') => {
-      if (!isAdmin) navigate(redirectPath, { replace: true });
-    },
-    [isAdmin, navigate]
-  );
+  const disconnect = () => {
+    socket.disconnect();
+  };
 
-  return useMemo(
-    () => ({
-      user,
-      token,
-      loading,
-      isAuthenticated,
-      isAdmin,
-      logout: handleLogout,
-      requireAuth,
-      requireAdmin,
-    }),
-    [user, token, loading, isAuthenticated, isAdmin, handleLogout, requireAuth, requireAdmin]
-  );
+  const emit = (event, data) => {
+    if (isConnected) {
+      socket.emit(event, data);
+    }
+  };
+
+  const on = (event, callback) => {
+    socket.on(event, callback);
+  };
+
+  return {
+    socket,
+    isConnected,
+    connect,
+    disconnect,
+    emit,
+    on,
+  };
 }

@@ -1,50 +1,30 @@
-import { useEffect, useMemo, useState } from 'react';
-import { io } from 'socket.io-client';
+import { useSelector } from 'react-redux';
+import { useMemo } from 'react';
 
-export default function useSocket() {
-  const [isConnected, setIsConnected] = useState(false);
-  const socket = useMemo(() => io('http://localhost:5000', { autoConnect: false }), []);
+export default function useCart() {
+  const { items, total } = useSelector((state) => state.cart);
 
-  useEffect(() => {
-    socket.on('connect', () => {
-      setIsConnected(true);
-    });
+  const cartCount = useMemo(() => {
+    return items.reduce((count, item) => count + item.quantity, 0);
+  }, [items]);
 
-    socket.on('disconnect', () => {
-      setIsConnected(false);
-    });
+  const isEmpty = items.length === 0;
 
-    return () => {
-      socket.off('connect');
-      socket.off('disconnect');
-      socket.disconnect();
-    };
-  }, [socket]);
-
-  const connect = () => {
-    socket.connect();
+  const hasItem = (productId) => {
+    return items.some(item => item.id === productId);
   };
 
-  const disconnect = () => {
-    socket.disconnect();
-  };
-
-  const emit = (event, data) => {
-    if (isConnected) {
-      socket.emit(event, data);
-    }
-  };
-
-  const on = (event, callback) => {
-    socket.on(event, callback);
+  const getItemQuantity = (productId) => {
+    const item = items.find(item => item.id === productId);
+    return item ? item.quantity : 0;
   };
 
   return {
-    socket,
-    isConnected,
-    connect,
-    disconnect,
-    emit,
-    on,
+    items,
+    total,
+    cartCount,
+    isEmpty,
+    hasItem,
+    getItemQuantity,
   };
 }

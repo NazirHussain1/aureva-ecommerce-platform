@@ -1,14 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from '../../api/axios';
 
 export const fetchAdminData = createAsyncThunk(
   'admin/fetchAdminData',
-  async (_, thunkAPI) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('/api/admin/data');
-      const data = await response.json();
-      return data;
+      const response = await axios.get('/api/admin/data');
+      return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch admin data');
     }
   }
 );
