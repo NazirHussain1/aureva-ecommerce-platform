@@ -78,7 +78,6 @@ const productSchema = new mongoose.Schema({
 });
 
 // Indexes for better query performance
-productSchema.index({ slug: 1 });
 productSchema.index({ category: 1 });
 productSchema.index({ brand: 1 });
 productSchema.index({ price: 1 });
@@ -87,7 +86,7 @@ productSchema.index({ isActive: 1, isDeleted: 1 });
 productSchema.index({ name: 'text', description: 'text', category: 'text', brand: 'text' });
 
 // Generate slug from name before saving
-productSchema.pre('save', async function(next) {
+productSchema.pre('save', async function() {
   if (this.isModified('name') && !this.slug) {
     const baseSlug = this.name
       .toLowerCase()
@@ -105,7 +104,6 @@ productSchema.pre('save', async function(next) {
     }
     this.slug = slug;
   }
-  next();
 });
 
 // Transform output to match frontend expectations

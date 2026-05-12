@@ -99,13 +99,12 @@ const orderSchema = new mongoose.Schema({
 });
 
 // Generate order number before saving
-orderSchema.pre('save', async function(next) {
+orderSchema.pre('save', async function() {
   if (!this.orderNumber) {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substr(2, 9).toUpperCase();
     this.orderNumber = `ORD-${timestamp}-${random}`;
   }
-  next();
 });
 
 // Indexes for better query performance
