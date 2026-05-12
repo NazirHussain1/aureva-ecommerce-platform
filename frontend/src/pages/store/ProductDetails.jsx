@@ -46,7 +46,7 @@ export default function ProductDetails() {
   const fetchProductByIdentifier = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`/api/products/${encodeURIComponent(identifier)}`);
+      const response = await axios.get(`/products/${encodeURIComponent(identifier)}`);
       setProduct(response.data);
       return response.data;
     } catch (error) {
@@ -64,7 +64,7 @@ export default function ProductDetails() {
 
     try {
       setLoadingReviews(true);
-      const response = await axios.get(`/api/reviews/${productId}`);
+      const response = await axios.get(`/reviews/${productId}`);
       setReviews(response.data || []);
     } catch (error) {
       
@@ -163,7 +163,7 @@ export default function ProductDetails() {
     if (!product) return;
 
     try {
-      await axios.post(`/api/reviews/${product.id}`, reviewForm);
+      await axios.post(`/reviews/${product.id}`, reviewForm);
       toast.success('Review submitted successfully!');
       setShowReviewForm(false);
       setReviewForm({ rating: 5, comment: '' });

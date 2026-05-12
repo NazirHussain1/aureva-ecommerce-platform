@@ -163,7 +163,7 @@ export default function AdminProducts() {
       }
 
       if (editingProduct) {
-        await axios.put(`/api/admin/products/${editingProduct.id}`, productData);
+        await axios.put(`/admin/products/${editingProduct.id}`, productData);
         toast.success('Product updated successfully!');
       } else {
         await axios.post('/admin/products', productData);
@@ -207,7 +207,7 @@ export default function AdminProducts() {
             onClick={async () => {
               toast.dismiss(t.id);
               try {
-                await axios.delete(`/api/admin/products/${id}`);
+                await axios.delete(`/admin/products/${id}`);
                 toast.success('Product deleted successfully!');
                 fetchProducts();
               } catch (error) {

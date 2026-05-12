@@ -75,7 +75,7 @@ export default function Navbar() {
 
       try {
         setSearchLoading(true);
-        const response = await axios.get(`/api/products?search=${searchQuery}&limit=5`);
+        const response = await axios.get(`/products?search=${searchQuery}&limit=5`);
         setSearchResults(response.data.products || []);
       } catch (error) {
         

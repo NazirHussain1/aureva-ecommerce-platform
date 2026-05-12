@@ -35,7 +35,7 @@ export default function AdminOrders() {
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
       setUpdating(orderId);
-      await axios.put(`/api/admin/orders/${orderId}/status`, { orderStatus: newStatus });
+      await axios.put(`/admin/orders/${orderId}/status`, { orderStatus: newStatus });
       
       setOrders((prev) =>
         prev.map((order) =>

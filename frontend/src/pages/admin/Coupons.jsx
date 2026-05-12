@@ -54,7 +54,7 @@ export default function AdminCoupons() {
       };
 
       if (editingCoupon) {
-        await axios.put(`/api/admin/coupons/${editingCoupon.id}`, couponData);
+        await axios.put(`/admin/coupons/${editingCoupon.id}`, couponData);
         toast.success('Coupon updated successfully!');
       } else {
         await axios.post('/admin/coupons', couponData);
@@ -90,7 +90,7 @@ export default function AdminCoupons() {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this coupon?')) {
       try {
-        await axios.delete(`/api/admin/coupons/${id}`);
+        await axios.delete(`/admin/coupons/${id}`);
         toast.success('Coupon deleted successfully!');
         fetchCoupons();
       } catch (error) {

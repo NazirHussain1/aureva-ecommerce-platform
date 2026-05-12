@@ -47,7 +47,7 @@ export default function AdminCustomers() {
             onClick={async () => {
               toast.dismiss(t.id);
               try {
-                await axios.put(`/api/admin/users/${userId}/status`, {
+                await axios.put(`/admin/users/${userId}/status`, {
                   status: nextStatus,
                 });
                 toast.success(`User ${action}ed successfully!`);

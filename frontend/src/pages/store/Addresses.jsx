@@ -61,7 +61,7 @@ export default function Addresses() {
 
     try {
       if (editingAddress) {
-        await axios.put(`/api/addresses/${editingAddress.id}`, formData);
+        await axios.put(`/addresses/${editingAddress.id}`, formData);
         toast.success('Address updated successfully!');
       } else {
         await axios.post('/addresses', formData);
@@ -96,7 +96,7 @@ export default function Addresses() {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this address?')) {
       try {
-        await axios.delete(`/api/addresses/${id}`);
+        await axios.delete(`/addresses/${id}`);
         toast.success('Address deleted successfully!');
         fetchAddresses();
       } catch (error) {
@@ -108,7 +108,7 @@ export default function Addresses() {
 
   const handleSetDefault = async (id) => {
     try {
-      await axios.put(`/api/addresses/${id}`, { isDefault: true });
+      await axios.put(`/addresses/${id}`, { isDefault: true });
       toast.success('Default address updated!');
       fetchAddresses();
     } catch (error) {

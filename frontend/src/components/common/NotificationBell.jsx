@@ -34,7 +34,7 @@ export default function NotificationBell() {
 
   const markAsRead = async (id) => {
     try {
-      await axios.put(`/api/notifications/${id}/read`);
+      await axios.put(`/notifications/${id}/read`);
       setNotifications(notifications.map(n => 
         n.id === id ? { ...n, isRead: true } : n
       ));
@@ -58,7 +58,7 @@ export default function NotificationBell() {
 
   const deleteNotification = async (id) => {
     try {
-      await axios.delete(`/api/notifications/${id}`);
+      await axios.delete(`/notifications/${id}`);
       setNotifications(notifications.filter(n => n.id !== id));
       toast.success('Notification deleted');
     } catch (error) {

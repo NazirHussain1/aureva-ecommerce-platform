@@ -26,7 +26,7 @@ export default function Dashboard() {
 
   const fetchChartData = useCallback(async () => {
     try {
-      const salesRes = await axios.get(`/api/admin/analytics/sales-chart?range=${timeRange}`);
+      const salesRes = await axios.get(`/admin/analytics/sales-chart?range=${timeRange}`);
       setSalesData(salesRes.data || []);
     } catch (error) {
           }
