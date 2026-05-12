@@ -5,7 +5,7 @@ export const fetchAdminData = createAsyncThunk(
   'admin/fetchAdminData',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get('/api/admin/data');
+      const response = await axios.get('/admin/data');
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch admin data');

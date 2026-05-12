@@ -22,7 +22,7 @@ export default function AdminOrders() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/admin/orders');
+      const response = await axios.get('/admin/orders');
       setOrders(response.data || []);
     } catch (error) {
       

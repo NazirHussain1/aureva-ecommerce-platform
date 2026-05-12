@@ -46,7 +46,7 @@ export default function Addresses() {
   const fetchAddresses = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/addresses');
+      const response = await axios.get('/addresses');
       setAddresses(response.data || []);
     } catch (error) {
       
@@ -64,7 +64,7 @@ export default function Addresses() {
         await axios.put(`/api/addresses/${editingAddress.id}`, formData);
         toast.success('Address updated successfully!');
       } else {
-        await axios.post('/api/addresses', formData);
+        await axios.post('/addresses', formData);
         toast.success('Address added successfully!');
       }
 

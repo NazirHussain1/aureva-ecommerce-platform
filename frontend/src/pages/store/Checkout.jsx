@@ -59,7 +59,7 @@ export default function Checkout() {
 
   const fetchAddresses = async () => {
     try {
-      const response = await axios.get('/api/addresses');
+      const response = await axios.get('/addresses');
       setAddresses(response.data || []);
       const defaultAddr = response.data?.find(addr => addr.isDefault);
       if (defaultAddr) {
@@ -151,7 +151,7 @@ export default function Checkout() {
         totalAmount: total
       };
 
-      await axios.post('/api/orders', orderData);
+      await axios.post('/orders', orderData);
       
       toast.success('Order placed successfully!');
       dispatch(clearCart());

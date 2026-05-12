@@ -139,7 +139,7 @@ function Home() {
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/products');
+      const response = await axios.get('/products');
       const allProducts = response.data.products || [];
       setProducts(allProducts.filter(p => p.stock > 0).slice(0, 8));
     } catch (error) {
@@ -163,7 +163,7 @@ function Home() {
 
     try {
       setSubscribing(true);
-      await axios.post('/api/newsletter/subscribe', { email: newsletterEmail });
+      await axios.post('/newsletter/subscribe', { email: newsletterEmail });
       toast.success('Successfully subscribed to newsletter!');
       setNewsletterEmail('');
     } catch (error) {

@@ -36,8 +36,8 @@ export default function Dashboard() {
     try {
       setLoading(true);
       const [ordersRes, customersRes] = await Promise.all([
-        axios.get('/api/admin/orders'),
-        axios.get('/api/admin/users')
+        axios.get('/admin/orders'),
+        axios.get('/admin/users')
       ]);
 
       const orders = ordersRes.data || [];

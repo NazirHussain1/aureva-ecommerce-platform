@@ -35,7 +35,7 @@ export default function Orders() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/orders');
+      const response = await axios.get('/orders');
       setOrders(response.data || []);
     } catch (error) {
       

@@ -30,7 +30,7 @@ export default function AdminCoupons() {
   const fetchCoupons = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/admin/coupons');
+      const response = await axios.get('/admin/coupons');
       setCoupons(response.data || []);
     } catch (error) {
       
@@ -57,7 +57,7 @@ export default function AdminCoupons() {
         await axios.put(`/api/admin/coupons/${editingCoupon.id}`, couponData);
         toast.success('Coupon updated successfully!');
       } else {
-        await axios.post('/api/admin/coupons', couponData);
+        await axios.post('/admin/coupons', couponData);
         toast.success('Coupon created successfully!');
       }
 

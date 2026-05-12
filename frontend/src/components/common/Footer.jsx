@@ -36,7 +36,7 @@ export default function Footer() {
 
     try {
       setSubscribing(true);
-      await axios.post('/api/newsletter/subscribe', { email });
+      await axios.post('/newsletter/subscribe', { email });
       toast.success('Successfully subscribed to newsletter!');
       setEmail('');
     } catch (error) {

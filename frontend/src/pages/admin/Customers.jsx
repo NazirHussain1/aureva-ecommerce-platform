@@ -20,7 +20,7 @@ export default function AdminCustomers() {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/admin/users');
+      const response = await axios.get('/admin/users');
       setCustomers(response.data || []);
     } catch (error) {
       

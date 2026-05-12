@@ -22,8 +22,8 @@ export default function Reports() {
     try {
       setLoading(true);
       const [ordersRes, customersRes, salesRes] = await Promise.all([
-        axios.get('/api/admin/orders'),
-        axios.get('/api/admin/users'),
+        axios.get('/admin/orders'),
+        axios.get('/admin/users'),
         axios.get(`/api/admin/analytics/sales-chart?range=${timeRange}`)
       ]);
 

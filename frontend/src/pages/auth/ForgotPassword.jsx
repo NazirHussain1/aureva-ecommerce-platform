@@ -47,7 +47,7 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      await axios.post('/api/users/forgot-password', { email });
+      await axios.post('/users/forgot-password', { email });
       setStep(2);
       setTimer(600);
       toast.success('OTP sent to your email!');
@@ -64,7 +64,7 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      const response = await axios.post('/api/users/verify-otp', { email, otp });
+      const response = await axios.post('/users/verify-otp', { email, otp });
       setResetToken(response.data.resetToken);
       setStep(3);
       toast.success('OTP verified successfully!');
@@ -92,7 +92,7 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      await axios.post('/api/users/reset-password', { 
+      await axios.post('/users/reset-password', { 
         token: resetToken, 
         newPassword: password 
       });
@@ -112,7 +112,7 @@ export default function ForgotPassword() {
   const handleResendOTP = async () => {
     setLoading(true);
     try {
-      await axios.post('/api/users/forgot-password', { email });
+      await axios.post('/users/forgot-password', { email });
       setTimer(600);
       setOtp('');
       toast.success('New OTP sent to your email!');

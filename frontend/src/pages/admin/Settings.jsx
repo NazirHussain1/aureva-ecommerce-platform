@@ -25,7 +25,7 @@ export default function Settings() {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/admin/settings');
+      const response = await axios.get('/admin/settings');
       if (response.data) {
         setSettings(response.data);
       }
@@ -41,7 +41,7 @@ export default function Settings() {
     
     try {
       setSaving(true);
-      await axios.put('/api/admin/settings', settings);
+      await axios.put('/admin/settings', settings);
       toast.success('Settings updated successfully!');
     } catch (error) {
       

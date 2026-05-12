@@ -102,7 +102,7 @@ export default function Profile() {
         updateData.newPassword = formData.newPassword;
       }
 
-      const response = await axios.put('/api/users/profile', updateData);
+      const response = await axios.put('/users/profile', updateData);
       const updatedUser = response.data?.user;
       if (updatedUser) {
         dispatch(updateUser(updatedUser));

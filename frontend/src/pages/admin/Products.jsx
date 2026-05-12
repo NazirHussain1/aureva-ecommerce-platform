@@ -118,7 +118,7 @@ export default function AdminProducts() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/products');
+      const response = await axios.get('/products');
       const apiProducts = response.data.products || response.data.data || [];
       setProducts(Array.isArray(apiProducts) ? apiProducts : []);
     } catch (error) {
@@ -141,7 +141,7 @@ export default function AdminProducts() {
           uploadFormData.append('images', file);
         });
 
-        const uploadResponse = await axios.post('/api/uploads', uploadFormData, {
+        const uploadResponse = await axios.post('/uploads', uploadFormData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -166,7 +166,7 @@ export default function AdminProducts() {
         await axios.put(`/api/admin/products/${editingProduct.id}`, productData);
         toast.success('Product updated successfully!');
       } else {
-        await axios.post('/api/admin/products', productData);
+        await axios.post('/admin/products', productData);
         toast.success('Product created successfully!');
       }
 
