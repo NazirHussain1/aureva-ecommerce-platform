@@ -6,7 +6,7 @@ const { sendWelcomeEmail, sendPasswordResetEmail } = require("../services/emailS
 
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
+    { id: user.id || user._id, email: user.email, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
   );
@@ -110,7 +110,7 @@ const forgotPassword = async (req, res) => {
 
     res.status(200).json({ 
       message: "OTP sent to your email",
-      email: email // Send back email for verification step
+      email: email
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -159,7 +159,7 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired reset token" });
     }
 
-    user.password = newPassword;
+    user.password = newPassword; // Will be hashed by pre-save hook
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
     user.resetPasswordOTP = null;
@@ -187,6 +187,7 @@ const getMe = async (req, res) => {
 };
 
 const logout = async (req, res) => {
+  res.cookie("token", "", { httpOnly: true, expires: new Date(0) });
   res.status(200).json({ message: "Logged out successfully" });
 };
 
@@ -243,7 +244,7 @@ const updateProfile = async (req, res) => {
         return res.status(400).json({ message: "New password must be at least 6 characters" });
       }
 
-      user.password = newPassword;
+      user.password = newPassword; // Will be hashed by pre-save hook
     }
 
     await user.save();
