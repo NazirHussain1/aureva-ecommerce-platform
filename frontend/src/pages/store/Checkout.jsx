@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { clearCart } from '../../features/cart/cartSlice';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
-import { FiCreditCard, FiTruck, FiMapPin, FiPhone, FiChevronRight, FiChevronLeft, FiHome, FiPackage, FiEdit2, FiPlus, FiUser } from 'react-icons/fi';
+import { FiCreditCard, FiTruck, FiMapPin, FiPhone, FiChevronRight, FiChevronLeft, FiHome, FiPackage, FiEdit2, FiPlus, FiUser, FiTag } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import { HiSparkles } from 'react-icons/hi';
 import { MdCheckCircle, MdRadioButtonUnchecked, MdRadioButtonChecked } from 'react-icons/md';
@@ -21,6 +21,9 @@ export default function Checkout() {
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [useNewAddress, setUseNewAddress] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [formData, setFormData] = useState({
     fullName: user?.name || '',
     phone: '',
@@ -36,7 +39,9 @@ export default function Checkout() {
     bankName: ''
   });
 
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const discount = appliedCoupon?.discount || 0;
+  const total = Math.max(subtotal - discount, 0);
   const steps = [
     { number: 1, title: 'Shipping', icon: FiTruck },
     { number: 2, title: 'Payment', icon: FiCreditCard },
@@ -100,6 +105,36 @@ export default function Checkout() {
     setCurrentStep(currentStep - 1);
   };
 
+  const handleApplyCoupon = async () => {
+    const code = couponCode.trim();
+
+    if (!code) {
+      toast.error('Enter a coupon code');
+      return;
+    }
+
+    try {
+      setApplyingCoupon(true);
+      const response = await axios.post('/coupons/apply', {
+        code,
+        orderAmount: subtotal
+      });
+      setAppliedCoupon(response.data);
+      setCouponCode(response.data.couponCode);
+      toast.success('Coupon applied');
+    } catch (error) {
+      setAppliedCoupon(null);
+      toast.error(error.response?.data?.message || 'Failed to apply coupon');
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -148,7 +183,7 @@ export default function Checkout() {
           accountTitle: formData.accountTitle,
           bankName: formData.bankName
         },
-        totalAmount: total
+        couponCode: appliedCoupon?.couponCode
       };
 
       await axios.post('/orders', orderData);
@@ -791,8 +826,52 @@ export default function Checkout() {
               <div className="border-t border-gray-200 pt-4 space-y-3">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal ({items.length} {items.length === 1 ? 'item' : 'items'})</span>
-                  <span className="font-semibold text-gray-900">${total.toFixed(2)}</span>
+                  <span className="font-semibold text-gray-900">${subtotal.toFixed(2)}</span>
                 </div>
+                <div className="rounded-2xl border border-purple-100 bg-purple-50 p-3">
+                  {appliedCoupon ? (
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FiTag className="text-purple-600 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-purple-900 truncate">{appliedCoupon.couponCode}</p>
+                          <p className="text-xs text-purple-700">Discount applied</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveCoupon}
+                        className="text-xs font-bold text-purple-700 hover:text-purple-900"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        className="input h-11 flex-1 font-mono text-sm"
+                        placeholder="COUPON"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        disabled={applyingCoupon}
+                        className="px-4 h-11 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 disabled:opacity-50"
+                      >
+                        {applyingCoupon ? '...' : 'Apply'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-700">
+                    <span>Discount</span>
+                    <span className="font-semibold">-${discount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
                   <span className="font-semibold text-green-600">Free</span>

@@ -1,7 +1,8 @@
 import { useNavigate, Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { removeFromWishlist, clearWishlist } from '../../features/wishlist/wishlistSlice';
-import { addToCart } from '../../features/cart/cartSlice';
+import { fetchWishlist, removeFromWishlistAsync, clearWishlist } from '../../features/wishlist/wishlistSlice';
+import { addToCartAsync } from '../../features/cart/cartSlice';
 import toast from 'react-hot-toast';
 import { FiShoppingCart, FiTrash2, FiHeart } from 'react-icons/fi';
 import { MdFavoriteBorder } from 'react-icons/md';
@@ -15,14 +16,24 @@ export default function Wishlist() {
   const { items } = useSelector((state) => state.wishlist);
   const { user } = useSelector((state) => state.auth);
 
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchWishlist());
+    }
+  }, [dispatch, user]);
+
   const handleRemove = (id, name) => {
-    dispatch(removeFromWishlist(id));
-    toast.success(`${name} removed from wishlist`);
+    dispatch(removeFromWishlistAsync(id))
+      .unwrap()
+      .then(() => toast.success(`${name} removed from wishlist`))
+      .catch((message) => toast.error(message || 'Failed to remove from wishlist'));
   };
 
   const handleAddToCart = (product) => {
-    dispatch(addToCart({ product, quantity: 1 }));
-    toast.success(`${product.name} added to cart!`);
+    dispatch(addToCartAsync({ productId: product.id, quantity: 1 }))
+      .unwrap()
+      .then(() => toast.success(`${product.name} added to cart!`))
+      .catch((message) => toast.error(message || 'Failed to add to cart'));
   };
 
   const handleClearWishlist = () => {

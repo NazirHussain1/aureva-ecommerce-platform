@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FiMail, FiTrash2, FiEye, FiFilter } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import toast from 'react-hot-toast';
@@ -11,11 +11,7 @@ export default function ContactMessages() {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    fetchMessages();
-  }, [filter]);
-
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       setLoading(true);
       const params = filter !== 'all' ? { isRead: filter === 'read' } : {};
@@ -27,7 +23,11 @@ export default function ContactMessages() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    fetchMessages();
+  }, [fetchMessages]);
 
   const handleViewMessage = async (message) => {
     setSelectedMessage(message);

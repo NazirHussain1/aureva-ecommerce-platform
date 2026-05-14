@@ -3,6 +3,11 @@ const Coupon = require("../models/Coupon");
 const applyCoupon = async (req, res) => {
   try {
     const { code, orderAmount } = req.body;
+    const amount = Number(orderAmount);
+
+    if (!code || Number.isNaN(amount) || amount < 0) {
+      return res.status(400).json({ message: "Coupon code and order amount are required" });
+    }
 
     const coupon = await Coupon.findOne({ code: code.toUpperCase() });
 
@@ -10,7 +15,7 @@ const applyCoupon = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired coupon" });
     }
 
-    if (orderAmount < coupon.minPurchase) {
+    if (amount < coupon.minPurchase) {
       return res.status(400).json({
         message: `Minimum purchase amount is $${coupon.minPurchase}`,
       });
@@ -19,18 +24,18 @@ const applyCoupon = async (req, res) => {
     let discount = 0;
 
     if (coupon.discountType === "percentage") {
-      discount = (orderAmount * coupon.discountValue) / 100;
+      discount = (amount * coupon.discountValue) / 100;
 
       if (coupon.maxDiscount) {
         discount = Math.min(discount, coupon.maxDiscount);
       }
     } else {
-      discount = coupon.discountValue;
+      discount = Math.min(coupon.discountValue, amount);
     }
 
     res.json({
-      discount,
-      finalAmount: orderAmount - discount,
+      discount: Number(discount.toFixed(2)),
+      finalAmount: Number((amount - discount).toFixed(2)),
       couponCode: coupon.code,
     });
   } catch (error) {

@@ -135,7 +135,7 @@ const securityLogger = (req, res, next) => {
     if (typeof obj === 'string') {
       suspiciousPatterns.forEach(pattern => {
         if (pattern.test(obj)) {
-          } from IP: ${req.ip}`);
+          console.warn(`Suspicious input detected at ${path} from IP: ${req.ip}`);
         }
       });
     } else if (typeof obj === 'object' && obj !== null) {

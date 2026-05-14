@@ -65,21 +65,35 @@ const validateOrder = [
     .isArray({ min: 1 })
     .withMessage("Order must contain at least one item"),
   body("items.*.productId")
-    .isInt({ min: 1 })
+    .isMongoId()
     .withMessage("Valid product ID is required"),
   body("items.*.quantity")
     .isInt({ min: 1 })
     .withMessage("Quantity must be at least 1"),
   body("items.*.price")
+    .optional()
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
   body("shippingAddress")
     .isObject()
     .withMessage("Shipping address is required"),
+  body("shippingAddress")
+    .custom((address) => Boolean(address.street || address.address || address.addressLine1))
+    .withMessage("Shipping street address is required"),
+  body("shippingAddress.city")
+    .notEmpty()
+    .withMessage("Shipping city is required"),
+  body("shippingAddress.state")
+    .notEmpty()
+    .withMessage("Shipping state is required"),
+  body("shippingAddress.zipCode")
+    .notEmpty()
+    .withMessage("Shipping ZIP code is required"),
   body("paymentMethod")
-    .isIn(["credit_card", "debit_card", "paypal", "stripe", "razorpay", "cash_on_delivery"])
+    .isIn(["credit_card", "debit_card", "card", "paypal", "stripe", "razorpay", "cod", "cash_on_delivery", "jazzcash", "easypaisa", "bank_transfer"])
     .withMessage("Invalid payment method"),
   body("totalAmount")
+    .optional()
     .isFloat({ min: 0 })
     .withMessage("Total amount must be a positive number"),
   handleValidationErrors,

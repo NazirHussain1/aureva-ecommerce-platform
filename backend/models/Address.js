@@ -73,6 +73,8 @@ addressSchema.pre('save', async function(next) {
 addressSchema.set('toJSON', {
   transform: function(doc, ret) {
     ret.id = ret._id;
+    ret.addressLine1 = ret.street;
+    ret.addressLine2 = ret.addressLine2 || '';
     delete ret._id;
     delete ret.__v;
     return ret;

@@ -38,6 +38,9 @@ const orderSchema = new mongoose.Schema({
   },
   items: [orderItemSchema],
   shippingAddress: {
+    fullName: { type: String },
+    phone: { type: String },
+    address: { type: String },
     street: { type: String, required: true },
     city: { type: String, required: true },
     state: { type: String, required: true },
@@ -46,7 +49,7 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['card', 'paypal', 'cod'],
+    enum: ['card', 'credit_card', 'debit_card', 'paypal', 'stripe', 'razorpay', 'cod', 'cash_on_delivery', 'jazzcash', 'easypaisa', 'bank_transfer'],
     required: true
   },
   paymentStatus: {
@@ -77,6 +80,11 @@ const orderSchema = new mongoose.Schema({
   discount: {
     type: Number,
     default: 0
+  },
+  couponCode: {
+    type: String,
+    uppercase: true,
+    trim: true
   },
   totalAmount: {
     type: Number,

@@ -1,9 +1,13 @@
 const Wishlist = require("../models/Wishlist");
 
+const formatWishlist = (wishlist) => ({
+  items: wishlist?.products?.map((product) => product.toJSON ? product.toJSON() : product) || [],
+});
+
 const getWishlist = async (req, res) => {
   try {
     const wishlist = await Wishlist.findOne({ user: req.user.id }).populate("products");
-    res.json(wishlist ? wishlist.products : []);
+    res.json(formatWishlist(wishlist));
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -27,7 +31,7 @@ const addToWishlist = async (req, res) => {
       { new: true, upsert: true, runValidators: true }
     ).populate("products");
 
-    res.status(201).json(item);
+    res.status(201).json(formatWishlist(item));
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -45,7 +49,8 @@ const removeFromWishlist = async (req, res) => {
       return res.status(404).json({ message: "Item not found" });
     }
 
-    res.json({ message: "Removed from wishlist" });
+    await item.populate("products");
+    res.json(formatWishlist(item));
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }

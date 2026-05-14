@@ -6,6 +6,11 @@ const calculateTotal = (items) => {
   return items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 };
 
+const normalizeCartItems = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  return payload?.items || [];
+};
+
 // Async thunks for backend sync
 export const fetchCart = createAsyncThunk(
   'cart/fetchCart',
@@ -47,8 +52,8 @@ export const removeFromCartAsync = createAsyncThunk(
   'cart/removeFromCartAsync',
   async (itemId, { rejectWithValue }) => {
     try {
-      await cartApi.removeFromCart(itemId);
-      return itemId;
+      const response = await cartApi.removeFromCart(itemId);
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to remove from cart');
     }
@@ -109,7 +114,7 @@ const cartSlice = createSlice({
       })
       .addCase(fetchCart.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.items = action.payload.items || [];
+        state.items = normalizeCartItems(action.payload);
         state.total = calculateTotal(state.items);
       })
       .addCase(fetchCart.rejected, (state, action) => {
@@ -123,7 +128,7 @@ const cartSlice = createSlice({
       })
       .addCase(addToCartAsync.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.items = action.payload.items || [];
+        state.items = normalizeCartItems(action.payload);
         state.total = calculateTotal(state.items);
       })
       .addCase(addToCartAsync.rejected, (state, action) => {
@@ -137,7 +142,7 @@ const cartSlice = createSlice({
       })
       .addCase(updateCartItemAsync.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.items = action.payload.items || [];
+        state.items = normalizeCartItems(action.payload);
         state.total = calculateTotal(state.items);
       })
       .addCase(updateCartItemAsync.rejected, (state, action) => {
@@ -151,7 +156,7 @@ const cartSlice = createSlice({
       })
       .addCase(removeFromCartAsync.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.items = state.items.filter(item => item.id !== action.payload);
+        state.items = normalizeCartItems(action.payload);
         state.total = calculateTotal(state.items);
       })
       .addCase(removeFromCartAsync.rejected, (state, action) => {

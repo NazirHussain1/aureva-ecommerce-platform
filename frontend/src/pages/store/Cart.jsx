@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { removeFromCart, updateQuantity } from '../../features/cart/cartSlice';
+import { fetchCart, removeFromCartAsync, updateCartItemAsync } from '../../features/cart/cartSlice';
 import toast from 'react-hot-toast';
 import { FiShoppingCart, FiMinus, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { MdRemoveShoppingCart } from 'react-icons/md';
@@ -14,15 +14,19 @@ export default function Cart() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { items } = useSelector((state) => state.cart);
+  const { user } = useSelector((state) => state.auth);
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   useEffect(() => {
     document.title = 'Shopping Cart - Aureva Beauty';
+    if (user) {
+      dispatch(fetchCart());
+    }
     return () => {
       document.title = 'Aureva Beauty';
     };
-  }, []);
+  }, [dispatch, user]);
 
   const handleUpdateQuantity = (id, newQuantity, stock) => {
     if (newQuantity > 0) {
@@ -30,13 +34,17 @@ export default function Cart() {
         toast.error(`Only ${stock} items available in stock`);
         return;
       }
-      dispatch(updateQuantity({ productId: id, quantity: newQuantity }));
+      dispatch(updateCartItemAsync({ itemId: id, quantity: newQuantity }))
+        .unwrap()
+        .catch((message) => toast.error(message || 'Failed to update cart'));
     }
   };
 
   const handleRemove = (id, name) => {
-    dispatch(removeFromCart(id));
-    toast.success(`${name} removed from cart`);
+    dispatch(removeFromCartAsync(id))
+      .unwrap()
+      .then(() => toast.success(`${name} removed from cart`))
+      .catch((message) => toast.error(message || 'Failed to remove from cart'));
   };
 
   if (items.length === 0) {

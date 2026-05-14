@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart } from '../../features/cart/cartSlice';
-import { addToWishlist, removeFromWishlist } from '../../features/wishlist/wishlistSlice';
+import { addToCartAsync } from '../../features/cart/cartSlice';
+import { addToWishlistAsync, removeFromWishlistAsync } from '../../features/wishlist/wishlistSlice';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
 import { 
@@ -111,8 +111,10 @@ export default function ProductDetails() {
       return;
     }
     
-    dispatch(addToCart({ product, quantity }));
-    toast.success(`${quantity} ${quantity > 1 ? 'items' : 'item'} added to cart!`);
+    dispatch(addToCartAsync({ productId: product.id, quantity }))
+      .unwrap()
+      .then(() => toast.success(`${quantity} ${quantity > 1 ? 'items' : 'item'} added to cart!`))
+      .catch((message) => toast.error(message || 'Failed to add to cart'));
   };
 
   const handleBuyNow = () => {
@@ -129,8 +131,10 @@ export default function ProductDetails() {
       return;
     }
     
-    dispatch(addToCart({ product, quantity }));
-    navigate('/checkout');
+    dispatch(addToCartAsync({ productId: product.id, quantity }))
+      .unwrap()
+      .then(() => navigate('/checkout'))
+      .catch((message) => toast.error(message || 'Failed to add to cart'));
   };
 
   const handleToggleWishlist = () => {
@@ -143,11 +147,15 @@ export default function ProductDetails() {
     }
     
     if (isInWishlist) {
-      dispatch(removeFromWishlist(product.id));
-      toast.success('Removed from wishlist');
+      dispatch(removeFromWishlistAsync(product.id))
+        .unwrap()
+        .then(() => toast.success('Removed from wishlist'))
+        .catch((message) => toast.error(message || 'Failed to remove from wishlist'));
     } else {
-      dispatch(addToWishlist(product));
-      toast.success('Added to wishlist');
+      dispatch(addToWishlistAsync(product.id))
+        .unwrap()
+        .then(() => toast.success('Added to wishlist'))
+        .catch((message) => toast.error(message || 'Failed to add to wishlist'));
     }
   };
 
@@ -580,12 +588,12 @@ export default function ProductDetails() {
                 <div key={review.id} className="border-b border-gray-200 pb-6 last:border-0">
                   <div className="flex items-start gap-5">
                     <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg flex-shrink-0">
-                      {review.User?.name?.charAt(0).toUpperCase() || 'U'}
+                      {review.user?.name?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div className="flex-1">
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
                         <div>
-                          <p className="font-bold text-gray-900 text-lg">{review.User?.name || 'Anonymous'}</p>
+                          <p className="font-bold text-gray-900 text-lg">{review.user?.name || 'Anonymous'}</p>
                           <p className="text-sm text-gray-500">
                             {new Date(review.createdAt).toLocaleDateString('en-US', {
                               year: 'numeric',

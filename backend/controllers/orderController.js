@@ -1,52 +1,101 @@
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const User = require("../models/User");
+const Cart = require("../models/Cart");
+const Coupon = require("../models/Coupon");
 const { sendOrderConfirmationEmail } = require("../services/emailService");
 
 const getOrderUserId = (order) => String(order?.user?._id || order?.user || "");
 
 const normalizeShippingAddress = (shippingAddress = {}) => ({
-  street: shippingAddress.street || [shippingAddress.addressLine1, shippingAddress.addressLine2].filter(Boolean).join(", "),
+  fullName: shippingAddress.fullName || shippingAddress.name,
+  phone: shippingAddress.phone,
+  address: shippingAddress.address || [shippingAddress.addressLine1, shippingAddress.addressLine2].filter(Boolean).join(", "),
+  street: shippingAddress.street || shippingAddress.address || [shippingAddress.addressLine1, shippingAddress.addressLine2].filter(Boolean).join(", "),
   city: shippingAddress.city,
   state: shippingAddress.state,
   zipCode: shippingAddress.zipCode,
   country: shippingAddress.country || "USA",
 });
 
+const calculateCouponDiscount = (coupon, subtotal) => {
+  if (!coupon) return 0;
+
+  if (coupon.discountType === "percentage") {
+    const percentageDiscount = (subtotal * coupon.discountValue) / 100;
+    return coupon.maxDiscount ? Math.min(percentageDiscount, coupon.maxDiscount) : percentageDiscount;
+  }
+
+  return Math.min(coupon.discountValue, subtotal);
+};
+
 const placeOrder = async (req, res) => {
-  const { items, shippingAddress, paymentMethod, paymentDetails, totalAmount } = req.body;
+  const { items, shippingAddress, paymentMethod, paymentDetails, couponCode } = req.body;
 
   if (!items || items.length === 0) {
     return res.status(400).json({ message: "No order items" });
   }
 
+  const stockUpdates = [];
+
   try {
     const orderItems = [];
 
     for (const item of items) {
-      const product = await Product.findById(item.productId || item.product);
+      const quantity = Number(item.quantity);
+      const productId = item.productId || item.product;
+      const product = await Product.findOneAndUpdate(
+        { _id: productId, stock: { $gte: quantity } },
+        { $inc: { stock: -quantity } },
+        { new: true }
+      );
+
       if (!product) {
-        return res.status(400).json({ message: "Product not found" });
-      }
-      if (product.stock < item.quantity) {
-        return res.status(400).json({
-          message: `${product.name} is out of stock`,
-        });
+        const existingProduct = await Product.findById(productId).select("name stock");
+        const message = existingProduct
+          ? `${existingProduct.name} has only ${existingProduct.stock} item(s) available`
+          : "Product not found";
+        await Promise.all(stockUpdates.map((update) =>
+          Product.findByIdAndUpdate(update.product, { $inc: { stock: update.quantity } })
+        ));
+        return res.status(400).json({ message });
       }
 
-      product.stock -= Number(item.quantity);
-      await product.save();
+      stockUpdates.push({ product: product.id, quantity });
 
       orderItems.push({
         product: product.id,
         name: product.name,
-        price: Number(item.price ?? product.price),
-        quantity: Number(item.quantity),
+        price: Number(product.price),
+        quantity,
         image: product.images?.[0],
       });
     }
 
     const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    let coupon = null;
+    let discount = 0;
+
+    if (couponCode) {
+      coupon = await Coupon.findOne({ code: String(couponCode).toUpperCase() });
+
+      if (!coupon || !coupon.isValid()) {
+        await Promise.all(stockUpdates.map((update) =>
+          Product.findByIdAndUpdate(update.product, { $inc: { stock: update.quantity } })
+        ));
+        return res.status(400).json({ message: "Invalid or expired coupon" });
+      }
+
+      if (subtotal < coupon.minPurchase) {
+        await Promise.all(stockUpdates.map((update) =>
+          Product.findByIdAndUpdate(update.product, { $inc: { stock: update.quantity } })
+        ));
+        return res.status(400).json({ message: `Minimum purchase amount is $${coupon.minPurchase}` });
+      }
+
+      discount = Number(calculateCouponDiscount(coupon, subtotal).toFixed(2));
+    }
+
     const order = await Order.create({
       user: req.user.id,
       items: orderItems,
@@ -54,17 +103,31 @@ const placeOrder = async (req, res) => {
       paymentMethod,
       paymentDetails: paymentDetails || null,
       subtotal,
-      totalAmount: Number(totalAmount ?? subtotal),
+      discount,
+      couponCode: coupon?.code,
+      totalAmount: Number((subtotal - discount).toFixed(2)),
     });
 
+    if (coupon) {
+      coupon.usedCount += 1;
+      await coupon.save();
+    }
+
+    await Cart.findOneAndUpdate({ user: req.user.id }, { items: [], totalAmount: 0 });
+
     const user = await User.findById(req.user.id);
-    await sendOrderConfirmationEmail(order.toJSON(), user);
+    sendOrderConfirmationEmail(order.toJSON(), user).catch((emailError) => {
+      console.error("Failed to send order confirmation email:", emailError.message);
+    });
 
     res.status(201).json({
       ...order.toJSON(),
       userId: getOrderUserId(order),
     });
   } catch (error) {
+    await Promise.all(stockUpdates.map((update) =>
+      Product.findByIdAndUpdate(update.product, { $inc: { stock: update.quantity } })
+    ));
     res.status(500).json({ message: "Server error" });
   }
 };

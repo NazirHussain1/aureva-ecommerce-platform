@@ -30,8 +30,8 @@ export const removeFromWishlistAsync = createAsyncThunk(
   'wishlist/removeFromWishlistAsync',
   async (productId, { rejectWithValue }) => {
     try {
-      await axios.delete(`/wishlist/${productId}`);
-      return productId;
+      const response = await axios.delete(`/wishlist/${productId}`);
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to remove from wishlist');
     }
@@ -89,11 +89,7 @@ const wishlistSlice = createSlice({
       })
       .addCase(addToWishlistAsync.fulfilled, (state, action) => {
         state.isLoading = false;
-        const product = action.payload.product || action.payload;
-        const exists = state.items.find(item => item.id === product.id);
-        if (!exists) {
-          state.items.push(product);
-        }
+        state.items = action.payload.items || action.payload || [];
       })
       .addCase(addToWishlistAsync.rejected, (state, action) => {
         state.isLoading = false;
@@ -106,7 +102,7 @@ const wishlistSlice = createSlice({
       })
       .addCase(removeFromWishlistAsync.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.items = state.items.filter(item => item.id !== action.payload);
+        state.items = action.payload.items || action.payload || [];
       })
       .addCase(removeFromWishlistAsync.rejected, (state, action) => {
         state.isLoading = false;

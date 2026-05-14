@@ -1,8 +1,30 @@
 const Coupon = require("../models/Coupon");
 
+const normalizeCouponPayload = (body) => {
+  const payload = { ...body };
+
+  if (!payload.validFrom) {
+    payload.validFrom = new Date();
+  }
+
+  if (!payload.validUntil && payload.expiryDate) {
+    payload.validUntil = payload.expiryDate;
+  }
+
+  if (!payload.validUntil) {
+    const noExpiryDate = new Date();
+    noExpiryDate.setFullYear(noExpiryDate.getFullYear() + 100);
+    payload.validUntil = noExpiryDate;
+  }
+
+  delete payload.expiryDate;
+
+  return payload;
+};
+
 const createCoupon = async (req, res) => {
   try {
-    const coupon = await Coupon.create(req.body);
+    const coupon = await Coupon.create(normalizeCouponPayload(req.body));
     res.status(201).json(coupon);
   } catch (error) {
     res.status(400).json({ message: error?.errors ? Object.values(error.errors)[0]?.message : "Failed to create coupon" });
@@ -20,7 +42,7 @@ const getCoupons = async (req, res) => {
 
 const updateCoupon = async (req, res) => {
   try {
-    const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, {
+    const coupon = await Coupon.findByIdAndUpdate(req.params.id, normalizeCouponPayload(req.body), {
       new: true,
       runValidators: true,
     });

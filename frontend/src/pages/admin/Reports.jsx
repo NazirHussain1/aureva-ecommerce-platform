@@ -21,10 +21,11 @@ export default function Reports() {
   const fetchReportsData = useCallback(async () => {
     try {
       setLoading(true);
-      const [ordersRes, customersRes, salesRes] = await Promise.all([
+      const [ordersRes, customersRes, salesRes, categoryRes] = await Promise.all([
         axios.get('/admin/orders'),
         axios.get('/admin/users'),
-        axios.get(`/admin/analytics/sales-chart?range=${timeRange}`)
+        axios.get(`/admin/analytics/sales-chart?range=${timeRange}`),
+        axios.get('/admin/analytics/category-revenue')
       ]);
 
       const orders = ordersRes.data || [];
@@ -42,6 +43,10 @@ export default function Reports() {
       });
 
       setRevenueData(salesData);
+      setCategoryData((categoryRes.data || []).map((item) => ({
+        category: item.name,
+        sales: item.value
+      })));
 
       const statusCounts = orders.reduce((acc, order) => {
         const status = order.orderStatus || 'placed';
@@ -56,15 +61,6 @@ export default function Reports() {
         { name: 'Delivered', value: statusCounts.delivered || 0, color: '#10b981' },
         { name: 'Cancelled', value: statusCounts.cancelled || 0, color: '#ef4444' }
       ]);
-
-      const mockCategoryData = [
-        { category: 'Skincare', sales: 45000 },
-        { category: 'Makeup', sales: 38000 },
-        { category: 'Haircare', sales: 32000 },
-        { category: 'Fragrance', sales: 28000 },
-        { category: 'Wellness', sales: 22000 }
-      ];
-      setCategoryData(mockCategoryData);
 
     } catch (error) {
       

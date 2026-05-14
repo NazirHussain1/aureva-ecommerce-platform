@@ -7,7 +7,14 @@ export default function FloatingWhatsApp() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    fetchSettings();
+    getPublicSettings()
+      .then((data) => {
+        const phoneNumber = data.whatsappNumber || data.phone;
+        if (phoneNumber) {
+          setPhone(phoneNumber.replace(/\D/g, ''));
+        }
+      })
+      .catch(() => {});
     
     const handleScroll = () => {
       setIsVisible(window.scrollY > 300);
@@ -16,22 +23,6 @@ export default function FloatingWhatsApp() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const fetchSettings = async () => {
-    try {
-      const data = await getPublicSettings();
-      // Use whatsappNumber if available, otherwise fallback to phone
-      if (data.whatsappNumber) {
-        const cleanPhone = data.whatsappNumber.replace(/\D/g, '');
-        setPhone(cleanPhone);
-      } else if (data.phone) {
-        const cleanPhone = data.phone.replace(/\D/g, '');
-        setPhone(cleanPhone);
-      }
-    } catch (error) {
-      
-    }
-  };
 
   const handleClick = () => {
     if (phone) {

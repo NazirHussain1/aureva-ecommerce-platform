@@ -3,10 +3,25 @@ const Product = require("../models/Product");
 
 const findUserCart = (userId) => Cart.findOne({ user: userId }).populate("items.product");
 
+const formatCartItem = (item) => {
+  const product = item.product?.toJSON ? item.product.toJSON() : item.product;
+  return {
+    ...(product || {}),
+    id: String(product?.id || product?._id || item.product),
+    quantity: item.quantity,
+    price: item.price,
+  };
+};
+
+const formatCart = (cart) => ({
+  items: cart?.items?.map(formatCartItem) || [],
+  totalAmount: cart?.totalAmount || 0,
+});
+
 const getCart = async (req, res) => {
   try {
     const cart = await findUserCart(req.user.id);
-    res.status(200).json(cart ? cart.items : []);
+    res.status(200).json(formatCart(cart));
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
@@ -40,7 +55,7 @@ const addToCart = async (req, res) => {
     await cart.save();
     await cart.populate("items.product");
 
-    res.status(existingItem ? 200 : 201).json(existingItem || cart.items[cart.items.length - 1]);
+    res.status(existingItem ? 200 : 201).json(formatCart(cart));
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
@@ -59,7 +74,8 @@ const updateCartItem = async (req, res) => {
 
     cartItem.quantity = Number(quantity);
     await cart.save();
-    res.status(200).json(cartItem);
+    await cart.populate("items.product");
+    res.status(200).json(formatCart(cart));
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
@@ -76,7 +92,8 @@ const removeCartItem = async (req, res) => {
 
     cart.items = cart.items.filter((item) => item.product.toString() !== req.params.id);
     await cart.save();
-    res.status(200).json({ message: "Cart item removed" });
+    await cart.populate("items.product");
+    res.status(200).json(formatCart(cart));
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
