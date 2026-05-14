@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 
 export default function useSocket() {
   const [isConnected, setIsConnected] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
   
   const socket = useMemo(() => io(API_URL, { autoConnect: false }), [API_URL]);
 

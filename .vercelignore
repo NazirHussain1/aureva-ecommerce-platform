@@ -3,8 +3,28 @@ node_modules
 backend/node_modules
 aureva-frontend/node_modules
 
+# Legacy per-route serverless functions are ignored for Vercel Hobby limits.
+api/_lib/
+api/addresses/
+api/admin/
+api/cart/
+api/categories/
+api/contact/
+api/coupons/
+api/newsletter/
+api/notifications/
+api/orders/
+api/payments/
+api/products/
+api/reviews/
+api/settings/
+api/uploads/
+api/users/
+api/wishlist/
+api/health.js
+api/package.json
+
 # Development files
-backend/
 scripts/
 *.log
 *.md

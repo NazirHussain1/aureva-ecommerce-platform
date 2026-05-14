@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { protect } = require("../middleware/authMiddleware");
 const {
+  quoteOrder,
   placeOrder,
   getUserOrders,
   getOrderById,
@@ -11,6 +12,7 @@ const {
 const { validateOrder } = require("../middleware/validationMiddleware");
 const { orderLimiter } = require("../middleware/rateLimitMiddleware");
 
+router.post("/quote", protect, quoteOrder);
 router.post("/", protect, orderLimiter, validateOrder, placeOrder);
 router.get("/", protect, getUserOrders);
 router.get("/history", protect, getUserOrders);

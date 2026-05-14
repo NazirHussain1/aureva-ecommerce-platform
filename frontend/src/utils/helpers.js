@@ -14,7 +14,7 @@ export const validatePassword = (password) => {
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return '/placeholder-product.jpg';
   if (imagePath.startsWith('http')) return imagePath;
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const API_URL = import.meta.env.VITE_API_URL || '';
   return `${API_URL}${imagePath}`;
 };
 

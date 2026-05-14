@@ -29,6 +29,130 @@ const calculateCouponDiscount = (coupon, subtotal) => {
   return Math.min(coupon.discountValue, subtotal);
 };
 
+const calculateShippingCost = (subtotal) => {
+  const freeShippingThreshold = Number(process.env.FREE_SHIPPING_THRESHOLD || 0);
+  const shippingCost = Number(process.env.FLAT_SHIPPING_COST || 0);
+
+  if (freeShippingThreshold > 0 && subtotal >= freeShippingThreshold) {
+    return 0;
+  }
+
+  return Number.isNaN(shippingCost) ? 0 : shippingCost;
+};
+
+const calculateTax = (taxableAmount) => {
+  const taxRate = Number(process.env.TAX_RATE || 0);
+  if (Number.isNaN(taxRate) || taxRate <= 0) return 0;
+  return taxableAmount * taxRate;
+};
+
+const buildOrderItems = async (items, { reserveStock = false, stockUpdates = [] } = {}) => {
+  const orderItems = [];
+
+  for (const item of items) {
+    const quantity = Number(item.quantity);
+    const productId = item.productId || item.product;
+    const product = reserveStock
+      ? await Product.findOneAndUpdate(
+        { _id: productId, stock: { $gte: quantity } },
+        { $inc: { stock: -quantity } },
+        { new: true }
+      )
+      : await Product.findById(productId);
+
+    if (!product || product.stock < 0 || (!reserveStock && product.stock < quantity)) {
+      const existingProduct = product || await Product.findById(productId).select("name stock");
+      const message = existingProduct
+        ? `${existingProduct.name} has only ${existingProduct.stock} item(s) available`
+        : "Product not found";
+      const error = new Error(message);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (reserveStock) {
+      stockUpdates.push({ product: product.id, quantity });
+    }
+
+    orderItems.push({
+      product: product.id,
+      name: product.name,
+      price: Number(product.price),
+      quantity,
+      image: product.images?.[0],
+    });
+  }
+
+  return orderItems;
+};
+
+const calculateOrderTotals = async (orderItems, couponCode) => {
+  const subtotal = Number(orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2));
+  let coupon = null;
+  let discount = 0;
+
+  if (couponCode) {
+    coupon = await Coupon.findOne({ code: String(couponCode).toUpperCase() });
+
+    if (!coupon || !coupon.isValid()) {
+      const error = new Error("Invalid or expired coupon");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (subtotal < coupon.minPurchase) {
+      const error = new Error(`Minimum purchase amount is $${coupon.minPurchase}`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    discount = Number(calculateCouponDiscount(coupon, subtotal).toFixed(2));
+  }
+
+  const shippingCost = Number(calculateShippingCost(subtotal).toFixed(2));
+  const taxableAmount = Math.max(subtotal - discount + shippingCost, 0);
+  const tax = Number(calculateTax(taxableAmount).toFixed(2));
+  const totalAmount = Number((taxableAmount + tax).toFixed(2));
+
+  return {
+    subtotal,
+    discount,
+    shippingCost,
+    tax,
+    totalAmount,
+    coupon,
+    couponCode: coupon?.code,
+  };
+};
+
+const rollbackStockUpdates = (stockUpdates) => Promise.all(stockUpdates.map((update) =>
+  Product.findByIdAndUpdate(update.product, { $inc: { stock: update.quantity } })
+));
+
+const quoteOrder = async (req, res) => {
+  const { items, couponCode } = req.body;
+
+  if (!items || items.length === 0) {
+    return res.status(400).json({ message: "No order items" });
+  }
+
+  try {
+    const orderItems = await buildOrderItems(items);
+    const totals = await calculateOrderTotals(orderItems, couponCode);
+
+    res.json({
+      subtotal: totals.subtotal,
+      discount: totals.discount,
+      shippingCost: totals.shippingCost,
+      tax: totals.tax,
+      totalAmount: totals.totalAmount,
+      couponCode: totals.couponCode,
+    });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: error.statusCode ? error.message : "Server error" });
+  }
+};
+
 const placeOrder = async (req, res) => {
   const { items, shippingAddress, paymentMethod, paymentDetails, couponCode } = req.body;
 
@@ -39,62 +163,8 @@ const placeOrder = async (req, res) => {
   const stockUpdates = [];
 
   try {
-    const orderItems = [];
-
-    for (const item of items) {
-      const quantity = Number(item.quantity);
-      const productId = item.productId || item.product;
-      const product = await Product.findOneAndUpdate(
-        { _id: productId, stock: { $gte: quantity } },
-        { $inc: { stock: -quantity } },
-        { new: true }
-      );
-
-      if (!product) {
-        const existingProduct = await Product.findById(productId).select("name stock");
-        const message = existingProduct
-          ? `${existingProduct.name} has only ${existingProduct.stock} item(s) available`
-          : "Product not found";
-        await Promise.all(stockUpdates.map((update) =>
-          Product.findByIdAndUpdate(update.product, { $inc: { stock: update.quantity } })
-        ));
-        return res.status(400).json({ message });
-      }
-
-      stockUpdates.push({ product: product.id, quantity });
-
-      orderItems.push({
-        product: product.id,
-        name: product.name,
-        price: Number(product.price),
-        quantity,
-        image: product.images?.[0],
-      });
-    }
-
-    const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    let coupon = null;
-    let discount = 0;
-
-    if (couponCode) {
-      coupon = await Coupon.findOne({ code: String(couponCode).toUpperCase() });
-
-      if (!coupon || !coupon.isValid()) {
-        await Promise.all(stockUpdates.map((update) =>
-          Product.findByIdAndUpdate(update.product, { $inc: { stock: update.quantity } })
-        ));
-        return res.status(400).json({ message: "Invalid or expired coupon" });
-      }
-
-      if (subtotal < coupon.minPurchase) {
-        await Promise.all(stockUpdates.map((update) =>
-          Product.findByIdAndUpdate(update.product, { $inc: { stock: update.quantity } })
-        ));
-        return res.status(400).json({ message: `Minimum purchase amount is $${coupon.minPurchase}` });
-      }
-
-      discount = Number(calculateCouponDiscount(coupon, subtotal).toFixed(2));
-    }
+    const orderItems = await buildOrderItems(items, { reserveStock: true, stockUpdates });
+    const totals = await calculateOrderTotals(orderItems, couponCode);
 
     const order = await Order.create({
       user: req.user.id,
@@ -102,15 +172,17 @@ const placeOrder = async (req, res) => {
       shippingAddress: normalizeShippingAddress(shippingAddress),
       paymentMethod,
       paymentDetails: paymentDetails || null,
-      subtotal,
-      discount,
-      couponCode: coupon?.code,
-      totalAmount: Number((subtotal - discount).toFixed(2)),
+      subtotal: totals.subtotal,
+      tax: totals.tax,
+      shippingCost: totals.shippingCost,
+      discount: totals.discount,
+      couponCode: totals.couponCode,
+      totalAmount: totals.totalAmount,
     });
 
-    if (coupon) {
-      coupon.usedCount += 1;
-      await coupon.save();
+    if (totals.coupon) {
+      totals.coupon.usedCount += 1;
+      await totals.coupon.save();
     }
 
     await Cart.findOneAndUpdate({ user: req.user.id }, { items: [], totalAmount: 0 });
@@ -125,10 +197,8 @@ const placeOrder = async (req, res) => {
       userId: getOrderUserId(order),
     });
   } catch (error) {
-    await Promise.all(stockUpdates.map((update) =>
-      Product.findByIdAndUpdate(update.product, { $inc: { stock: update.quantity } })
-    ));
-    res.status(500).json({ message: "Server error" });
+    await rollbackStockUpdates(stockUpdates);
+    res.status(error.statusCode || 500).json({ message: error.statusCode ? error.message : "Server error" });
   }
 };
 
@@ -237,4 +307,4 @@ const returnOrder = async (req, res) => {
   }
 };
 
-module.exports = { placeOrder, getUserOrders, getOrderById, cancelOrder, returnOrder };
+module.exports = { quoteOrder, placeOrder, getUserOrders, getOrderById, cancelOrder, returnOrder };

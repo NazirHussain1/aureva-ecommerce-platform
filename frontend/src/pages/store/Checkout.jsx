@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { clearCart } from '../../features/cart/cartSlice';
@@ -24,6 +24,7 @@ export default function Checkout() {
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [applyingCoupon, setApplyingCoupon] = useState(false);
+  const [orderQuote, setOrderQuote] = useState(null);
   const [formData, setFormData] = useState({
     fullName: user?.name || '',
     phone: '',
@@ -39,9 +40,17 @@ export default function Checkout() {
     bankName: ''
   });
 
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const discount = appliedCoupon?.discount || 0;
-  const total = Math.max(subtotal - discount, 0);
+  const quoteItems = useCallback(() => items.map(item => ({
+    productId: item.id,
+    quantity: item.quantity
+  })), [items]);
+
+  const localSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = orderQuote?.subtotal ?? localSubtotal;
+  const discount = orderQuote?.discount ?? appliedCoupon?.discount ?? 0;
+  const shippingCost = orderQuote?.shippingCost ?? 0;
+  const tax = orderQuote?.tax ?? 0;
+  const total = orderQuote?.totalAmount ?? Math.max(subtotal - discount + shippingCost + tax, 0);
   const steps = [
     { number: 1, title: 'Shipping', icon: FiTruck },
     { number: 2, title: 'Payment', icon: FiCreditCard },
@@ -61,6 +70,42 @@ export default function Checkout() {
       document.title = 'Aureva Beauty';
     };
   }, [items, navigate, user]);
+
+  useEffect(() => {
+    if (!user || items.length === 0) {
+      setOrderQuote(null);
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchQuote = async () => {
+      try {
+        const response = await axios.post('/orders/quote', {
+          items: quoteItems(),
+          couponCode: appliedCoupon?.couponCode
+        });
+
+        if (isMounted) {
+          setOrderQuote(response.data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setOrderQuote(null);
+          if (appliedCoupon) {
+            setAppliedCoupon(null);
+            toast.error(error.response?.data?.message || 'Coupon no longer applies');
+          }
+        }
+      }
+    };
+
+    fetchQuote();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, items, quoteItems, appliedCoupon]);
 
   const fetchAddresses = async () => {
     try {
@@ -115,11 +160,15 @@ export default function Checkout() {
 
     try {
       setApplyingCoupon(true);
-      const response = await axios.post('/coupons/apply', {
-        code,
-        orderAmount: subtotal
+      const response = await axios.post('/orders/quote', {
+        items: quoteItems(),
+        couponCode: code
       });
-      setAppliedCoupon(response.data);
+      setOrderQuote(response.data);
+      setAppliedCoupon({
+        couponCode: response.data.couponCode,
+        discount: response.data.discount
+      });
       setCouponCode(response.data.couponCode);
       toast.success('Coupon applied');
     } catch (error) {
@@ -132,6 +181,7 @@ export default function Checkout() {
 
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
+    setOrderQuote(null);
     setCouponCode('');
   };
 
@@ -874,11 +924,13 @@ export default function Checkout() {
                 )}
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
-                  <span className="font-semibold text-green-600">Free</span>
+                  <span className={`font-semibold ${shippingCost === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                    {shippingCost === 0 ? 'Free' : `$${shippingCost.toFixed(2)}`}
+                  </span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Tax</span>
-                  <span className="font-semibold text-gray-900">$0.00</span>
+                  <span className="font-semibold text-gray-900">${tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center font-bold text-xl pt-3 border-t border-gray-200">
                   <span className="text-gray-900">Total</span>
