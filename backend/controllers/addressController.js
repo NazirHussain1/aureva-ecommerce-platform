@@ -1,7 +1,6 @@
 const Address = require("../models/Address");
 
-const getStreet = ({ street, addressLine1, addressLine2 }) =>
-  street || [addressLine1, addressLine2].filter(Boolean).join(", ");
+const getStreet = ({ street, addressLine1 }) => street || addressLine1;
 
 const compact = (payload) =>
   Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined && value !== ""));
@@ -17,7 +16,7 @@ const getAddresses = async (req, res) => {
 
 const addAddress = async (req, res) => {
   try {
-    const { fullName, phone, city, state, zipCode, country, isDefault, addressType } = req.body;
+    const { fullName, phone, addressLine2, city, state, zipCode, country, isDefault, addressType } = req.body;
 
     if (isDefault) {
       await Address.updateMany({ user: req.user.id }, { isDefault: false });
@@ -27,6 +26,7 @@ const addAddress = async (req, res) => {
       fullName,
       phone,
       street: getStreet(req.body),
+      addressLine2,
       city,
       state,
       zipCode,
@@ -44,7 +44,7 @@ const addAddress = async (req, res) => {
 
 const updateAddress = async (req, res) => {
   try {
-    const { fullName, phone, city, state, zipCode, country, isDefault, addressType } = req.body;
+    const { fullName, phone, addressLine2, city, state, zipCode, country, isDefault, addressType } = req.body;
 
     if (isDefault) {
       await Address.updateMany({ user: req.user.id, _id: { $ne: req.params.id } }, { isDefault: false });
@@ -54,6 +54,7 @@ const updateAddress = async (req, res) => {
       fullName,
       phone,
       street: getStreet(req.body),
+      addressLine2,
       city,
       state,
       zipCode,

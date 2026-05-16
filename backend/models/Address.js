@@ -21,6 +21,11 @@ const addressSchema = new mongoose.Schema({
     required: [true, 'Street address is required'],
     trim: true
   },
+  addressLine2: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   city: {
     type: String,
     required: [true, 'City is required'],
@@ -59,14 +64,13 @@ const addressSchema = new mongoose.Schema({
 addressSchema.index({ user: 1 });
 
 // Ensure only one default address per user
-addressSchema.pre('save', async function(next) {
+addressSchema.pre('save', async function() {
   if (this.isDefault) {
     await mongoose.model('Address').updateMany(
       { user: this.user, _id: { $ne: this._id } },
       { isDefault: false }
     );
   }
-  next();
 });
 
 // Transform output to match frontend expectations
