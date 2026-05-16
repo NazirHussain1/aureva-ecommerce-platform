@@ -11,7 +11,8 @@ import { IoManSharp, IoWomanSharp } from 'react-icons/io5';
 import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
 import { ProductCardSkeleton } from '../../components/common/SkeletonLoader';
-import { getProductUrl } from '../../utils/helpers';
+import StoreProductCard from '../../components/product/ProductCard';
+import heroImage from '../../assets/beauty-hero.png';
 
 // Memoized category data to prevent recreation on every render
 const CATEGORIES = [
@@ -57,77 +58,6 @@ const CategoryCard = memo(({ cat }) => {
 });
 
 CategoryCard.displayName = 'CategoryCard';
-
-// Memoized ProductCard component
-const ProductCard = memo(({ product }) => {
-  return (
-    <div
-      key={product.id}
-      className="group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100"
-    >
-      <Link to={getProductUrl(product)} className="block">
-        <div className="relative h-56 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-          {product.images && product.images[0] ? (
-            <img
-              src={product.images[0]}
-              alt={product.name}
-              loading="lazy"
-              className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <HiSparkles className="text-6xl text-gray-300" />
-            </div>
-          )}
-          
-          {product.stock < 10 && product.stock > 0 && (
-            <div className="absolute top-3 right-3 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg">
-              Only {product.stock} left!
-            </div>
-          )}
-          
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        </div>
-        
-        <div className="p-5">
-          {product.brand && (
-            <p className="text-xs text-purple-600 font-bold uppercase mb-2 tracking-wider">
-              {product.brand}
-            </p>
-          )}
-          
-          <h3 className="font-bold text-base text-gray-800 mb-3 line-clamp-2 group-hover:text-purple-600 transition min-h-[3rem] leading-snug">
-            {product.name}
-          </h3>
-          
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                ${Number(product.price).toFixed(2)}
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-              <span className="font-medium">{product.stock} in stock</span>
-            </div>
-          </div>
-          
-          <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2 group-hover:scale-105 active:scale-95 touch-target">
-            <span>View Details</span>
-            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-      </Link>
-    </div>
-  );
-});
-
-ProductCard.displayName = 'ProductCard';
 
 function Home() {
   const { user } = useSelector((state) => state.auth);
@@ -178,137 +108,59 @@ function Home() {
     <div className="w-full min-h-screen bg-gray-50">
       <Navbar />
 
-      <section className="relative bg-gradient-to-br from-purple-50 via-pink-50 to-white overflow-hidden mt-20">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="text-left space-y-8">
-              <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-purple-100">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
-                </span>
-                <span className="text-sm font-medium text-gray-700">New Arrivals Available</span>
-              </div>
+      <section className="relative mt-20 overflow-hidden bg-ivory">
+        <div className="absolute inset-0">
+          <img
+            src={heroImage}
+            alt=""
+            className="h-full w-full object-cover object-center"
+            fetchPriority="high"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-ivory via-ivory/92 to-ivory/20"></div>
+          <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-t from-ivory via-transparent to-transparent"></div>
+        </div>
 
-              <div className="space-y-4">
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
-                  <span className="block text-gray-900">Discover Your</span>
-                  <span className="block bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                    Natural Radiance
-                  </span>
-                </h1>
-                <p className="text-xl text-gray-600 leading-relaxed max-w-xl">
-                  Premium beauty products crafted with care. Elevate your skincare routine with our curated collection of luxury essentials.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  to="/products"
-                  className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 touch-target"
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    Shop Now
-                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-pink-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </Link>
-                
-                <Link
-                  to="/products"
-                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-700 bg-white rounded-2xl border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-300 shadow-sm hover:shadow-md active:scale-95 touch-target"
-                >
-                  Explore Categories
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
-                <div className="flex items-center gap-3 group cursor-pointer">
-                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">Free Shipping</p>
-                    <p className="text-xs text-gray-500">On orders $50+</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 group cursor-pointer">
-                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">Secure Payment</p>
-                    <p className="text-xs text-gray-500">100% Protected</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 group cursor-pointer">
-                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-orange-400 to-pink-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">Easy Returns</p>
-                    <p className="text-xs text-gray-500">10-day policy</p>
-                  </div>
-                </div>
-              </div>
+        <div className="relative mx-auto grid min-h-[680px] max-w-7xl items-center px-4 py-16 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8 lg:py-20">
+          <div className="max-w-2xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white/80 px-4 py-2 text-sm font-semibold text-plum-800 shadow-sm backdrop-blur">
+              <HiSparkles className="h-4 w-4 text-rose-600" />
+              Curated beauty essentials
             </div>
 
-            <div className="relative lg:h-[600px] flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-200 to-pink-200 rounded-[3rem] transform rotate-3 opacity-20"></div>
-              <div className="relative bg-white rounded-[3rem] shadow-2xl p-8 transform hover:scale-105 transition-transform duration-500">
-                <div className="absolute -top-6 -right-6 bg-gradient-to-br from-yellow-400 to-orange-500 text-white px-6 py-3 rounded-2xl shadow-xl transform rotate-12 hover:rotate-0 transition-transform">
-                  <p className="text-sm font-bold">50% OFF</p>
-                  <p className="text-xs">Limited Time</p>
+            <h1 className="mb-6 text-5xl font-semibold leading-tight tracking-normal text-stone-950 sm:text-6xl lg:text-7xl">
+              Beauty that feels considered, not complicated.
+            </h1>
+
+            <p className="mb-8 max-w-xl text-lg leading-8 text-stone-700 sm:text-xl">
+              Shop refined skincare, makeup, fragrance, and daily care picks selected for quality, comfort, and everyday confidence.
+            </p>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link
+                to="/products"
+                className="inline-flex min-h-12 items-center justify-center rounded-lg bg-plum-800 px-7 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-plum-900"
+              >
+                Shop Collection
+              </Link>
+              <Link
+                to="/products?category=skincare"
+                className="inline-flex min-h-12 items-center justify-center rounded-lg border border-stone-300 bg-white/85 px-7 py-3.5 text-base font-semibold text-stone-800 shadow-sm backdrop-blur transition hover:border-rose-300 hover:bg-white"
+              >
+                Explore Skincare
+              </Link>
+            </div>
+
+            <div className="mt-10 grid gap-4 border-t border-stone-200 pt-8 sm:grid-cols-3">
+              {[
+                ['Free delivery', 'On qualifying orders'],
+                ['Cash on delivery', 'Pakistan-friendly checkout'],
+                ['10-day returns', 'Clear support policy'],
+              ].map(([title, copy]) => (
+                <div key={title}>
+                  <p className="text-sm font-semibold text-stone-950">{title}</p>
+                  <p className="text-sm leading-6 text-stone-600">{copy}</p>
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl p-6 hover:shadow-lg transition-shadow">
-                    <div className="w-full h-40 bg-white rounded-xl mb-4 flex items-center justify-center shadow-sm">
-                      <HiSparkles className="text-6xl text-purple-400" />
-                    </div>
-                    <h3 className="font-semibold text-gray-800 mb-1">Skincare</h3>
-                    <p className="text-sm text-gray-600">Premium Collection</p>
-                  </div>
-                  
-                  <div className="bg-gradient-to-br from-pink-100 to-rose-100 rounded-2xl p-6 hover:shadow-lg transition-shadow">
-                    <div className="w-full h-40 bg-white rounded-xl mb-4 flex items-center justify-center shadow-sm">
-                      <GiLipstick className="text-6xl text-pink-400" />
-                    </div>
-                    <h3 className="font-semibold text-gray-800 mb-1">Makeup</h3>
-                    <p className="text-sm text-gray-600">Trending Shades</p>
-                  </div>
-                  
-                  <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-6 hover:shadow-lg transition-shadow">
-                    <div className="w-full h-40 bg-white rounded-xl mb-4 flex items-center justify-center shadow-sm">
-                      <GiPerfumeBottle className="text-6xl text-indigo-400" />
-                    </div>
-                    <h3 className="font-semibold text-gray-800 mb-1">Fragrance</h3>
-                    <p className="text-sm text-gray-600">Luxury Scents</p>
-                  </div>
-                  
-                  <div className="bg-gradient-to-br from-teal-100 to-cyan-100 rounded-2xl p-6 hover:shadow-lg transition-shadow">
-                    <div className="w-full h-40 bg-white rounded-xl mb-4 flex items-center justify-center shadow-sm">
-                      <GiComb className="text-6xl text-teal-400" />
-                    </div>
-                    <h3 className="font-semibold text-gray-800 mb-1">Haircare</h3>
-                    <p className="text-sm text-gray-600">Salon Quality</p>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -365,69 +217,7 @@ function Home() {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 {products.map(product => (
-                  <div
-                    key={product.id}
-                    className="group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100"
-                  >
-                    <Link to={getProductUrl(product)} className="block">
-                      <div className="relative h-56 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-                        {product.images && product.images[0] ? (
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            loading="lazy"
-                            className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <HiSparkles className="text-6xl text-gray-300" />
-                          </div>
-                        )}
-                        
-                        {product.stock < 10 && product.stock > 0 && (
-                          <div className="absolute top-3 right-3 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-lg">
-                            Only {product.stock} left!
-                          </div>
-                        )}
-                        
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-                      
-                      <div className="p-5">
-                        {product.brand && (
-                          <p className="text-xs text-purple-600 font-bold uppercase mb-2 tracking-wider">
-                            {product.brand}
-                          </p>
-                        )}
-                        
-                        <h3 className="font-bold text-base text-gray-800 mb-3 line-clamp-2 group-hover:text-purple-600 transition min-h-[3rem] leading-snug">
-                          {product.name}
-                        </h3>
-                        
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex flex-col">
-                            <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                              ${Number(product.price).toFixed(2)}
-                            </span>
-                          </div>
-                          
-                          <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                            <span className="font-medium">{product.stock} in stock</span>
-                          </div>
-                        </div>
-                        
-                        <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2 group-hover:scale-105 active:scale-95 touch-target">
-                          <span>View Details</span>
-                          <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
-                      </div>
-                    </Link>
-                  </div>
+                  <StoreProductCard key={product.id} product={product} />
                 ))}
               </div>
               
