@@ -1,116 +1,170 @@
 import { Link } from 'react-router-dom';
+import { FiAward, FiHeart, FiShield, FiTruck, FiUsers } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi';
-import { FiAward, FiHeart, FiUsers, FiTrendingUp } from 'react-icons/fi';
+import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
+import heroImage from '../../assets/beauty-hero.png';
+
+const stats = [
+  ['500+', 'curated products'],
+  ['50K+', 'customers served'],
+  ['98%', 'positive feedback'],
+  ['4+', 'years in beauty'],
+];
+
+const values = [
+  {
+    title: 'Selective sourcing',
+    copy: 'We prioritize products with clear purpose, dependable quality, and practical everyday value.',
+    icon: FiAward,
+  },
+  {
+    title: 'Customer-first support',
+    copy: 'From product discovery to returns, the shopping experience should feel simple and human.',
+    icon: FiUsers,
+  },
+  {
+    title: 'Trust over noise',
+    copy: 'We avoid overcomplicated claims and focus on products customers can understand and use confidently.',
+    icon: FiShield,
+  },
+  {
+    title: 'Better daily rituals',
+    copy: 'Beauty should fit into real life, with routines that feel calm, repeatable, and personal.',
+    icon: FiHeart,
+  },
+];
+
+const promises = [
+  { icon: FiShield, label: 'Secure checkout' },
+  { icon: FiTruck, label: 'Clear delivery' },
+  { icon: FiHeart, label: 'Helpful care' },
+];
 
 export default function AboutUs() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-pink-600 to-purple-600 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <Link to="/" className="text-white hover:text-gray-200 mb-4 inline-block">
-            ← Back to Home
-          </Link>
-          <h1 className="text-5xl font-bold mb-4">Our Story</h1>
-          <p className="text-xl text-white/90">Discover the journey behind Aureva Beauty</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-ivory">
+      <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-          <div className="flex items-center gap-3 mb-6">
-            <HiSparkles className="text-5xl text-purple-600" />
-            <h2 className="text-3xl font-bold text-gray-800">Who We Are</h2>
-          </div>
-          <p className="text-gray-600 text-lg leading-relaxed mb-4">
-            Founded in 2020, Aureva Beauty was born from a simple belief: everyone deserves access to premium, 
-            effective beauty products that enhance their natural radiance. We're more than just an e-commerce 
-            platform – we're a community dedicated to helping you discover your most confident self.
-          </p>
-          <p className="text-gray-600 text-lg leading-relaxed">
-            Our carefully curated collection features the finest skincare, makeup, haircare, and wellness products 
-            from around the world. Each product is selected with care, ensuring it meets our high standards for 
-            quality, effectiveness, and sustainability.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <div className="bg-white rounded-xl shadow-md p-6 text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FiAward className="text-3xl text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">500+</h3>
-            <p className="text-gray-600">Premium Products</p>
+      <main className="mt-20">
+        <section className="relative overflow-hidden bg-ivory">
+          <div className="absolute inset-0">
+            <img src={heroImage} alt="" className="h-full w-full object-cover object-center" />
+            <div className="absolute inset-0 bg-gradient-to-r from-ivory via-ivory/95 to-ivory/35" />
+            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ivory to-transparent" />
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6 text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FiUsers className="text-3xl text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">50K+</h3>
-            <p className="text-gray-600">Happy Customers</p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-md p-6 text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FiHeart className="text-3xl text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">98%</h3>
-            <p className="text-gray-600">Satisfaction Rate</p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-md p-6 text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FiTrendingUp className="text-3xl text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">4+ Years</h3>
-            <p className="text-gray-600">In Business</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Our Mission</h2>
-          <p className="text-gray-600 text-lg leading-relaxed mb-4">
-            At Aureva Beauty, our mission is to empower individuals to feel confident and beautiful in their own skin. 
-            We believe that beauty is personal, and everyone's journey is unique. That's why we offer a diverse range 
-            of products to suit every skin type, concern, and preference.
-          </p>
-          <p className="text-gray-600 text-lg leading-relaxed">
-            We're committed to transparency, sustainability, and ethical practices. From sourcing ingredients to 
-            packaging, we consider the impact of every decision on both our customers and the planet.
-          </p>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Our Values</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-xl font-bold text-purple-600 mb-2">Quality First</h3>
-              <p className="text-gray-600">
-                We never compromise on quality. Every product in our collection is thoroughly vetted and tested.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-purple-600 mb-2">Customer-Centric</h3>
-              <p className="text-gray-600">
-                Your satisfaction is our priority. We're here to support you every step of your beauty journey.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-purple-600 mb-2">Sustainability</h3>
-              <p className="text-gray-600">
-                We're committed to eco-friendly practices and partnering with brands that share our values.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-purple-600 mb-2">Innovation</h3>
-              <p className="text-gray-600">
-                We stay ahead of beauty trends, bringing you the latest and most effective products.
+          <div className="relative mx-auto grid min-h-[560px] max-w-7xl items-center px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+            <div className="max-w-2xl">
+              <Link to="/" className="mb-8 inline-flex text-sm font-semibold text-plum-800 hover:text-plum-900">
+                Back to home
+              </Link>
+              <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-rose-700">About Aureva</p>
+              <h1 className="mb-6 text-5xl font-semibold tracking-normal text-stone-950 sm:text-6xl">
+                Beauty shopping, made more considered.
+              </h1>
+              <p className="max-w-xl text-lg leading-8 text-stone-700">
+                Aureva brings together skincare, makeup, fragrance, haircare, and wellness products for customers who want quality choices without a complicated shopping experience.
               </p>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+
+        <section className="px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+              <div>
+                <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-rose-700">Our story</p>
+                <h2 className="text-4xl font-semibold tracking-normal text-stone-950">
+                  We curate beauty products for real routines.
+                </h2>
+              </div>
+              <div className="space-y-5 text-base leading-8 text-stone-700">
+                <p>
+                  Aureva Beauty was built around a simple idea: customers should be able to find dependable beauty essentials quickly, understand what they are buying, and feel confident at checkout.
+                </p>
+                <p>
+                  Our collection focuses on everyday skincare, color, scent, personal care, and wellness categories. Each product experience is shaped around clear information, accessible support, and a calm path from browsing to delivery.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {stats.map(([value, label]) => (
+                <div key={label} className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
+                  <p className="text-3xl font-semibold text-stone-950">{value}</p>
+                  <p className="mt-2 text-sm font-medium text-stone-600">{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-10 max-w-2xl">
+              <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-rose-700">What guides us</p>
+              <h2 className="text-4xl font-semibold tracking-normal text-stone-950">Simple values customers can feel.</h2>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {values.map((value) => {
+                const Icon = value.icon;
+                return (
+                  <div key={value.title} className="flex gap-5 rounded-xl border border-stone-200 bg-ivory p-6">
+                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-white text-plum-800 shadow-sm">
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-stone-950">{value.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-stone-600">{value.copy}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl rounded-2xl border border-stone-200 bg-white p-8 shadow-sm sm:p-10 lg:p-12">
+            <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr] lg:items-center">
+              <div>
+                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-rose-50 text-plum-800">
+                  <HiSparkles className="h-6 w-6" />
+                </div>
+                <h2 className="text-3xl font-semibold tracking-normal text-stone-950">Our promise</h2>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                {promises.map((promise) => {
+                  const PromiseIcon = promise.icon;
+                  return (
+                    <div key={promise.label} className="rounded-xl bg-ivory p-5">
+                      <PromiseIcon className="mb-4 h-6 w-6 text-plum-800" />
+                      <p className="text-sm font-semibold text-stone-950">{promise.label}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-col gap-3 border-t border-stone-200 pt-8 sm:flex-row">
+              <Link
+                to="/products"
+                className="inline-flex min-h-12 items-center justify-center rounded-lg bg-plum-800 px-6 py-3 text-sm font-semibold text-white transition hover:bg-plum-900"
+              >
+                Shop products
+              </Link>
+              <Link
+                to="/contact"
+                className="inline-flex min-h-12 items-center justify-center rounded-lg border border-stone-300 bg-white px-6 py-3 text-sm font-semibold text-stone-800 transition hover:border-rose-200 hover:bg-rose-50"
+              >
+                Contact support
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
 
       <Footer />
     </div>

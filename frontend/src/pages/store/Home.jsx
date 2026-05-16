@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import axios from '../../api/axios';
 import toast from 'react-hot-toast';
 import { HiSparkles } from 'react-icons/hi';
+import { FiMail } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import { GiLipstick, GiPerfumeBottle, GiComb } from 'react-icons/gi';
 import { MdFace, MdChildCare } from 'react-icons/md';
@@ -14,45 +15,80 @@ import { ProductCardSkeleton } from '../../components/common/SkeletonLoader';
 import StoreProductCard from '../../components/product/ProductCard';
 import heroImage from '../../assets/beauty-hero.png';
 
-// Memoized category data to prevent recreation on every render
 const CATEGORIES = [
-  { name: 'Skincare', icon: HiSparkles, category: 'skincare', gradient: 'from-purple-400 to-purple-600', bg: 'bg-purple-50' },
-  { name: 'Haircare', icon: GiComb, category: 'haircare', gradient: 'from-pink-400 to-pink-600', bg: 'bg-pink-50' },
-  { name: 'Makeup', icon: GiLipstick, category: 'makeup', gradient: 'from-red-400 to-red-600', bg: 'bg-red-50' },
-  { name: 'Fragrance', icon: GiPerfumeBottle, category: 'fragrance', gradient: 'from-indigo-400 to-indigo-600', bg: 'bg-indigo-50' },
-  { name: "Men's Care", icon: IoManSharp, category: 'men', gradient: 'from-blue-400 to-blue-600', bg: 'bg-blue-50' },
-  { name: "Women's Care", icon: IoWomanSharp, category: 'women', gradient: 'from-pink-500 to-pink-700', bg: 'bg-pink-50' },
-  { name: "Kids' Care", icon: MdChildCare, category: 'kids', gradient: 'from-orange-400 to-orange-600', bg: 'bg-orange-50' },
-  { name: 'Wellness', icon: MdFace, category: 'wellness', gradient: 'from-green-400 to-green-600', bg: 'bg-green-50' }
+  {
+    name: 'Skincare',
+    icon: HiSparkles,
+    category: 'skincare',
+    description: 'Cleansers, serums, moisturizers, and daily glow support.',
+  },
+  {
+    name: 'Haircare',
+    icon: GiComb,
+    category: 'haircare',
+    description: 'Salon-inspired care for shine, strength, and softness.',
+  },
+  {
+    name: 'Makeup',
+    icon: GiLipstick,
+    category: 'makeup',
+    description: 'Everyday color, complexion essentials, and finishing touches.',
+  },
+  {
+    name: 'Fragrance',
+    icon: GiPerfumeBottle,
+    category: 'fragrance',
+    description: 'Signature scents for daytime polish and evening depth.',
+  },
+  {
+    name: "Men's Care",
+    icon: IoManSharp,
+    category: 'men',
+    description: 'Simple grooming, skin, and personal care routines.',
+  },
+  {
+    name: "Women's Care",
+    icon: IoWomanSharp,
+    category: 'women',
+    description: 'Curated care for daily rituals and special moments.',
+  },
+  {
+    name: "Kids' Care",
+    icon: MdChildCare,
+    category: 'kids',
+    description: 'Gentle essentials selected for delicate everyday care.',
+  },
+  {
+    name: 'Wellness',
+    icon: MdFace,
+    category: 'wellness',
+    description: 'Personal wellness products that complete the routine.',
+  }
 ];
 
-// Memoized CategoryCard component
 const CategoryCard = memo(({ cat }) => {
   const IconComponent = cat.icon;
   return (
     <Link
       key={cat.category}
       to={`/products?category=${cat.category}`}
-      className="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-transparent hover:-translate-y-1"
+      className="group flex min-h-[190px] flex-col justify-between rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-rose-200 hover:shadow-lg"
     >
-      <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-      
-      <div className="relative p-6 sm:p-8 flex flex-col items-center">
-        <div className={`w-16 h-16 sm:w-20 sm:h-20 ${cat.bg} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
-          <IconComponent className={`text-3xl sm:text-4xl bg-gradient-to-br ${cat.gradient} bg-clip-text text-transparent`} />
+      <div>
+        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-rose-50 text-plum-800 transition group-hover:bg-plum-800 group-hover:text-white">
+          <IconComponent className="h-6 w-6" />
         </div>
-        
-        <h3 className="font-bold text-base sm:text-lg text-gray-800 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-purple-600 group-hover:to-pink-600 transition-all duration-300 text-center">
+        <h3 className="mb-2 text-lg font-semibold text-stone-950">
           {cat.name}
         </h3>
-        
-        <div className="mt-3 flex items-center gap-1 text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <span className="text-sm font-medium">Explore</span>
-          <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
+        <p className="text-sm leading-6 text-stone-600">{cat.description}</p>
       </div>
+      <span className="mt-5 inline-flex items-center text-sm font-semibold text-plum-800">
+        Browse category
+        <svg className="ml-2 h-4 w-4 transition group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </span>
     </Link>
   );
 });
@@ -166,14 +202,29 @@ function Home() {
         </div>
       </section>
       
-      <div className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-3">Shop by Category</h2>
-            <p className="text-lg text-gray-600">Explore our curated collections for every beauty need</p>
+      <div className="bg-ivory px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-rose-700">Shop by ritual</p>
+              <h2 className="max-w-2xl text-4xl font-semibold tracking-normal text-stone-950 sm:text-5xl">
+                Find the products that fit your routine.
+              </h2>
+            </div>
+            <div className="max-w-xl">
+              <p className="text-base leading-7 text-stone-600">
+                Browse focused collections for skin, hair, makeup, fragrance, and daily care. Each category is organized to help customers move from discovery to checkout faster.
+              </p>
+              <Link
+                to="/products"
+                className="mt-5 inline-flex min-h-11 items-center rounded-lg border border-stone-300 bg-white px-5 py-2.5 text-sm font-semibold text-stone-800 shadow-sm transition hover:border-rose-200 hover:bg-rose-50"
+              >
+                View all products
+              </Link>
+            </div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {CATEGORIES.map(cat => (
               <CategoryCard key={cat.category} cat={cat} />
             ))}
@@ -237,59 +288,65 @@ function Home() {
         </div>
       </div>
 
-      <div className="relative bg-gradient-to-br from-purple-600 via-pink-600 to-purple-700 text-white py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-        <div className="absolute top-0 left-0 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-3xl opacity-10 animate-blob"></div>
-        <div className="absolute bottom-0 right-0 w-72 h-72 bg-pink-300 rounded-full mix-blend-overlay filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
-        
-        <div className="relative max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-semibold mb-6">
-            <HiSparkles className="w-4 h-4" />
-            <span>Stay Updated</span>
-          </div>
-          
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4">Subscribe to Newsletter</h2>
-          <p className="text-xl text-purple-100 mb-10 max-w-2xl mx-auto">
-            Get exclusive offers, beauty tips, and early access to new products delivered to your inbox
-          </p>
-          
-          <form onSubmit={handleNewsletterSubscribe} className="max-w-md mx-auto">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input 
-                type="email" 
-                placeholder="Enter your email address" 
-                value={newsletterEmail}
-                onChange={(e) => setNewsletterEmail(e.target.value)}
-                className="flex-1 px-6 py-4 rounded-xl text-gray-800 outline-none focus:ring-4 focus:ring-white/30 transition shadow-lg placeholder:text-gray-400" 
-                required
-              />
-              <button 
-                type="submit"
-                disabled={subscribing}
-                className="bg-white text-purple-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 whitespace-nowrap touch-target"
-              >
-                {subscribing ? (
-                  <span className="flex items-center gap-2">
-                    <BiLoaderAlt className="animate-spin w-5 h-5" />
-                    Subscribing...
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    Subscribe Now
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  </span>
-                )}
-              </button>
+      <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl border-y border-stone-200 py-12">
+          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <div>
+              <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-rose-700">The Aureva edit</p>
+              <h2 className="max-w-xl text-4xl font-semibold tracking-normal text-stone-950 sm:text-5xl">
+                New launches, restocks, and care notes worth opening.
+              </h2>
+              <p className="mt-4 max-w-xl text-base leading-7 text-stone-600">
+                A calm newsletter for beauty shoppers: useful product updates, practical routine ideas, and private offers when they matter.
+              </p>
             </div>
-            
-            <p className="text-sm text-purple-100 mt-4">
-              Join 10,000+ beauty enthusiasts. Unsubscribe anytime.
-            </p>
-          </form>
+
+            <div className="rounded-2xl bg-ivory p-5 sm:p-6 lg:p-8">
+              <form onSubmit={handleNewsletterSubscribe} className="space-y-4">
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <div className="relative flex-1">
+                    <FiMail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
+                    <input
+                      id="newsletter-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={newsletterEmail}
+                      onChange={(e) => setNewsletterEmail(e.target.value)}
+                      className="min-h-14 w-full rounded-xl border border-stone-200 bg-white py-4 pl-12 pr-4 text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-rose-300 focus:ring-4 focus:ring-rose-100"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={subscribing}
+                    className="inline-flex min-h-14 items-center justify-center rounded-xl bg-stone-950 px-7 py-4 text-sm font-semibold text-white transition hover:bg-plum-900 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {subscribing ? (
+                      <span className="flex items-center gap-2">
+                        <BiLoaderAlt className="h-5 w-5 animate-spin" />
+                        Joining
+                      </span>
+                    ) : (
+                      'Join list'
+                    )}
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-3 text-sm text-stone-600 sm:flex-row sm:items-center sm:justify-between">
+                  <p>No spam. Unsubscribe anytime.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {['New drops', 'Restocks', 'Offers'].map((item) => (
+                      <span key={item} className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-plum-800">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       <Footer />
     </div>
