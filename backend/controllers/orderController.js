@@ -4,8 +4,16 @@ const User = require("../models/User");
 const Cart = require("../models/Cart");
 const Coupon = require("../models/Coupon");
 const { sendOrderConfirmationEmail } = require("../services/emailService");
+const logger = require("../utils/logger");
 
 const getOrderUserId = (order) => String(order?.user?._id || order?.user || "");
+
+const getOrderLogContext = (req) => ({
+  userId: req.user?.id,
+  itemCount: req.body?.items?.length || 0,
+  paymentMethod: req.body?.paymentMethod,
+  couponCode: req.body?.couponCode,
+});
 
 const normalizeShippingAddress = (shippingAddress = {}) => ({
   fullName: shippingAddress.fullName || shippingAddress.name,
@@ -56,7 +64,7 @@ const buildOrderItems = async (items, { reserveStock = false, stockUpdates = [] 
       ? await Product.findOneAndUpdate(
         { _id: productId, stock: { $gte: quantity } },
         { $inc: { stock: -quantity } },
-        { new: true }
+        { returnDocument: "after" }
       )
       : await Product.findById(productId);
 
@@ -198,7 +206,14 @@ const placeOrder = async (req, res) => {
     });
   } catch (error) {
     await rollbackStockUpdates(stockUpdates);
-    res.status(error.statusCode || 500).json({ message: error.statusCode ? error.message : "Server error" });
+    logger.error("Failed to place order", {
+      error: error.message,
+      stack: error.stack,
+      ...getOrderLogContext(req),
+    });
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode || process.env.NODE_ENV === "development" ? error.message : "Server error",
+    });
   }
 };
 
