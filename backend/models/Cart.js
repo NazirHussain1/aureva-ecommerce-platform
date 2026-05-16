@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+const isObjectId = (value) => value instanceof mongoose.Types.ObjectId;
+const toId = (value) => String(value?._id || value);
+
 const cartItemSchema = new mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,
@@ -46,16 +49,20 @@ cartSchema.pre('save', function() {
 // Transform output to match frontend expectations
 cartSchema.set('toJSON', {
   transform: function(doc, ret) {
-    ret.id = ret._id;
+    ret.id = toId(ret._id);
     delete ret._id;
     delete ret.__v;
     
     // Transform items
     if (ret.items) {
       ret.items = ret.items.map(item => {
-        if (item.product && item.product._id) {
-          item.product.id = item.product._id;
-          delete item.product._id;
+        if (item.product) {
+          if (isObjectId(item.product)) {
+            item.product = toId(item.product);
+          } else if (item.product._id) {
+            item.product.id = toId(item.product._id);
+            delete item.product._id;
+          }
         }
         return item;
       });

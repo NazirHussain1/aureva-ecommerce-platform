@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+const isObjectId = (value) => value instanceof mongoose.Types.ObjectId;
+const toId = (value) => String(value?._id || value);
+
 const orderItemSchema = new mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,
@@ -117,29 +120,36 @@ orderSchema.pre('save', async function() {
 
 // Indexes for better query performance
 orderSchema.index({ user: 1, createdAt: -1 });
-orderSchema.index({ orderNumber: 1 });
 orderSchema.index({ orderStatus: 1 });
 orderSchema.index({ paymentStatus: 1 });
 
 // Transform output to match frontend expectations
 orderSchema.set('toJSON', {
   transform: function(doc, ret) {
-    ret.id = ret._id;
+    ret.id = toId(ret._id);
     delete ret._id;
     delete ret.__v;
     
     // Transform user if populated
-    if (ret.user && ret.user._id) {
-      ret.user.id = ret.user._id;
-      delete ret.user._id;
+    if (ret.user) {
+      if (isObjectId(ret.user)) {
+        ret.user = toId(ret.user);
+      } else if (ret.user._id) {
+        ret.user.id = toId(ret.user._id);
+        delete ret.user._id;
+      }
     }
     
     // Transform items
     if (ret.items) {
       ret.items = ret.items.map(item => {
-        if (item.product && item.product._id) {
-          item.product.id = item.product._id;
-          delete item.product._id;
+        if (item.product) {
+          if (isObjectId(item.product)) {
+            item.product = toId(item.product);
+          } else if (item.product._id) {
+            item.product.id = toId(item.product._id);
+            delete item.product._id;
+          }
         }
         return item;
       });

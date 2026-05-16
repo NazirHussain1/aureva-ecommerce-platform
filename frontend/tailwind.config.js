@@ -6,6 +6,14 @@ export default {
   theme: {
     extend: {
       colors: {
+        ivory: '#FAF7F2',
+        plum: {
+          50: '#F7F1F6',
+          100: '#EBDDEA',
+          700: '#6B3C62',
+          800: '#4F2A49',
+          900: '#3A1D35',
+        },
         brand: {
           pink: {
             DEFAULT: '#DB2777',
@@ -24,19 +32,19 @@ export default {
       },
       fontSize: {
         'xs': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.025em' }],
-        'sm': ['0.875rem', { lineHeight: '1.75', letterSpacing: '0.01em' }],
+        'sm': ['0.875rem', { lineHeight: '1.75', letterSpacing: '0' }],
         'base': ['1rem', { lineHeight: '1.75', letterSpacing: '0' }],
-        'lg': ['1.125rem', { lineHeight: '1.75', letterSpacing: '-0.01em' }],
-        'xl': ['1.25rem', { lineHeight: '1.75', letterSpacing: '-0.01em' }],
-        '2xl': ['1.5rem', { lineHeight: '1.5', letterSpacing: '-0.02em' }],
-        '3xl': ['1.875rem', { lineHeight: '1.4', letterSpacing: '-0.02em' }],
-        '4xl': ['2.25rem', { lineHeight: '1.3', letterSpacing: '-0.025em' }],
-        '5xl': ['3rem', { lineHeight: '1.2', letterSpacing: '-0.025em' }],
-        '6xl': ['3.75rem', { lineHeight: '1.1', letterSpacing: '-0.03em' }],
+        'lg': ['1.125rem', { lineHeight: '1.75', letterSpacing: '0' }],
+        'xl': ['1.25rem', { lineHeight: '1.75', letterSpacing: '0' }],
+        '2xl': ['1.5rem', { lineHeight: '1.5', letterSpacing: '0' }],
+        '3xl': ['1.875rem', { lineHeight: '1.4', letterSpacing: '0' }],
+        '4xl': ['2.25rem', { lineHeight: '1.3', letterSpacing: '0' }],
+        '5xl': ['3rem', { lineHeight: '1.2', letterSpacing: '0' }],
+        '6xl': ['3.75rem', { lineHeight: '1.1', letterSpacing: '0' }],
       },
       letterSpacing: {
-        tighter: '-0.05em',
-        tight: '-0.025em',
+        tighter: '0',
+        tight: '0',
         normal: '0',
         wide: '0.025em',
         wider: '0.05em',
