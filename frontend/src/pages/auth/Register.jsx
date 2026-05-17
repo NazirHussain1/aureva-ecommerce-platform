@@ -1,23 +1,39 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { register } from '../../features/auth/authSlice';
-import { FiMail, FiLock, FiUser, FiEye, FiEyeOff, FiArrowRight, FiShield } from 'react-icons/fi';
+import {
+  FiArrowLeft,
+  FiArrowRight,
+  FiCheck,
+  FiEye,
+  FiEyeOff,
+  FiLock,
+  FiMail,
+  FiShield,
+  FiUser,
+} from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
-import { HiSparkles } from 'react-icons/hi';
-import { MdCheckCircle } from 'react-icons/md';
+import { register } from '../../features/auth/authSlice';
+
+const welcomePoints = [
+  'Faster checkout with saved delivery details',
+  'Wishlist access across skincare, makeup, and fragrance',
+  'Order history, returns, and updates in one account',
+];
+
+const initialFormData = {
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+};
 
 export default function Register() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
+
+  const [formData, setFormData] = useState(initialFormData);
   const [localError, setLocalError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -33,33 +49,27 @@ export default function Register() {
     if (!formData.password) return 0;
 
     let strength = 0;
-    if (formData.password.length >= 6) strength++;
-    if (formData.password.length >= 8) strength++;
-    if (/[A-Z]/.test(formData.password)) strength++;
-    if (/[0-9]/.test(formData.password)) strength++;
-    if (/[^A-Za-z0-9]/.test(formData.password)) strength++;
+    if (formData.password.length >= 6) strength += 1;
+    if (formData.password.length >= 8) strength += 1;
+    if (/[A-Z]/.test(formData.password)) strength += 1;
+    if (/[0-9]/.test(formData.password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(formData.password)) strength += 1;
     return strength;
   }, [formData.password]);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setLocalError('');
-  };
-
-  const getPasswordStrengthColor = () => {
-    if (passwordStrength <= 1) return 'bg-red-500';
-    if (passwordStrength <= 2) return 'bg-orange-500';
-    if (passwordStrength <= 3) return 'bg-yellow-500';
-    if (passwordStrength <= 4) return 'bg-green-500';
-    return 'bg-emerald-600';
-  };
-
-  const getPasswordStrengthText = () => {
+  const passwordStrengthLabel = useMemo(() => {
     if (passwordStrength <= 1) return 'Weak';
     if (passwordStrength <= 2) return 'Fair';
     if (passwordStrength <= 3) return 'Good';
     if (passwordStrength <= 4) return 'Strong';
-    return 'Very Strong';
+    return 'Very strong';
+  }, [passwordStrength]);
+
+  const passwordStrengthColor = passwordStrength <= 2 ? 'bg-rose-500' : 'bg-plum-800';
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setLocalError('');
   };
 
   const handleSubmit = async (e) => {
@@ -82,223 +92,234 @@ export default function Register() {
       await dispatch(register(registerData)).unwrap();
       navigate('/login');
     } catch (err) {
-      
       setLocalError(err || 'Registration failed. Please try again.');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      <div className="absolute top-0 right-0 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-      
-      <div className="w-full max-w-md relative z-10 animate-fadeIn">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block group">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <HiSparkles className="text-4xl text-purple-600 group-hover:scale-110 transition-transform" />
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                Aureva Beauty
-              </h1>
-            </div>
+    <main className="min-h-screen bg-ivory-50">
+      <div className="container-custom grid min-h-screen items-center gap-10 py-10 lg:grid-cols-[1fr_520px] lg:py-16">
+        <section className="hidden lg:block">
+          <Link to="/" className="inline-flex items-center gap-3 text-2xl font-semibold text-stone-950">
+            <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-plum-900 text-white">
+              A
+            </span>
+            Aureva Beauty
           </Link>
-          <p className="text-gray-600 text-lg">Create your account to get started</p>
-        </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-gray-100">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
-            <p className="text-gray-600">Join us and discover amazing beauty products</p>
+          <div className="mt-16 max-w-xl">
+            <p className="mb-4 text-sm font-semibold uppercase tracking-normal text-rose-700">
+              Create account
+            </p>
+            <h1 className="text-5xl font-semibold leading-tight text-stone-950">
+              Start building a beauty shelf that feels personal.
+            </h1>
+            <p className="mt-6 text-lg leading-8 text-stone-600">
+              Create an account for a smoother checkout, saved picks, and order
+              updates without extra steps.
+            </p>
           </div>
 
-          {(error || localError) && (
-            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4 mb-6 animate-slideInDown">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white text-sm font-bold">!</span>
-                </div>
-                <p className="text-red-800 font-medium">{localError || error}</p>
+          <div className="mt-10 grid max-w-xl gap-3">
+            {welcomePoints.map((point) => (
+              <div key={point} className="flex items-center gap-3 border-b border-stone-200 py-4">
+                <FiCheck className="h-5 w-5 text-plum-800" />
+                <span className="text-sm font-medium text-stone-700">{point}</span>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
+        </section>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FiUser className="text-gray-400 text-lg" />
-                </div>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="input pl-12"
-                  placeholder="John Doe"
-                />
-              </div>
-            </div>
+        <section className="mx-auto w-full max-w-md lg:max-w-none">
+          <div className="mb-8 flex items-center justify-between lg:hidden">
+            <Link to="/" className="inline-flex items-center gap-3 text-xl font-semibold text-stone-950">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-plum-900 text-white">
+                A
+              </span>
+              Aureva
+            </Link>
+            <Link to="/" className="text-sm font-semibold text-stone-600 hover:text-plum-800">
+              Home
+            </Link>
+          </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FiMail className="text-gray-400 text-lg" />
-                </div>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="input pl-12"
-                  placeholder="you@example.com"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FiLock className="text-gray-400 text-lg" />
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  className="input pl-12 pr-12"
-                  placeholder="Create a strong password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition"
-                >
-                  {showPassword ? <FiEyeOff className="text-lg" /> : <FiEye className="text-lg" />}
-                </button>
-              </div>
-              {formData.password && (
-                <div className="mt-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-600">Password Strength:</span>
-                    <span className={`text-xs font-bold ${
-                      passwordStrength <= 2 ? 'text-red-600' : 
-                      passwordStrength <= 3 ? 'text-yellow-600' : 
-                      'text-green-600'
-                    }`}>
-                      {getPasswordStrengthText()}
-                    </span>
-                  </div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full transition-all duration-300 ${getPasswordStrengthColor()}`}
-                      style={{ width: `${(passwordStrength / 5) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FiShield className="text-gray-400 text-lg" />
-                </div>
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                  className="input pl-12 pr-12"
-                  placeholder="Confirm your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition"
-                >
-                  {showConfirmPassword ? <FiEyeOff className="text-lg" /> : <FiEye className="text-lg" />}
-                </button>
-              </div>
-              {formData.confirmPassword && formData.password === formData.confirmPassword && (
-                <div className="mt-2 flex items-center gap-2 text-green-600">
-                  <MdCheckCircle className="text-lg" />
-                  <span className="text-sm font-medium">Passwords match</span>
-                </div>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-pink-700 hover:to-purple-700 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 touch-target"
+          <div className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+            <Link
+              to="/"
+              className="mb-8 hidden items-center gap-2 text-sm font-semibold text-stone-500 hover:text-plum-800 lg:inline-flex"
             >
-              {loading ? (
-                <>
-                  <BiLoaderAlt className="animate-spin text-xl" />
-                  Creating account...
-                </>
-              ) : (
-                <>
-                  Create Account
-                  <FiArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </button>
-          </form>
+              <FiArrowLeft className="h-4 w-4" />
+              Back to home
+            </Link>
 
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-center text-gray-600">
-              Already have an account?{' '}
-              <Link 
-                to="/login" 
-                className="font-bold text-purple-600 hover:text-purple-700 transition inline-flex items-center gap-1"
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-normal text-rose-700">
+                Join Aureva
+              </p>
+              <h2 className="mt-2 text-3xl font-semibold text-stone-950">Create your account</h2>
+              <p className="mt-3 text-sm leading-6 text-stone-600">
+                Add your details once and keep every order easier to manage.
+              </p>
+            </div>
+
+            {(error || localError) && (
+              <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4">
+                <p className="text-sm font-semibold text-red-800">Registration failed</p>
+                <p className="mt-1 text-sm text-red-700">{localError || error}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-stone-700">
+                  Full name
+                </label>
+                <div className="relative">
+                  <FiUser className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="input pl-12"
+                    placeholder="Your name"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-stone-700">
+                  Email address
+                </label>
+                <div className="relative">
+                  <FiMail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="input pl-12"
+                    placeholder="you@example.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-stone-700">
+                  Password
+                </label>
+                <div className="relative">
+                  <FiLock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    className="input pl-12 pr-12"
+                    placeholder="Create a password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((value) => !value)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-plum-800"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                  </button>
+                </div>
+
+                {formData.password && (
+                  <div className="mt-3">
+                    <div className="mb-2 flex items-center justify-between text-xs">
+                      <span className="font-medium text-stone-500">Password strength</span>
+                      <span className="font-semibold text-stone-700">{passwordStrengthLabel}</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-stone-100">
+                      <div
+                        className={`h-full rounded-full transition-all duration-300 ${passwordStrengthColor}`}
+                        style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-stone-700">
+                  Confirm password
+                </label>
+                <div className="relative">
+                  <FiShield className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                    className="input pl-12 pr-12"
+                    placeholder="Repeat your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((value) => !value)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-plum-800"
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showConfirmPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                  </button>
+                </div>
+
+                {formData.confirmPassword && formData.password === formData.confirmPassword && (
+                  <p className="mt-2 flex items-center gap-2 text-sm font-medium text-plum-800">
+                    <FiCheck className="h-4 w-4" />
+                    Passwords match
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
               >
+                {loading ? (
+                  <>
+                    <BiLoaderAlt className="h-5 w-5 animate-spin" />
+                    Creating account
+                  </>
+                ) : (
+                  <>
+                    Create account
+                    <FiArrowRight className="h-5 w-5" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <p className="mt-8 border-t border-stone-200 pt-6 text-center text-sm text-stone-600">
+              Already have an account?{' '}
+              <Link to="/login" className="font-semibold text-plum-800 hover:text-plum-950">
                 Sign in
-                <FiArrowRight className="w-4 h-4" />
               </Link>
             </p>
           </div>
 
-          <div className="mt-6 text-center">
-            <Link 
-              to="/" 
-              className="text-sm text-gray-500 hover:text-gray-700 transition inline-flex items-center gap-1 justify-center"
-            >
-              ← Back to Home
-            </Link>
-          </div>
-        </div>
-
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
+          <p className="mt-6 text-center text-xs leading-5 text-stone-500">
             By creating an account, you agree to our{' '}
-            <Link to="/terms-of-service" className="text-purple-600 hover:text-purple-700 font-medium">
-              Terms of Service
-            </Link>
-            {' '}and{' '}
-            <Link to="/privacy-policy" className="text-purple-600 hover:text-purple-700 font-medium">
+            <Link to="/terms-of-service" className="font-semibold text-stone-700 hover:text-plum-800">
+              Terms
+            </Link>{' '}
+            and{' '}
+            <Link to="/privacy-policy" className="font-semibold text-stone-700 hover:text-plum-800">
               Privacy Policy
             </Link>
+            .
           </p>
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
