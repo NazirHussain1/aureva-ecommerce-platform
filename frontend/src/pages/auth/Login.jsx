@@ -11,6 +11,7 @@ import {
   FiShield,
 } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
+import BrandLogo from '../../components/common/BrandLogo';
 import { login } from '../../features/auth/authSlice';
 
 const accountBenefits = [
@@ -56,12 +57,7 @@ export default function Login() {
     <main className="min-h-screen bg-ivory-50">
       <div className="container-custom grid min-h-screen items-center gap-10 py-10 lg:grid-cols-[1fr_480px] lg:py-16">
         <section className="hidden lg:block">
-          <Link to="/" className="inline-flex items-center gap-3 text-2xl font-semibold text-stone-950">
-            <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-plum-900 text-white">
-              A
-            </span>
-            Aureva Beauty
-          </Link>
+          <BrandLogo />
 
           <div className="mt-16 max-w-xl">
             <p className="mb-4 text-sm font-semibold uppercase tracking-normal text-rose-700">
@@ -88,12 +84,7 @@ export default function Login() {
 
         <section className="mx-auto w-full max-w-md">
           <div className="mb-8 flex items-center justify-between lg:hidden">
-            <Link to="/" className="inline-flex items-center gap-3 text-xl font-semibold text-stone-950">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-plum-900 text-white">
-                A
-              </span>
-              Aureva
-            </Link>
+            <BrandLogo />
             <Link to="/" className="text-sm font-semibold text-stone-600 hover:text-plum-800">
               Home
             </Link>

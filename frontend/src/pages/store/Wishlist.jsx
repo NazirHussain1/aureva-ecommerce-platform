@@ -1,13 +1,14 @@
-import { useNavigate, Link } from 'react-router-dom';
 import { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchWishlist, removeFromWishlistAsync, clearWishlist } from '../../features/wishlist/wishlistSlice';
-import { addToCartAsync } from '../../features/cart/cartSlice';
 import toast from 'react-hot-toast';
-import { FiShoppingCart, FiTrash2, FiHeart } from 'react-icons/fi';
-import { MdFavoriteBorder } from 'react-icons/md';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { FiHeart, FiShoppingCart, FiTrash2 } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi';
-import Footer from '../../components/common/Footer';
+import { MdFavoriteBorder } from 'react-icons/md';
+import AccountLayout from '../../components/common/AccountLayout';
+import EmptyState from '../../components/common/EmptyState';
+import { addToCartAsync } from '../../features/cart/cartSlice';
+import { clearWishlist, fetchWishlist, removeFromWishlistAsync } from '../../features/wishlist/wishlistSlice';
 import { getProductUrl } from '../../utils/helpers';
 
 export default function Wishlist() {
@@ -22,6 +23,21 @@ export default function Wishlist() {
     }
   }, [dispatch, user]);
 
+  if (!user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-ivory-50 px-4">
+        <div className="max-w-md rounded-lg border border-stone-200 bg-white p-8 text-center shadow-sm">
+          <FiHeart className="mx-auto h-10 w-10 text-plum-900" />
+          <h1 className="mt-4 text-2xl font-semibold text-stone-950">Login to view your wishlist</h1>
+          <p className="mt-3 text-sm leading-6 text-stone-600">Save products you love and return to them whenever you are ready.</p>
+          <button type="button" onClick={() => navigate('/login')} className="btn-primary mt-6">
+            Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const handleRemove = (id, name) => {
     dispatch(removeFromWishlistAsync(id))
       .unwrap()
@@ -32,158 +48,92 @@ export default function Wishlist() {
   const handleAddToCart = (product) => {
     dispatch(addToCartAsync({ productId: product.id, quantity: 1 }))
       .unwrap()
-      .then(() => toast.success(`${product.name} added to cart!`))
+      .then(() => toast.success(`${product.name} added to cart`))
       .catch((message) => toast.error(message || 'Failed to add to cart'));
   };
 
   const handleClearWishlist = () => {
-    if (window.confirm('Are you sure you want to clear your entire wishlist?')) {
-      dispatch(clearWishlist());
-      toast.success('Wishlist cleared');
-    }
+    if (!window.confirm('Clear your wishlist?')) return;
+    dispatch(clearWishlist());
+    toast.success('Wishlist cleared');
   };
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <FiHeart className="text-6xl text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Login to View Your Wishlist</h2>
-          <p className="text-gray-600 mb-6">Save your favorite products for later</p>
-          <button
-            onClick={() => navigate('/login')}
-            className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold active:scale-95 touch-target"
-          >
-            Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (items.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-8">My Wishlist</h1>
-          
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <MdFavoriteBorder className="text-8xl text-gray-400 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">Your wishlist is empty</h3>
-            <p className="text-gray-600 mb-8">Start adding products you love!</p>
-            <button
-              onClick={() => navigate('/products')}
-              className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-3 rounded-full hover:from-pink-700 hover:to-purple-700 transition font-semibold shadow-lg active:scale-95 touch-target"
-            >
-              Browse Products
-            </button>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">My Wishlist</h1>
-            <p className="text-gray-600">{items.length} {items.length === 1 ? 'item' : 'items'} saved</p>
-          </div>
-          {items.length > 0 && (
-            <button
-              onClick={handleClearWishlist}
-              className="text-red-600 hover:text-red-700 font-medium flex items-center gap-2 active:scale-95 transition touch-target"
-            >
-              <FiTrash2 />
-              Clear All
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <AccountLayout
+      user={user}
+      title="Wishlist"
+      subtitle="Saved products you may want to revisit or move to cart."
+      action={items.length > 0 && (
+        <button type="button" onClick={handleClearWishlist} className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100">
+          <FiTrash2 className="h-4 w-4" />
+          Clear wishlist
+        </button>
+      )}
+    >
+      {items.length === 0 ? (
+        <EmptyState
+          icon={MdFavoriteBorder}
+          title="Your wishlist is empty"
+          message="Save products while browsing and they will appear here."
+          actionText="Browse products"
+          actionOnClick={() => navigate('/products')}
+        />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((product) => (
-            <div
-              key={product.id}
-              className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 group"
-            >
-              <Link to={getProductUrl(product)} className="block">
-                <div className="h-64 bg-white overflow-hidden relative flex items-center justify-center border-b border-gray-100">
-                  {product.images && product.images[0] ? (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      loading="lazy"
-                      className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                      <HiSparkles className="text-6xl text-gray-400" />
-                    </div>
-                  )}
-                  {product.stock < 10 && product.stock > 0 && (
-                    <span className="absolute top-3 right-3 bg-orange-500 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
-                      Only {product.stock} left!
-                    </span>
-                  )}
-                  {product.stock === 0 && (
-                    <span className="absolute top-3 right-3 bg-red-500 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
-                      Out of Stock
-                    </span>
-                  )}
-                </div>
+            <article key={product.id} className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm">
+              <Link to={getProductUrl(product)} className="block aspect-square bg-stone-50">
+                {product.images?.[0] ? (
+                  <img src={product.images[0]} alt={product.name} loading="lazy" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center text-stone-300">
+                    <HiSparkles className="h-10 w-10" />
+                  </span>
+                )}
               </Link>
 
-              <div className="p-4">
+              <div className="p-5">
                 {product.brand && (
-                  <p className="text-xs text-purple-600 font-semibold uppercase mb-1 tracking-wide">
-                    {product.brand}
-                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-normal text-rose-700">{product.brand}</p>
                 )}
-                <Link to={getProductUrl(product)}>
-                  <h3 className="font-bold text-lg text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-600 transition min-h-[3.5rem]">
+                <Link to={getProductUrl(product)} className="mt-2 block">
+                  <h2 className="line-clamp-2 min-h-[3rem] text-base font-semibold text-stone-950 hover:text-plum-900">
                     {product.name}
-                  </h3>
+                  </h2>
                 </Link>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[2.5rem]">
-                  {product.description}
-                </p>
+                <p className="mt-2 line-clamp-2 min-h-[3rem] text-sm leading-6 text-stone-600">{product.description}</p>
 
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-2xl font-bold text-purple-600">
-                    ${Number(product.price).toFixed(2)}
-                  </span>
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                    {product.stock} in stock
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <p className="text-xl font-semibold text-stone-950">${Number(product.price).toFixed(2)}</p>
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${product.stock > 0 ? 'bg-ivory-100 text-plum-900' : 'bg-red-50 text-red-600'}`}>
+                    {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                   </span>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="mt-5 flex gap-2">
                   <button
+                    type="button"
                     onClick={() => handleAddToCart(product)}
                     disabled={product.stock === 0}
-                    className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:from-pink-700 hover:to-purple-700 transition shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 touch-target"
+                    className="btn-primary inline-flex flex-1 items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <FiShoppingCart />
-                    {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                    <FiShoppingCart className="h-4 w-4" />
+                    Add to cart
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleRemove(product.id, product.name)}
-                    className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition active:scale-95 touch-target"
-                    title="Remove from wishlist"
+                    className="rounded-lg bg-red-50 px-4 text-red-600 transition hover:bg-red-100"
+                    aria-label={`Remove ${product.name} from wishlist`}
                   >
-                    <FiTrash2 />
+                    <FiTrash2 className="h-5 w-5" />
                   </button>
                 </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
-      </div>
-
-      <Footer />
-    </div>
+      )}
+    </AccountLayout>
   );
 }

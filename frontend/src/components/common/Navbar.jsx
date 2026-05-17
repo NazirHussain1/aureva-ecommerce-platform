@@ -21,7 +21,9 @@ import { MdChildCare, MdFace } from 'react-icons/md';
 import axios from '../../api/axios';
 import { logout } from '../../features/auth/authSlice';
 import { getProductUrl } from '../../utils/helpers';
+import BrandLogo from './BrandLogo';
 import NotificationBell from './NotificationBell';
+import UserAvatar from './UserAvatar';
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -149,12 +151,7 @@ export default function Navbar() {
         <div className="container-custom">
           <div className="flex h-16 items-center justify-between gap-4 lg:h-20">
             <div className="flex items-center gap-8">
-              <Link to="/" className="flex shrink-0 items-center gap-3 text-stone-950">
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-plum-900 text-base font-semibold text-white">
-                  A
-                </span>
-                <span className="text-xl font-semibold">Aureva</span>
-              </Link>
+              <BrandLogo />
 
               <div className="hidden items-center gap-1 lg:flex">
                 {navLinks.map((link) => (
@@ -298,9 +295,7 @@ export default function Navbar() {
                     onClick={() => setShowUserDropdown((value) => !value)}
                     className="flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-2 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-rose-200 hover:bg-ivory-100"
                   >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-plum-900 text-white">
-                      {user.name?.charAt(0).toUpperCase()}
-                    </span>
+                    <UserAvatar user={user} size="sm" />
                     <FiChevronDown className={`h-4 w-4 transition ${showUserDropdown ? 'rotate-180' : ''}`} />
                   </button>
 
@@ -379,8 +374,13 @@ export default function Navbar() {
             <div className="space-y-6 p-5 pt-20">
               {user && (
                 <div className="rounded-lg border border-stone-200 bg-ivory-50 p-4">
-                  <p className="text-sm font-semibold text-stone-900">{user.name}</p>
-                  <p className="mt-1 truncate text-xs text-stone-500">{user.email}</p>
+                  <div className="flex items-center gap-3">
+                    <UserAvatar user={user} size="md" />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-stone-900">{user.name}</p>
+                      <p className="mt-1 truncate text-xs text-stone-500">{user.email}</p>
+                    </div>
+                  </div>
                 </div>
               )}
 

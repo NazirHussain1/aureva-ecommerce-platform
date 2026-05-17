@@ -94,10 +94,8 @@ export default function Footer() {
       <div className="container-custom py-14 lg:py-16">
         <div className="grid gap-10 lg:grid-cols-[1.25fr_0.8fr_0.9fr_1.15fr]">
           <section>
-            <Link to="/" className="inline-flex items-center gap-3 text-white">
-              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-white text-base font-semibold text-plum-900">
-                A
-              </span>
+            <Link to="/" className="inline-flex items-baseline gap-3 text-white">
+              <span className="font-serif text-3xl font-semibold leading-none">A</span>
               <span className="text-2xl font-semibold">Aureva</span>
             </Link>
 
