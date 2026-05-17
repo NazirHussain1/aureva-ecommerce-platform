@@ -9,30 +9,43 @@ const logFormat = winston.format.combine(
   winston.format.json()
 );
 
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL === 'true';
+
+const transports = isVercel
+  ? [
+      new winston.transports.Console({
+        format: winston.format.combine(
+          winston.format.timestamp(),
+          winston.format.json()
+        ),
+      }),
+    ]
+  : [
+      // Write all logs with level 'error' and below to error.log
+      new winston.transports.File({
+        filename: path.join(__dirname, '../logs/error.log'),
+        level: 'error',
+        maxsize: 5242880, // 5MB
+        maxFiles: 5,
+      }),
+      // Write all logs with level 'info' and below to combined.log
+      new winston.transports.File({
+        filename: path.join(__dirname, '../logs/combined.log'),
+        maxsize: 5242880, // 5MB
+        maxFiles: 5,
+      }),
+    ];
+
 // Create logger instance
 const logger = winston.createLogger({
   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
   format: logFormat,
   defaultMeta: { service: 'aureva-backend' },
-  transports: [
-    // Write all logs with level 'error' and below to error.log
-    new winston.transports.File({ 
-      filename: path.join(__dirname, '../logs/error.log'), 
-      level: 'error',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    }),
-    // Write all logs with level 'info' and below to combined.log
-    new winston.transports.File({ 
-      filename: path.join(__dirname, '../logs/combined.log'),
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    }),
-  ],
+  transports,
 });
 
 // If not in production, log to console as well
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production' && !isVercel) {
   logger.add(new winston.transports.Console({
     format: winston.format.combine(
       winston.format.colorize(),
