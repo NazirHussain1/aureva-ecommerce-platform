@@ -64,14 +64,15 @@ export default function Settings() {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Website Settings</h1>
-        <p className="text-gray-600">Manage contact information and social media links</p>
+      <div className="mb-8 border-b border-stone-200 pb-6">
+        <p className="text-sm font-semibold uppercase tracking-normal text-rose-700">Operations</p>
+        <h1 className="mt-2 text-3xl font-semibold text-stone-950">Website Settings</h1>
+        <p className="mt-2 text-sm text-stone-600">Manage contact information and social media links</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+        <div className="bg-white rounded-lg border border-stone-200 shadow-sm p-6">
+          <h2 className="text-xl font-semibold text-stone-950 mb-6 flex items-center gap-2">
             <FiMail className="text-purple-600" />
             Contact Information
           </h2>
@@ -131,8 +132,8 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+        <div className="bg-white rounded-lg border border-stone-200 shadow-sm p-6">
+          <h2 className="text-xl font-semibold text-stone-950 mb-6 flex items-center gap-2">
             <FiFacebook className="text-purple-600" />
             Social Media Links
           </h2>
@@ -200,7 +201,7 @@ export default function Settings() {
           <button
             type="submit"
             disabled={saving}
-            className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-pink-700 hover:to-purple-700 transition font-semibold shadow-md flex items-center gap-2 disabled:opacity-50"
+            className="bg-plum-900 text-white px-8 py-3 rounded-lg hover:bg-plum-950 transition-colors font-semibold shadow-sm flex items-center gap-2 disabled:opacity-50"
           >
             {saving ? (
               <>
@@ -217,8 +218,8 @@ export default function Settings() {
         </div>
       </form>
 
-      <div className="mt-8 bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
-        <h3 className="font-bold text-blue-900 mb-2">Note:</h3>
+      <div className="mt-8 rounded-lg border border-blue-100 bg-blue-50 p-5">
+        <h3 className="font-semibold text-blue-900 mb-2">Note</h3>
         <p className="text-blue-800 text-sm">
           These settings will be displayed on the website footer and contact pages. Make sure all information 
           is accurate and up-to-date. Social media links are optional but recommended for better customer engagement.

@@ -1,16 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import {
+  FiArrowDown,
+  FiArrowUp,
+  FiDollarSign,
+  FiPackage,
+  FiShoppingBag,
+  FiTrendingUp,
+  FiUsers,
+} from 'react-icons/fi';
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import axios from '../../api/axios';
-import { FiDollarSign, FiShoppingBag, FiUsers, FiTrendingUp, FiArrowUp, FiArrowDown, FiPackage, FiEye } from 'react-icons/fi';
-import { MdAttachMoney, MdShoppingCart, MdPeople, MdTrendingUp } from 'react-icons/md';
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 
 export default function Dashboard() {
   const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('week');
+  const [salesData, setSalesData] = useState([]);
   const [stats, setStats] = useState({
     totalRevenue: 0,
     revenueGrowth: 0,
@@ -20,16 +28,16 @@ export default function Dashboard() {
     customersGrowth: 0,
     conversionRate: 0,
     conversionGrowth: 0,
-    recentOrders: []
+    recentOrders: [],
   });
-  const [salesData, setSalesData] = useState([]);
 
   const fetchChartData = useCallback(async () => {
     try {
       const salesRes = await axios.get(`/admin/analytics/sales-chart?range=${timeRange}`);
       setSalesData(salesRes.data || []);
-    } catch (error) {
-          }
+    } catch {
+      setSalesData([]);
+    }
   }, [timeRange]);
 
   const fetchDashboardData = useCallback(async () => {
@@ -37,14 +45,12 @@ export default function Dashboard() {
       setLoading(true);
       const [ordersRes, customersRes] = await Promise.all([
         axios.get('/admin/orders'),
-        axios.get('/admin/users')
+        axios.get('/admin/users'),
       ]);
 
       const orders = ordersRes.data || [];
       const customers = customersRes.data || [];
-
       const totalRevenue = orders.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0);
-      const recentOrders = orders.slice(0, 5);
 
       setStats({
         totalRevenue,
@@ -55,10 +61,10 @@ export default function Dashboard() {
         customersGrowth: 15.3,
         conversionRate: 3.2,
         conversionGrowth: 2.1,
-        recentOrders
+        recentOrders: orders.slice(0, 5),
       });
-    } catch (error) {
-      
+    } catch {
+      setStats((current) => ({ ...current, recentOrders: [] }));
     } finally {
       setLoading(false);
     }
@@ -72,226 +78,169 @@ export default function Dashboard() {
     fetchChartData();
   }, [fetchChartData]);
 
-  const statCards = [
+  const metricCards = [
     {
-      title: 'Total Revenue',
+      title: 'Revenue',
       value: `$${stats.totalRevenue.toFixed(2)}`,
-      growth: stats.revenueGrowth,
-      icon: MdAttachMoney,
-      color: 'from-blue-500 to-cyan-500',
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600'
+      delta: stats.revenueGrowth,
+      icon: FiDollarSign,
     },
     {
-      title: 'Total Orders',
+      title: 'Orders',
       value: stats.totalOrders,
-      growth: stats.ordersGrowth,
-      icon: MdShoppingCart,
-      color: 'from-purple-500 to-pink-500',
-      bgColor: 'bg-purple-50',
-      iconColor: 'text-purple-600'
+      delta: stats.ordersGrowth,
+      icon: FiShoppingBag,
     },
     {
       title: 'Customers',
       value: stats.totalCustomers,
-      growth: stats.customersGrowth,
-      icon: MdPeople,
-      color: 'from-green-500 to-emerald-500',
-      bgColor: 'bg-green-50',
-      iconColor: 'text-green-600'
+      delta: stats.customersGrowth,
+      icon: FiUsers,
     },
     {
-      title: 'Conversion Rate',
+      title: 'Conversion',
       value: `${stats.conversionRate}%`,
-      growth: stats.conversionGrowth,
-      icon: MdTrendingUp,
-      color: 'from-orange-500 to-red-500',
-      bgColor: 'bg-orange-50',
-      iconColor: 'text-orange-600'
-    }
+      delta: stats.conversionGrowth,
+      icon: FiTrendingUp,
+    },
   ];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-fadeIn">
+    <div className="p-6">
+      <div className="mb-8 flex flex-col gap-4 border-b border-stone-200 pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {user?.name}!</p>
+          <p className="text-sm font-semibold uppercase tracking-normal text-rose-700">Overview</p>
+          <h2 className="mt-2 text-3xl font-semibold text-stone-950">Welcome back, {user?.name || 'Admin'}</h2>
+          <p className="mt-2 text-sm text-stone-600">Monitor revenue, orders, customers, and recent activity.</p>
         </div>
-        <select
-          value={timeRange}
-          onChange={(e) => setTimeRange(e.target.value)}
-          className="px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300 font-medium text-gray-700"
-        >
+        <select value={timeRange} onChange={(e) => setTimeRange(e.target.value)} className="select max-w-48">
           <option value="today">Today</option>
           <option value="week">Last 7 days</option>
           <option value="month">Last 30 days</option>
-          <option value="year">This Year</option>
+          <option value="year">This year</option>
         </select>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-gray-200 rounded-xl animate-shimmer"></div>
-                <div className="w-16 h-6 bg-gray-200 rounded-lg animate-shimmer"></div>
-              </div>
-              <div className="h-4 w-24 bg-gray-200 rounded animate-shimmer mb-2"></div>
-              <div className="h-8 w-32 bg-gray-200 rounded animate-shimmer"></div>
+        <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((item) => (
+            <div key={item} className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
+              <SkeletonLoader variant="card" />
             </div>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-slideInUp">
-          {statCards.map((stat, index) => {
-            const IconComponent = stat.icon;
-            const isPositive = stat.growth >= 0;
-            return (
-              <div
-                key={index}
-                className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-12 h-12 ${stat.bgColor} rounded-xl flex items-center justify-center`}>
-                    <IconComponent className={`text-2xl ${stat.iconColor}`} />
-                  </div>
-                  <div className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-sm font-bold ${
-                    isPositive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-                  }`}>
-                    {isPositive ? <FiArrowUp className="w-4 h-4" /> : <FiArrowDown className="w-4 h-4" />}
-                    {Math.abs(stat.growth)}%
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600 font-medium mb-1">{stat.title}</p>
-                <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-              </div>
-            );
-          })}
+        <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {metricCards.map((metric) => (
+            <MetricCard key={metric.title} metric={metric} />
+          ))}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm p-6 border border-gray-100 animate-fadeIn">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Sales Overview</h2>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
-              Revenue
+      <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+        <section className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-stone-950">Sales overview</h3>
+              <p className="mt-1 text-sm text-stone-500">Revenue trend for the selected period.</p>
             </div>
+            <span className="rounded-full bg-ivory-100 px-3 py-1 text-xs font-semibold text-plum-900">Revenue</span>
           </div>
-          {loading ? (
-            <div className="h-80 flex items-center justify-center">
-              <SkeletonLoader variant="card" />
-            </div>
-          ) : salesData.length === 0 ? (
-            <div className="h-80 flex flex-col items-center justify-center text-gray-400">
-              <FiTrendingUp className="text-6xl mb-3" />
-              <p>No sales data available</p>
+
+          {salesData.length === 0 ? (
+            <div className="flex h-80 flex-col items-center justify-center rounded-lg bg-stone-50 text-stone-400">
+              <FiTrendingUp className="mb-3 h-10 w-10" />
+              <p className="text-sm">No sales data available</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={320}>
               <AreaChart data={salesData}>
                 <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
+                  <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#4a1831" stopOpacity={0.24} />
+                    <stop offset="95%" stopColor="#4a1831" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-                <XAxis 
-                  dataKey="date" 
-                  stroke="#9ca3af" 
-                  style={{ fontSize: '12px', fontWeight: '500' }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis 
-                  stroke="#9ca3af" 
-                  style={{ fontSize: '12px', fontWeight: '500' }}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(value) => `$${value}`}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#fff', 
-                    border: 'none',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                    padding: '12px'
+                <CartesianGrid stroke="#ece7df" vertical={false} />
+                <XAxis dataKey="date" stroke="#78716c" tickLine={false} axisLine={false} style={{ fontSize: 12 }} />
+                <YAxis stroke="#78716c" tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} style={{ fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e7e5e4',
+                    borderRadius: '8px',
+                    boxShadow: '0 12px 24px rgba(15, 23, 42, 0.08)',
                   }}
                   formatter={(value) => [`$${value}`, 'Revenue']}
-                  labelStyle={{ fontWeight: '600', marginBottom: '4px' }}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="#a855f7" 
-                  strokeWidth={3}
-                  fillOpacity={1} 
-                  fill="url(#colorRevenue)" 
-                />
+                <Area type="monotone" dataKey="revenue" stroke="#4a1831" strokeWidth={2} fill="url(#revenueFill)" />
               </AreaChart>
             </ResponsiveContainer>
           )}
-        </div>
+        </section>
 
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 animate-fadeIn">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Orders</h2>
-          {loading ? (
-            <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <SkeletonLoader key={i} variant="card" />
-              ))}
+        <section className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-stone-950">Recent orders</h3>
+              <p className="mt-1 text-sm text-stone-500">Latest customer activity.</p>
             </div>
-          ) : stats.recentOrders.length === 0 ? (
-            <div className="h-80 flex flex-col items-center justify-center text-gray-400">
-              <FiShoppingBag className="text-6xl mb-3" />
-              <p>No orders yet</p>
+            <Link to="/admin/orders" className="text-sm font-semibold text-plum-900 hover:text-plum-950">
+              View all
+            </Link>
+          </div>
+
+          {stats.recentOrders.length === 0 ? (
+            <div className="flex h-72 flex-col items-center justify-center rounded-lg bg-stone-50 text-stone-400">
+              <FiPackage className="mb-3 h-10 w-10" />
+              <p className="text-sm">No orders yet</p>
             </div>
           ) : (
             <div className="space-y-3">
               {stats.recentOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-300 group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                      #{order.id}
-                    </div>
+                <div key={order.id} className="rounded-lg border border-stone-200 p-4">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">{order.User?.name || 'Customer'}</p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </p>
+                      <p className="text-sm font-semibold text-stone-950">#{order.id}</p>
+                      <p className="mt-1 text-xs text-stone-500">{order.User?.name || 'Customer'}</p>
                     </div>
+                    <p className="text-sm font-semibold text-stone-950">${Number(order.totalAmount).toFixed(2)}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-gray-900 text-sm">${Number(order.totalAmount).toFixed(2)}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      order.orderStatus === 'delivered' ? 'bg-green-100 text-green-700' :
-                      order.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-700' :
-                      order.orderStatus === 'processing' ? 'bg-purple-100 text-purple-700' :
-                      'bg-yellow-100 text-yellow-700'
-                    }`}>
-                      {order.orderStatus}
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    <span className="rounded-full bg-ivory-100 px-3 py-1 text-xs font-semibold capitalize text-plum-900">
+                      {order.orderStatus || 'placed'}
                     </span>
+                    <span className="text-xs text-stone-500">{new Date(order.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               ))}
-              <Link
-                to="/admin/orders"
-                className="block mt-4 text-center text-purple-600 hover:text-purple-700 font-semibold text-sm py-2 hover:bg-purple-50 rounded-lg transition-colors duration-300"
-              >
-                View All Orders →
-              </Link>
             </div>
           )}
-        </div>
+        </section>
       </div>
     </div>
+  );
+}
+
+function MetricCard({ metric }) {
+  const Icon = metric.icon;
+  const positive = metric.delta >= 0;
+
+  return (
+    <article className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-ivory-100 text-plum-900">
+          <Icon className="h-5 w-5" />
+        </span>
+        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
+          positive ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+        }`}>
+          {positive ? <FiArrowUp className="h-3.5 w-3.5" /> : <FiArrowDown className="h-3.5 w-3.5" />}
+          {Math.abs(metric.delta)}%
+        </span>
+      </div>
+      <p className="mt-5 text-sm font-medium text-stone-500">{metric.title}</p>
+      <p className="mt-1 text-2xl font-semibold text-stone-950">{metric.value}</p>
+    </article>
   );
 }

@@ -117,10 +117,11 @@ export default function AdminCustomers() {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="mb-8 animate-fadeIn">
-        <h1 className="text-3xl font-bold text-gray-900 mb-1">Customers</h1>
-        <p className="text-gray-600">{filteredCustomers.length} total customers</p>
+    <div className="p-6">
+      <div className="mb-8 border-b border-stone-200 pb-6 animate-fadeIn">
+        <p className="text-sm font-semibold uppercase tracking-normal text-rose-700">Customer CRM</p>
+        <h1 className="mt-2 text-3xl font-semibold text-stone-950">Customers</h1>
+        <p className="mt-2 text-sm text-stone-600">{filteredCustomers.length} total customers</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-slideInUp">

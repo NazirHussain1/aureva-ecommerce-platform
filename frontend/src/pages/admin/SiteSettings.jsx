@@ -81,13 +81,14 @@ export default function SiteSettings() {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Site Settings</h1>
-        <p className="text-gray-600 mt-1">Manage contact information and social media links</p>
+      <div className="mb-8 border-b border-stone-200 pb-6">
+        <p className="text-sm font-semibold uppercase tracking-normal text-rose-700">Storefront</p>
+        <h1 className="mt-2 text-3xl font-semibold text-stone-950">Site Settings</h1>
+        <p className="mt-2 text-sm text-stone-600">Manage contact information and social media links</p>
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-4xl">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <FiMail className="text-purple-600" />
             Contact Information
@@ -155,7 +156,7 @@ export default function SiteSettings() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Social Media Links
           </h2>
@@ -257,7 +258,7 @@ export default function SiteSettings() {
         <button
           type="submit"
           disabled={saving}
-          className="px-6 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-semibold hover:from-pink-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-6 py-3 bg-plum-900 text-white rounded-lg font-semibold hover:bg-plum-950 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {saving ? (
             <>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FiMail, FiTrash2, FiEye, FiFilter } from 'react-icons/fi';
+import { FiMail, FiTrash2, FiEye, FiFilter, FiX } from 'react-icons/fi';
 import { BiLoaderAlt } from 'react-icons/bi';
 import toast from 'react-hot-toast';
 import { getAllMessages, markMessageAsRead, deleteMessage } from '../../api/contactApi';
@@ -82,10 +82,11 @@ export default function ContactMessages() {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex flex-col gap-4 border-b border-stone-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Contact Messages</h1>
-          <p className="text-gray-600 mt-1">View and manage customer inquiries</p>
+          <p className="text-sm font-semibold uppercase tracking-normal text-rose-700">Inbox</p>
+          <h1 className="mt-2 text-3xl font-semibold text-stone-950">Contact Messages</h1>
+          <p className="mt-2 text-sm text-stone-600">View and manage customer inquiries</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -103,13 +104,13 @@ export default function ContactMessages() {
       </div>
 
       {messages.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+        <div className="bg-white rounded-lg shadow-sm border border-stone-200 p-12 text-center">
           <FiMail className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No messages found</h3>
           <p className="text-gray-600">Customer messages will appear here</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
@@ -185,7 +186,7 @@ export default function ContactMessages() {
 
       {showModal && selectedMessage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-900">Message Details</h2>
@@ -193,7 +194,7 @@ export default function ContactMessages() {
                   onClick={() => setShowModal(false)}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  ✕
+                  <FiX className="h-5 w-5" />
                 </button>
               </div>
             </div>

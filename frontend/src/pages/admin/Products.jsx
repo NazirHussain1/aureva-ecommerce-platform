@@ -270,18 +270,19 @@ export default function AdminProducts() {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-fadeIn">
+    <div className="p-6">
+      <div className="mb-8 flex flex-col gap-4 border-b border-stone-200 pb-6 sm:flex-row sm:items-end sm:justify-between animate-fadeIn">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Products</h1>
-          <p className="text-gray-600">{filteredProducts.length} total products</p>
+          <p className="text-sm font-semibold uppercase tracking-normal text-rose-700">Catalog</p>
+          <h1 className="mt-2 text-3xl font-semibold text-stone-950">Products</h1>
+          <p className="mt-2 text-sm text-stone-600">{filteredProducts.length} total products</p>
         </div>
         <button
           onClick={() => {
             resetForm();
             setShowModal(true);
           }}
-          className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex items-center gap-2"
+          className="bg-plum-900 text-white px-5 py-3 rounded-lg hover:bg-plum-950 transition-colors duration-200 font-semibold shadow-sm flex items-center gap-2"
         >
           <FiPlus className="text-xl" />
           Add Product
@@ -343,7 +344,7 @@ export default function AdminProducts() {
                   resetForm();
                   setShowModal(true);
                 }}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 font-bold shadow-lg"
+                className="bg-plum-900 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 font-bold shadow-lg"
               >
                 Add Your First Product
               </button>
@@ -445,7 +446,7 @@ export default function AdminProducts() {
                       onClick={() => setCurrentPage(i + 1)}
                       className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
                         currentPage === i + 1
-                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
+                          ? 'bg-plum-900 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -469,7 +470,7 @@ export default function AdminProducts() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn" onClick={() => { setShowModal(false); resetForm(); }}>
           <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-modalFadeIn" onClick={(e) => e.stopPropagation()}>
-            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8 rounded-t-3xl relative">
+            <div className="bg-plum-900 text-white p-8 rounded-t-3xl relative">
               <button
                 onClick={() => { setShowModal(false); resetForm(); }}
                 className="absolute top-6 right-6 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
@@ -641,7 +642,7 @@ export default function AdminProducts() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 font-bold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-plum-900 text-white py-4 rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 font-bold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? 'Saving...' : editingProduct ? 'Update Product' : 'Add Product'}
                 </button>
@@ -660,3 +661,4 @@ export default function AdminProducts() {
     </div>
   );
 }
+

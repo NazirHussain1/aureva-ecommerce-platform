@@ -194,6 +194,128 @@ p {
   background-size: 20px 20px;
 }
 
+.admin-workspace {
+  min-height: calc(100vh - 5rem);
+  background: #faf7f2;
+}
+
+.admin-workspace > div {
+  min-height: calc(100vh - 5rem);
+}
+
+.admin-workspace h1 {
+  color: #0c0a09;
+  font-weight: 650;
+}
+
+.admin-workspace h2,
+.admin-workspace h3 {
+  color: #1c1917;
+}
+
+.admin-workspace p {
+  color: #57534e;
+}
+
+.admin-workspace .bg-white {
+  border-color: #e7e5e4;
+}
+
+.admin-workspace .bg-gray-50 {
+  background-color: #fafaf9 !important;
+}
+
+.admin-workspace .border-gray-100,
+.admin-workspace .border-gray-200,
+.admin-workspace .border-purple-100,
+.admin-workspace .border-purple-200 {
+  border-color: #e7e5e4 !important;
+}
+
+.admin-workspace .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #e7e5e4 !important;
+}
+
+.admin-workspace .rounded-xl,
+.admin-workspace .rounded-2xl,
+.admin-workspace .rounded-3xl,
+.admin-workspace .rounded-t-3xl {
+  border-radius: 0.5rem !important;
+}
+
+.admin-workspace .shadow-lg,
+.admin-workspace .shadow-xl,
+.admin-workspace .shadow-2xl {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06) !important;
+}
+
+.admin-workspace [class*="from-purple-600"][class*="to-pink-600"],
+.admin-workspace [class*="from-pink-600"][class*="to-purple-600"],
+.admin-workspace [class*="from-purple-500"][class*="to-pink-500"] {
+  background-image: none !important;
+  background-color: #3a1d35 !important;
+}
+
+.admin-workspace [class*="from-purple-50"][class*="to-pink-50"] {
+  background-image: none !important;
+  background-color: #faf7f2 !important;
+}
+
+.admin-workspace .bg-purple-50,
+.admin-workspace .bg-purple-100 {
+  background-color: #f7f1f6 !important;
+}
+
+.admin-workspace .text-purple-600,
+.admin-workspace .text-purple-700 {
+  color: #3a1d35 !important;
+}
+
+.admin-workspace .focus\:border-purple-400:focus {
+  border-color: #6b3c62 !important;
+}
+
+.admin-workspace .focus\:ring-purple-100:focus {
+  --tw-ring-color: #f7f1f6 !important;
+}
+
+.admin-workspace .focus\:ring-purple-500:focus {
+  --tw-ring-color: rgba(58, 29, 53, 0.28) !important;
+}
+
+.admin-workspace th {
+  color: #57534e !important;
+  font-weight: 650 !important;
+  letter-spacing: 0 !important;
+}
+
+.admin-workspace table {
+  font-size: 0.875rem;
+}
+
+.admin-workspace tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.admin-workspace .hover\:-translate-y-1:hover,
+.admin-workspace .hover\:scale-105:hover,
+.admin-workspace .hover\:scale-110:hover,
+.admin-workspace .active\:scale-95:active {
+  transform: none !important;
+}
+
+.admin-workspace .hover\:shadow-lg:hover,
+.admin-workspace .hover\:shadow-xl:hover,
+.admin-workspace .hover\:shadow-2xl:hover {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06) !important;
+}
+
+.admin-workspace button[class*="from-purple-600"]:hover,
+.admin-workspace button[class*="from-pink-600"]:hover,
+.admin-workspace button.bg-plum-900:hover {
+  background-color: #2a1427 !important;
+}
+
 @layer components {
   /* Button Components */
   .btn-primary {
@@ -250,6 +372,10 @@ p {
   /* Section */
   .section {
     @apply py-16 px-4 sm:px-6 lg:px-8;
+  }
+
+  .admin-page-title {
+    @apply text-3xl font-semibold text-stone-950;
   }
 
   /* Heading Styles */

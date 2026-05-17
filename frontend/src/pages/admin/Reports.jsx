@@ -105,11 +105,12 @@ export default function Reports() {
   ];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-fadeIn">
+    <div className="p-6">
+      <div className="mb-8 flex flex-col gap-4 border-b border-stone-200 pb-6 sm:flex-row sm:items-end sm:justify-between animate-fadeIn">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Analytics & Reports</h1>
-          <p className="text-gray-600">Track your business performance</p>
+          <p className="text-sm font-semibold uppercase tracking-normal text-rose-700">Analytics</p>
+          <h1 className="mt-2 text-3xl font-semibold text-stone-950">Analytics & Reports</h1>
+          <p className="mt-2 text-sm text-stone-600">Track your business performance</p>
         </div>
         <div className="flex items-center gap-3">
           <select
@@ -122,7 +123,7 @@ export default function Reports() {
             <option value="month">Last 30 days</option>
             <option value="year">This Year</option>
           </select>
-          <button className="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex items-center gap-2">
+          <button className="px-4 py-2.5 bg-plum-900 text-white rounded-lg hover:bg-plum-950 transition-colors duration-200 font-semibold shadow-sm flex items-center gap-2">
             <FiDownload className="text-lg" />
             Export
           </button>
