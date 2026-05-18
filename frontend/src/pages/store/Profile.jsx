@@ -10,6 +10,7 @@ import {
   FiEyeOff,
   FiLock,
   FiMail,
+  FiRefreshCw,
   FiSave,
   FiShield,
   FiUser,
@@ -31,6 +32,8 @@ export default function Profile() {
   const [cropSettings, setCropSettings] = useState({ zoom: 1, x: 0, y: 0 });
   const [editing, setEditing] = useState(false);
   const cropImageRef = useRef(null);
+  const cropFrameRef = useRef(null);
+  const dragStartRef = useRef(null);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -178,6 +181,59 @@ export default function Profile() {
     }
     setAvatarCrop(null);
     setCropSettings({ zoom: 1, x: 0, y: 0 });
+    dragStartRef.current = null;
+  };
+
+  const clampCropValue = (value) => Math.max(-100, Math.min(100, value));
+
+  const updateCropPosition = (nextPosition) => {
+    setCropSettings((current) => ({
+      ...current,
+      x: clampCropValue(nextPosition.x),
+      y: clampCropValue(nextPosition.y),
+    }));
+  };
+
+  const handleCropPointerDown = (event) => {
+    if (event.button !== undefined && event.button !== 0) return;
+
+    event.preventDefault();
+    cropFrameRef.current?.setPointerCapture?.(event.pointerId);
+    dragStartRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      cropX: cropSettings.x,
+      cropY: cropSettings.y,
+      frameSize: cropFrameRef.current?.clientWidth || 1,
+    };
+  };
+
+  const handleCropPointerMove = (event) => {
+    const dragState = dragStartRef.current;
+    if (!dragState || dragState.pointerId !== event.pointerId) return;
+
+    const movementScale = 180 / dragState.frameSize;
+    updateCropPosition({
+      x: dragState.cropX + (event.clientX - dragState.startX) * movementScale,
+      y: dragState.cropY + (event.clientY - dragState.startY) * movementScale,
+    });
+  };
+
+  const stopCropDrag = (event) => {
+    if (dragStartRef.current?.pointerId === event.pointerId) {
+      cropFrameRef.current?.releasePointerCapture?.(event.pointerId);
+      dragStartRef.current = null;
+    }
+  };
+
+  const handleCropWheel = (event) => {
+    event.preventDefault();
+    const zoomDelta = event.deltaY > 0 ? -0.08 : 0.08;
+    setCropSettings((current) => ({
+      ...current,
+      zoom: Math.max(1, Math.min(3, Number((current.zoom + zoomDelta).toFixed(2)))),
+    }));
   };
 
   const createCroppedAvatar = () => new Promise((resolve, reject) => {
@@ -365,17 +421,27 @@ export default function Profile() {
               </button>
             </div>
 
-            <div className="mt-5 overflow-hidden rounded-lg bg-stone-100">
-              <div className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-full border-4 border-white shadow-inner">
+            <div className="mt-5 overflow-hidden rounded-lg bg-stone-100 p-4">
+              <div
+                ref={cropFrameRef}
+                className="relative mx-auto aspect-square w-full max-w-sm touch-none cursor-grab overflow-hidden rounded-full border-4 border-white shadow-inner active:cursor-grabbing"
+                onPointerDown={handleCropPointerDown}
+                onPointerMove={handleCropPointerMove}
+                onPointerUp={stopCropDrag}
+                onPointerCancel={stopCropDrag}
+                onWheel={handleCropWheel}
+              >
                 <img
                   ref={cropImageRef}
                   src={avatarCrop.previewUrl}
                   alt="Profile crop preview"
-                  className="h-full w-full object-cover"
+                  draggable="false"
+                  className="h-full w-full select-none object-cover"
                   style={{
                     transform: `scale(${cropSettings.zoom}) translate(${cropSettings.x / 3}%, ${cropSettings.y / 3}%)`,
                   }}
                 />
+                <div className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-black/10" />
               </div>
             </div>
 
@@ -410,6 +476,16 @@ export default function Profile() {
               <button type="button" onClick={uploadCroppedAvatar} disabled={avatarUploading} className="btn-primary inline-flex flex-1 items-center justify-center gap-2 disabled:opacity-60">
                 {avatarUploading ? <BiLoaderAlt className="h-5 w-5 animate-spin" /> : <FiSave className="h-4 w-4" />}
                 Save picture
+              </button>
+              <button
+                type="button"
+                onClick={() => setCropSettings({ zoom: 1, x: 0, y: 0 })}
+                disabled={avatarUploading}
+                className="inline-flex h-12 w-12 items-center justify-center rounded-lg border border-stone-200 text-stone-600 transition hover:bg-stone-50 hover:text-plum-900 disabled:opacity-60"
+                aria-label="Reset crop"
+                title="Reset crop"
+              >
+                <FiRefreshCw className="h-4 w-4" />
               </button>
               <button type="button" onClick={closeAvatarCrop} disabled={avatarUploading} className="btn-secondary flex-1">
                 Cancel
