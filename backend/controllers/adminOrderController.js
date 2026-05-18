@@ -4,8 +4,8 @@ const { sendOrderStatusUpdateEmail } = require("../services/emailService");
 const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate("user", "name email")
-      .populate("items.product")
+      .populate("user", "name email role createdAt")
+      .populate("items.product", "name slug price stock category brand images")
       .sort({ createdAt: -1 });
 
     res.json(orders);
@@ -23,7 +23,9 @@ const updateOrderStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid order status" });
     }
 
-    const order = await Order.findById(req.params.id).populate("user", "name email");
+    const order = await Order.findById(req.params.id)
+      .populate("user", "name email role createdAt")
+      .populate("items.product", "name slug price stock category brand images");
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });

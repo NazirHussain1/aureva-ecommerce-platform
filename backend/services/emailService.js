@@ -5,6 +5,7 @@ const {
   contactFormAutoReplyTemplate,
   orderConfirmationTemplate,
   orderStatusUpdateTemplate,
+  lowStockAlertTemplate,
   passwordResetTemplate,
   newsletterTemplate,
 } = require("../utils/emailTemplates");
@@ -95,6 +96,24 @@ const sendOrderStatusUpdateEmail = async (order, user, newStatus) => {
   }
 };
 
+const sendLowStockAlertEmail = async (product, threshold = 5) => {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+    if (!adminEmail) {
+      return { success: false, error: "Admin email is not configured" };
+    }
+
+    const result = await sendEmail({
+      to: adminEmail,
+      subject: `Low stock alert: ${product.name} (${product.stock} left)`,
+      html: lowStockAlertTemplate(product, threshold),
+    });
+    return result;
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
 const sendPasswordResetEmail = async (user, resetToken = null, otp = null) => {
   try {
     if (otp) {
@@ -179,6 +198,7 @@ module.exports = {
   sendContactFormAutoReply,
   sendOrderConfirmationEmail,
   sendOrderStatusUpdateEmail,
+  sendLowStockAlertEmail,
   sendPasswordResetEmail,
   sendNewsletterEmail,
   sendBulkNewsletterEmail,

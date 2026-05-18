@@ -16,6 +16,12 @@ const emailFooter = () => `
   </div>
 `;
 
+const getFrontendUrl = () => {
+  const configuredUrl = process.env.FRONTEND_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+  if (!configuredUrl) return 'https://aureva.vercel.app';
+  return configuredUrl.startsWith('http') ? configuredUrl : `https://${configuredUrl}`;
+};
+
 const welcomeEmailTemplate = (userName) => `
   <!DOCTYPE html>
   <html>
@@ -46,7 +52,7 @@ const welcomeEmailTemplate = (userName) => `
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/products" 
+          <a href="${getFrontendUrl()}/products"
              style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
             Start Shopping
           </a>
@@ -94,7 +100,7 @@ const contactFormNotificationTemplate = (name, email, subject, message) => `
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/contact-messages" 
+          <a href="${getFrontendUrl()}/admin/contact-messages"
              style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
             View in Admin Panel
           </a>
@@ -137,7 +143,7 @@ const contactFormAutoReplyTemplate = (userName) => `
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/products" 
+          <a href="${getFrontendUrl()}/products"
              style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
             Browse Products
           </a>
@@ -181,7 +187,7 @@ const orderConfirmationTemplate = (order, user) => `
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/orders" 
+          <a href="${getFrontendUrl()}/orders"
              style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
             Track Your Order
           </a>
@@ -248,7 +254,7 @@ const orderStatusUpdateTemplate = (order, user, newStatus) => {
           </div>
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/orders" 
+            <a href="${getFrontendUrl()}/orders"
                style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
               View Order Details
             </a>
@@ -285,7 +291,7 @@ const passwordResetTemplate = (userName, resetToken) => `
         </p>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}" 
+          <a href="${getFrontendUrl()}/reset-password/${resetToken}"
              style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
             Reset Password
           </a>
@@ -329,7 +335,7 @@ const newsletterTemplate = (userName, subject, content) => `
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/products" 
+          <a href="${getFrontendUrl()}/products"
              style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
             Shop Now
           </a>
@@ -342,12 +348,48 @@ const newsletterTemplate = (userName, subject, content) => `
   </html>
 `;
 
+const lowStockAlertTemplate = (product, threshold) => `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body style="margin: 0; padding: 0; font-family: 'Arial', sans-serif; background-color: #f3f4f6;">
+    <div style="max-width: 600px; margin: 40px auto; background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      ${emailHeader()}
+      <div style="padding: 40px 30px;">
+        <h2 style="color: #111827; font-size: 24px; margin: 0 0 20px 0;">Low Stock Alert</h2>
+        <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+          A product has reached the low stock threshold and needs attention.
+        </p>
+        <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p style="color: #6b7280; font-size: 14px; margin: 0 0 10px 0;"><strong>Product:</strong></p>
+          <p style="color: #111827; font-size: 18px; font-weight: bold; margin: 0 0 20px 0;">${product.name}</p>
+          <p style="color: #6b7280; font-size: 14px; margin: 0 0 10px 0;"><strong>Current stock:</strong></p>
+          <p style="color: #dc2626; font-size: 24px; font-weight: bold; margin: 0 0 20px 0;">${product.stock}</p>
+          <p style="color: #6b7280; font-size: 14px; margin: 0;"><strong>Threshold:</strong> ${threshold}</p>
+        </div>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${getFrontendUrl()}/admin/products"
+             style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
+            Manage Inventory
+          </a>
+        </div>
+      </div>
+      ${emailFooter()}
+    </div>
+  </body>
+  </html>
+`;
+
 module.exports = {
   welcomeEmailTemplate,
   contactFormNotificationTemplate,
   contactFormAutoReplyTemplate,
   orderConfirmationTemplate,
   orderStatusUpdateTemplate,
+  lowStockAlertTemplate,
   passwordResetTemplate,
   newsletterTemplate,
 };

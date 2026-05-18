@@ -6,6 +6,32 @@ import { MdShoppingCart, MdLocalShipping, MdCheckCircle as MdCheck, MdCancel } f
 import { HiSparkles } from 'react-icons/hi';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 
+const getOrderCustomer = (order) => ({
+  name: order?.user?.name || order?.User?.name || order?.shippingAddress?.fullName || 'Customer',
+  email: order?.user?.email || order?.User?.email || 'N/A',
+  phone: order?.shippingAddress?.phone || order?.user?.phone || order?.User?.phone || '',
+  role: order?.user?.role || order?.User?.role || 'customer',
+  memberSince: order?.user?.createdAt || order?.User?.createdAt || null,
+});
+
+const getOrderItems = (order) => order?.items || order?.OrderItems || [];
+
+const getOrderItemName = (item) => item?.name || item?.product?.name || item?.Product?.name || 'Product';
+
+const getOrderItemImage = (item) => item?.image || item?.product?.images?.[0] || item?.Product?.images?.[0] || '';
+
+const formatMoney = (value = 0) => `$${Number(value || 0).toFixed(2)}`;
+
+const formatDateTime = (value) => value
+  ? new Date(value).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  : 'N/A';
+
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +83,7 @@ export default function AdminOrders() {
 
   const getStatusBadge = (status) => {
     const badges = {
+      pending: { text: 'Pending', class: 'bg-yellow-100 text-yellow-700', icon: FiClock },
       placed: { text: 'Pending', class: 'bg-yellow-100 text-yellow-700', icon: FiClock },
       processing: { text: 'Processing', class: 'bg-blue-100 text-blue-700', icon: FiPackage },
       shipped: { text: 'Shipped', class: 'bg-purple-100 text-purple-700', icon: FiTruck },
@@ -68,13 +95,15 @@ export default function AdminOrders() {
   };
 
   const stats = {
-    pending: orders.filter(o => o.orderStatus === 'placed').length,
+    pending: orders.filter(o => ['placed', 'pending'].includes(o.orderStatus)).length,
     shipped: orders.filter(o => o.orderStatus === 'shipped').length,
     delivered: orders.filter(o => o.orderStatus === 'delivered').length,
     cancelled: orders.filter(o => o.orderStatus === 'cancelled').length
   };
 
-  const filteredOrders = filter === 'all' ? orders : orders.filter(o => o.orderStatus === filter);
+  const filteredOrders = filter === 'all'
+    ? orders
+    : orders.filter(o => filter === 'pending' ? ['placed', 'pending'].includes(o.orderStatus) : o.orderStatus === filter);
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
   const paginatedOrders = filteredOrders.slice(
     (currentPage - 1) * itemsPerPage,
@@ -133,7 +162,7 @@ export default function AdminOrders() {
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 p-6 animate-fadeIn">
         <div className="flex flex-wrap gap-3">
-          {['all', 'placed', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
+          {['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
             <button
               key={status}
               onClick={() => {
@@ -184,6 +213,7 @@ export default function AdminOrders() {
                 <tbody className="divide-y divide-gray-200">
                   {paginatedOrders.map((order) => {
                     const badge = getStatusBadge(order.orderStatus);
+                    const customer = getOrderCustomer(order);
                     const StatusIcon = badge.icon;
                     return (
                       <tr key={order.id} className="hover:bg-gray-50 transition-colors duration-200">
@@ -196,8 +226,9 @@ export default function AdminOrders() {
                         </td>
                         <td className="px-6 py-4">
                           <div>
-                            <p className="font-semibold text-gray-900">{order.User?.name || 'Customer'}</p>
-                            <p className="text-sm text-gray-500">{order.User?.email || 'N/A'}</p>
+                            <p className="font-semibold text-gray-900">{customer.name}</p>
+                            <p className="text-sm text-gray-500">{customer.email}</p>
+                            {customer.phone && <p className="text-xs text-gray-500">{customer.phone}</p>}
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -287,7 +318,7 @@ export default function AdminOrders() {
 
       {selectedOrder && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn" onClick={() => setSelectedOrder(null)}>
-          <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-modalFadeIn" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-modalFadeIn" onClick={(e) => e.stopPropagation()}>
             <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8 rounded-t-3xl relative">
               <button
                 onClick={() => setSelectedOrder(null)}
@@ -313,6 +344,13 @@ export default function AdminOrders() {
             </div>
 
             <div className="p-8 space-y-6">
+              <div className="grid gap-4 md:grid-cols-4">
+                <SummaryTile label="Order number" value={selectedOrder.orderNumber || selectedOrder.id} />
+                <SummaryTile label="Payment status" value={selectedOrder.paymentStatus || 'pending'} capitalize />
+                <SummaryTile label="Items" value={getOrderItems(selectedOrder).reduce((sum, item) => sum + Number(item.quantity || 0), 0)} />
+                <SummaryTile label="Total" value={formatMoney(selectedOrder.totalAmount)} />
+              </div>
+
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-gray-50 rounded-2xl p-6">
                   <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -320,8 +358,11 @@ export default function AdminOrders() {
                     Customer Information
                   </h3>
                   <div className="space-y-2 text-sm">
-                    <p className="text-gray-600">Name: <span className="font-semibold text-gray-900">{selectedOrder.User?.name || 'N/A'}</span></p>
-                    <p className="text-gray-600">Email: <span className="font-semibold text-gray-900">{selectedOrder.User?.email || 'N/A'}</span></p>
+                    <p className="text-gray-600">Name: <span className="font-semibold text-gray-900">{getOrderCustomer(selectedOrder).name}</span></p>
+                    <p className="text-gray-600">Email: <span className="font-semibold text-gray-900">{getOrderCustomer(selectedOrder).email}</span></p>
+                    <p className="text-gray-600">Phone: <span className="font-semibold text-gray-900">{getOrderCustomer(selectedOrder).phone || 'N/A'}</span></p>
+                    <p className="text-gray-600">Role: <span className="font-semibold capitalize text-gray-900">{getOrderCustomer(selectedOrder).role}</span></p>
+                    <p className="text-gray-600">Customer since: <span className="font-semibold text-gray-900">{formatDateTime(getOrderCustomer(selectedOrder).memberSince)}</span></p>
                   </div>
                 </div>
 
@@ -332,9 +373,32 @@ export default function AdminOrders() {
                   </h3>
                   <div className="space-y-1 text-sm text-gray-700">
                     <p className="font-semibold">{selectedOrder.shippingAddress?.fullName}</p>
-                    <p>{selectedOrder.shippingAddress?.address}</p>
+                    <p>{selectedOrder.shippingAddress?.address || selectedOrder.shippingAddress?.street}</p>
                     <p>{selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state} {selectedOrder.shippingAddress?.zipCode}</p>
+                    <p>{selectedOrder.shippingAddress?.country}</p>
                     <p className="text-gray-600">{selectedOrder.shippingAddress?.phone}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-gray-50 rounded-2xl p-6">
+                  <h3 className="font-bold text-gray-900 mb-4">Order Information</h3>
+                  <div className="space-y-2 text-sm">
+                    <p className="text-gray-600">Order ID: <span className="font-semibold text-gray-900">{selectedOrder.id}</span></p>
+                    <p className="text-gray-600">Order number: <span className="font-semibold text-gray-900">{selectedOrder.orderNumber || 'N/A'}</span></p>
+                    <p className="text-gray-600">Created: <span className="font-semibold text-gray-900">{formatDateTime(selectedOrder.createdAt)}</span></p>
+                    <p className="text-gray-600">Updated: <span className="font-semibold text-gray-900">{formatDateTime(selectedOrder.updatedAt)}</span></p>
+                    <p className="text-gray-600">Delivered: <span className="font-semibold text-gray-900">{formatDateTime(selectedOrder.deliveredAt)}</span></p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-2xl p-6">
+                  <h3 className="font-bold text-gray-900 mb-4">Fulfillment</h3>
+                  <div className="space-y-2 text-sm">
+                    <p className="text-gray-600">Order status: <span className="font-semibold capitalize text-gray-900">{selectedOrder.orderStatus}</span></p>
+                    <p className="text-gray-600">Tracking number: <span className="font-semibold text-gray-900">{selectedOrder.trackingNumber || 'N/A'}</span></p>
+                    <p className="text-gray-600">Notes: <span className="font-semibold text-gray-900">{selectedOrder.notes || 'N/A'}</span></p>
                   </div>
                 </div>
               </div>
@@ -345,11 +409,11 @@ export default function AdminOrders() {
                   Order Items
                 </h3>
                 <div className="space-y-3">
-                  {selectedOrder.OrderItems?.map((item) => (
-                    <div key={item.id} className="flex items-center gap-4 p-3 bg-white rounded-xl">
+                  {getOrderItems(selectedOrder).map((item, index) => (
+                    <div key={item.id || item.product?.id || index} className="flex items-center gap-4 p-3 bg-white rounded-xl">
                       <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                        {item.Product?.images && item.Product.images[0] ? (
-                          <img src={item.Product.images[0]} alt={item.Product.name} className="w-full h-full object-cover" />
+                        {getOrderItemImage(item) ? (
+                          <img src={getOrderItemImage(item)} alt={getOrderItemName(item)} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <HiSparkles className="text-2xl text-gray-400" />
@@ -357,10 +421,15 @@ export default function AdminOrders() {
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">{item.Product?.name || 'Product'}</p>
-                        <p className="text-sm text-gray-500">Qty: {item.quantity} × ${Number(item.price).toFixed(2)}</p>
+                        <p className="font-semibold text-gray-900">{getOrderItemName(item)}</p>
+                        <p className="text-sm text-gray-500">Qty: {item.quantity} x {formatMoney(item.price)}</p>
+                        {(item.product?.brand || item.product?.category || item.product?.stock !== undefined) && (
+                          <p className="mt-1 text-xs text-gray-500">
+                            {[item.product?.brand, item.product?.category, item.product?.stock !== undefined ? `${item.product.stock} left` : null].filter(Boolean).join(' | ')}
+                          </p>
+                        )}
                       </div>
-                      <p className="font-bold text-gray-900">${(item.quantity * item.price).toFixed(2)}</p>
+                      <p className="font-bold text-gray-900">{formatMoney(item.quantity * item.price)}</p>
                     </div>
                   ))}
                 </div>
@@ -376,10 +445,32 @@ export default function AdminOrders() {
                     {selectedOrder.paymentMethod?.replace('_', ' ')}
                   </span>
                 </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between text-gray-700">
+                    <span>Subtotal</span>
+                    <span className="font-semibold">{formatMoney(selectedOrder.subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-700">
+                    <span>Shipping</span>
+                    <span className="font-semibold">{formatMoney(selectedOrder.shippingCost)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-700">
+                    <span>Tax</span>
+                    <span className="font-semibold">{formatMoney(selectedOrder.tax)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-700">
+                    <span>Discount {selectedOrder.couponCode ? `(${selectedOrder.couponCode})` : ''}</span>
+                    <span className="font-semibold">-{formatMoney(selectedOrder.discount)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-700">
+                    <span>Payment status</span>
+                    <span className="font-semibold capitalize">{selectedOrder.paymentStatus || 'pending'}</span>
+                  </div>
+                </div>
                 <div className="flex justify-between items-center pt-4 border-t border-purple-200">
                   <span className="text-lg font-bold text-gray-900">Total Amount</span>
                   <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    ${Number(selectedOrder.totalAmount).toFixed(2)}
+                    {formatMoney(selectedOrder.totalAmount)}
                   </span>
                 </div>
               </div>
@@ -387,7 +478,7 @@ export default function AdminOrders() {
               <div className="bg-gray-50 rounded-2xl p-6">
                 <h3 className="font-bold text-gray-900 mb-4">Update Order Status</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {['placed', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => {
+                  {['pending', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => {
                     const badge = getStatusBadge(status);
                     return (
                       <button
@@ -410,6 +501,15 @@ export default function AdminOrders() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function SummaryTile({ label, value, capitalize = false }) {
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+      <p className="text-xs font-bold uppercase tracking-wider text-gray-500">{label}</p>
+      <p className={`mt-2 break-words text-sm font-bold text-gray-950 ${capitalize ? 'capitalize' : ''}`}>{value || 'N/A'}</p>
     </div>
   );
 }

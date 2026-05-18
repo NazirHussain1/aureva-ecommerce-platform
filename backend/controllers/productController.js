@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const NotificationService = require("../services/notificationService");
+const { sendLowStockAlertEmail } = require("../services/emailService");
 
 const escapeRegex = (value = "") => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -41,6 +42,20 @@ const buildProductFilter = ({ category, brand, minPrice, maxPrice, search, inSto
 };
 
 const getSortDirection = (sortOrder) => (String(sortOrder).toUpperCase() === "ASC" ? 1 : -1);
+
+const lowStockThreshold = 5;
+
+const notifyLowStock = async (product) => {
+  if (product.stock <= lowStockThreshold && product.stock > 0) {
+    await NotificationService.createLowStockAlert(
+      product.id,
+      product.name,
+      product.stock,
+      lowStockThreshold
+    );
+    sendLowStockAlertEmail(product, lowStockThreshold).catch(() => {});
+  }
+};
 
 const getProducts = async (req, res) => {
   try {
@@ -152,6 +167,8 @@ const createProduct = async (req, res) => {
       images: imageUrl ? [imageUrl] : req.body.images,
     });
 
+    await notifyLowStock(product);
+
     res.status(201).json({ success: true, product });
   } catch (err) {
     const message = err?.errors ? Object.values(err.errors)[0]?.message : "Server Error";
@@ -173,15 +190,7 @@ const updateProduct = async (req, res) => {
 
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    const lowStockThreshold = 5;
-    if (product.stock <= lowStockThreshold && product.stock > 0) {
-      await NotificationService.createLowStockAlert(
-        product.id,
-        product.name,
-        product.stock,
-        lowStockThreshold
-      );
-    }
+    await notifyLowStock(product);
 
     res.status(200).json(product);
   } catch (err) {

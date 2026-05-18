@@ -63,6 +63,17 @@ class NotificationService {
     );
   }
 
+  static async createLowStockAlert(productId, productName, stock, threshold = 5) {
+    return this.createNotification(
+      null,
+      "Low stock alert",
+      `${productName} has ${stock} item(s) left`,
+      "product",
+      `/admin/products`,
+      { productId, productName, stock, threshold }
+    );
+  }
+
   static async createSystemNotification(userId, title, message) {
     return this.createNotification(userId, title, message, "system");
   }

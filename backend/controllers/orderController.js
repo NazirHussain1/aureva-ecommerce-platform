@@ -3,7 +3,7 @@ const Product = require("../models/Product");
 const User = require("../models/User");
 const Cart = require("../models/Cart");
 const Coupon = require("../models/Coupon");
-const { sendOrderConfirmationEmail } = require("../services/emailService");
+const { sendOrderConfirmationEmail, sendLowStockAlertEmail } = require("../services/emailService");
 const logger = require("../utils/logger");
 
 const getOrderUserId = (order) => String(order?.user?._id || order?.user || "");
@@ -137,6 +137,21 @@ const rollbackStockUpdates = (stockUpdates) => Promise.all(stockUpdates.map((upd
   Product.findByIdAndUpdate(update.product, { $inc: { stock: update.quantity } })
 ));
 
+const sendLowStockAlertsForOrder = async (stockUpdates) => {
+  const lowStockThreshold = 5;
+  const productIds = stockUpdates.map((update) => update.product);
+  if (!productIds.length) return;
+
+  const lowStockProducts = await Product.find({
+    _id: { $in: productIds },
+    stock: { $gt: 0, $lte: lowStockThreshold },
+  }).select("name stock");
+
+  await Promise.all(lowStockProducts.map((product) =>
+    sendLowStockAlertEmail(product, lowStockThreshold)
+  ));
+};
+
 const quoteOrder = async (req, res) => {
   const { items, couponCode } = req.body;
 
@@ -198,6 +213,9 @@ const placeOrder = async (req, res) => {
     const user = await User.findById(req.user.id);
     sendOrderConfirmationEmail(order.toJSON(), user).catch((emailError) => {
       console.error("Failed to send order confirmation email:", emailError.message);
+    });
+    sendLowStockAlertsForOrder(stockUpdates).catch((emailError) => {
+      console.error("Failed to send low stock alert email:", emailError.message);
     });
 
     res.status(201).json({

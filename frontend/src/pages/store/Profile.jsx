@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,7 +27,10 @@ export default function Profile() {
   const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarCrop, setAvatarCrop] = useState(null);
+  const [cropSettings, setCropSettings] = useState({ zoom: 1, x: 0, y: 0 });
   const [editing, setEditing] = useState(false);
+  const cropImageRef = useRef(null);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -60,6 +63,12 @@ export default function Profile() {
       document.title = 'Aureva Beauty';
     };
   }, []);
+
+  useEffect(() => () => {
+    if (avatarCrop?.previewUrl) {
+      URL.revokeObjectURL(avatarCrop.previewUrl);
+    }
+  }, [avatarCrop?.previewUrl]);
 
   if (!user) return null;
 
@@ -152,10 +161,61 @@ export default function Profile() {
       return;
     }
 
+    if (avatarCrop?.previewUrl) {
+      URL.revokeObjectURL(avatarCrop.previewUrl);
+    }
+
+    setCropSettings({ zoom: 1, x: 0, y: 0 });
+    setAvatarCrop({
+      file,
+      previewUrl: URL.createObjectURL(file),
+    });
+  };
+
+  const closeAvatarCrop = () => {
+    if (avatarCrop?.previewUrl) {
+      URL.revokeObjectURL(avatarCrop.previewUrl);
+    }
+    setAvatarCrop(null);
+    setCropSettings({ zoom: 1, x: 0, y: 0 });
+  };
+
+  const createCroppedAvatar = () => new Promise((resolve, reject) => {
+    const image = cropImageRef.current;
+    if (!image?.naturalWidth || !image?.naturalHeight) {
+      reject(new Error('Image is still loading'));
+      return;
+    }
+
+    const outputSize = 512;
+    const canvas = document.createElement('canvas');
+    canvas.width = outputSize;
+    canvas.height = outputSize;
+
+    const sourceSize = Math.min(image.naturalWidth, image.naturalHeight) / cropSettings.zoom;
+    const maxOffsetX = Math.max((image.naturalWidth - sourceSize) / 2, 0);
+    const maxOffsetY = Math.max((image.naturalHeight - sourceSize) / 2, 0);
+    const sourceX = (image.naturalWidth - sourceSize) / 2 + (cropSettings.x / 100) * maxOffsetX;
+    const sourceY = (image.naturalHeight - sourceSize) / 2 + (cropSettings.y / 100) * maxOffsetY;
+
+    const context = canvas.getContext('2d');
+    context.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, outputSize, outputSize);
+
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('Could not crop image'));
+        return;
+      }
+      resolve(new File([blob], avatarCrop.file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+    }, 'image/jpeg', 0.9);
+  });
+
+  const uploadCroppedAvatar = async () => {
     try {
       setAvatarUploading(true);
+      const croppedFile = await createCroppedAvatar();
       const avatarData = new FormData();
-      avatarData.append('avatar', file);
+      avatarData.append('avatar', croppedFile);
 
       const response = await axios.put('/users/avatar', avatarData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -166,8 +226,9 @@ export default function Profile() {
         dispatch(updateUser(updatedUser));
       }
       toast.success('Profile picture updated');
+      closeAvatarCrop();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update profile picture');
+      toast.error(error.response?.data?.message || error.message || 'Failed to update profile picture');
     } finally {
       setAvatarUploading(false);
     }
@@ -293,6 +354,70 @@ export default function Profile() {
           </form>
         )}
       </div>
+
+      {avatarCrop && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeAvatarCrop}>
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-stone-950">Crop profile picture</h3>
+              <button type="button" onClick={closeAvatarCrop} className="rounded-lg p-2 text-stone-500 hover:bg-stone-100 hover:text-stone-900" aria-label="Close crop dialog">
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-5 overflow-hidden rounded-lg bg-stone-100">
+              <div className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-full border-4 border-white shadow-inner">
+                <img
+                  ref={cropImageRef}
+                  src={avatarCrop.previewUrl}
+                  alt="Profile crop preview"
+                  className="h-full w-full object-cover"
+                  style={{
+                    transform: `scale(${cropSettings.zoom}) translate(${cropSettings.x / 3}%, ${cropSettings.y / 3}%)`,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-4">
+              <CropSlider
+                label="Zoom"
+                min="1"
+                max="3"
+                step="0.05"
+                value={cropSettings.zoom}
+                onChange={(value) => setCropSettings((current) => ({ ...current, zoom: Number(value) }))}
+              />
+              <CropSlider
+                label="Horizontal"
+                min="-100"
+                max="100"
+                step="1"
+                value={cropSettings.x}
+                onChange={(value) => setCropSettings((current) => ({ ...current, x: Number(value) }))}
+              />
+              <CropSlider
+                label="Vertical"
+                min="-100"
+                max="100"
+                step="1"
+                value={cropSettings.y}
+                onChange={(value) => setCropSettings((current) => ({ ...current, y: Number(value) }))}
+              />
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button type="button" onClick={uploadCroppedAvatar} disabled={avatarUploading} className="btn-primary inline-flex flex-1 items-center justify-center gap-2 disabled:opacity-60">
+                {avatarUploading ? <BiLoaderAlt className="h-5 w-5 animate-spin" /> : <FiSave className="h-4 w-4" />}
+                Save picture
+              </button>
+              <button type="button" onClick={closeAvatarCrop} disabled={avatarUploading} className="btn-secondary flex-1">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AccountLayout>
   );
 }
@@ -348,6 +473,24 @@ function PasswordField({ label, value, visible, setVisible, onChange }) {
           {visible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
         </button>
       </span>
+    </label>
+  );
+}
+
+function CropSlider({ label, value, onChange, ...props }) {
+  return (
+    <label className="block">
+      <span className="mb-2 flex items-center justify-between text-sm font-semibold text-stone-700">
+        <span>{label}</span>
+        <span className="text-xs text-stone-500">{Number(value).toFixed(label === 'Zoom' ? 2 : 0)}</span>
+      </span>
+      <input
+        type="range"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full accent-plum-900"
+        {...props}
+      />
     </label>
   );
 }
