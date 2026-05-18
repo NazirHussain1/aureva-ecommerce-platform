@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   FiCalendar,
+  FiCamera,
   FiEdit2,
   FiEye,
   FiEyeOff,
@@ -25,6 +26,7 @@ export default function Profile() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -133,6 +135,44 @@ export default function Profile() {
     });
   };
 
+  const handleAvatarChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please choose a JPG or PNG image');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Profile picture must be under 2MB');
+      return;
+    }
+
+    try {
+      setAvatarUploading(true);
+      const avatarData = new FormData();
+      avatarData.append('avatar', file);
+
+      const response = await axios.put('/users/avatar', avatarData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      const updatedUser = response.data?.user;
+      if (updatedUser) {
+        dispatch(updateUser(updatedUser));
+      }
+      toast.success('Profile picture updated');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update profile picture');
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
   return (
     <AccountLayout
       user={user}
@@ -149,7 +189,23 @@ export default function Profile() {
         <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <UserAvatar user={user} size="xl" />
+              <div className="relative">
+                <UserAvatar user={user} size="xl" />
+                <label
+                  className="absolute bottom-0 right-0 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-plum-900 text-white shadow-sm transition hover:bg-plum-950"
+                  title="Change profile picture"
+                  aria-label="Change profile picture"
+                >
+                  {avatarUploading ? <BiLoaderAlt className="h-4 w-4 animate-spin" /> : <FiCamera className="h-4 w-4" />}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg"
+                    onChange={handleAvatarChange}
+                    disabled={avatarUploading}
+                    className="sr-only"
+                  />
+                </label>
+              </div>
               <div>
                 <h2 className="text-2xl font-semibold text-stone-950">{user.name}</h2>
                 <p className="mt-1 text-sm text-stone-500">{user.email}</p>

@@ -87,11 +87,6 @@ const securityConfig = (app) => {
 
     next();
   });
-
-  // Prevent parameter pollution
-  // app.use(hpp({
-  //   whitelist: ['price', 'rating', 'category']
-  // }));
 };
 
 module.exports = securityConfig;

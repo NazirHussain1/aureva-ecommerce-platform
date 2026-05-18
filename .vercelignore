@@ -1,75 +1,35 @@
 # Dependencies
 node_modules
 backend/node_modules
-aureva-frontend/node_modules
+frontend/node_modules
 
-# Legacy per-route serverless functions are ignored for Vercel Hobby limits.
-api/_lib/
-api/addresses/
-api/admin/
-api/cart/
-api/categories/
-api/contact/
-api/coupons/
-api/newsletter/
-api/notifications/
-api/orders/
-api/payments/
-api/products/
-api/reviews/
-api/settings/
-api/uploads/
-api/users/
-api/wishlist/
-api/health.js
-api/package.json
-
-# Development files
-scripts/
-*.log
-*.md
-!README.md
-
-# Environment files (use Vercel dashboard)
+# Local and development files
 .env
 .env.local
 .env.*.local
 backend/.env
-
-# Build files
-aureva-frontend/dist
-.cache
-
-# IDE
+frontend/.env
 .vscode
 .idea
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Git
-.git
-.gitignore
-
-# Development scripts
 start-dev.bat
-QUICK_START.md
 
-# Logs
+# Build, logs, and caches
+frontend/dist
+dist
+build
+.cache
 logs
+backend/logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-backend/logs
-
-# Testing
 coverage
 .nyc_output
 
-# Misc
+# Repository metadata and OS files
+.git
+.gitignore
+.DS_Store
+Thumbs.db
 .vercel

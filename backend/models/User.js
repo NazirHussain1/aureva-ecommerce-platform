@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema({
     enum: ['active', 'blocked'],
     default: 'active'
   },
+  avatar: {
+    type: String,
+    default: ''
+  },
   resetPasswordToken: {
     type: String,
     select: false

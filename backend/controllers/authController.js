@@ -12,6 +12,15 @@ const generateToken = (user) => {
   );
 };
 
+const toAuthUser = (user) => ({
+  id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  avatar: user.avatar || '',
+  createdAt: user.createdAt,
+});
+
 const signup = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -39,13 +48,7 @@ const signup = async (req, res) => {
     await sendWelcomeEmail(user);
 
     res.status(201).json({
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        createdAt: user.createdAt,
-      },
+      user: toAuthUser(user),
       token,
     });
   } catch (error) {
@@ -70,13 +73,7 @@ const login = async (req, res) => {
     const token = generateToken(user);
 
     res.status(200).json({
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        createdAt: user.createdAt,
-      },
+      user: toAuthUser(user),
       token,
     });
   } catch (error) {
@@ -182,6 +179,7 @@ const getMe = async (req, res) => {
     name: req.user.name,
     email: req.user.email,
     role: req.user.role,
+    avatar: req.user.avatar || '',
     createdAt: req.user.createdAt,
   });
 };
@@ -251,17 +249,38 @@ const updateProfile = async (req, res) => {
 
     res.status(200).json({
       message: "Profile updated successfully",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        createdAt: user.createdAt,
-      },
+      user: toAuthUser(user),
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
 };
 
-module.exports = { signup, login, forgotPassword, verifyOTP, resetPassword, getMe, logout, updateProfile };
+const updateAvatar = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    if (!req.file?.path) {
+      return res.status(400).json({ message: "Please upload an image" });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.avatar = req.file.path;
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile picture updated successfully",
+      user: toAuthUser(user),
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { signup, login, forgotPassword, verifyOTP, resetPassword, getMe, logout, updateProfile, updateAvatar };
